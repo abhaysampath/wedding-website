@@ -1,0 +1,53 @@
+{
+  "us": {
+    "label": "US Wedding",
+    "date": "Sunday, May 30, 2027",
+    "venue": "New York Botanical Garden",
+    "address": "2900 Southern Blvd, Bronx, NY 10458",
+    "timeline": [
+      { "time": "6:30 PM", "label": "Ceremony", "description": "Join us under the arbor as we exchange our vows" },
+      { "time": "7:00 PM", "label": "Cocktail Hour", "description": "Hors d'oeuvres and drinks in the garden courtyard" },
+      { "time": "8:00 PM", "label": "Reception", "description": "Dinner, toasts, and dancing under the stars" }
+    ],
+    "dressCode": "To be announced",
+    "hotels": [
+      { "name": "The Botanic Hotel", "distance": "0.5 miles from venue", "address": "123 Garden Lane, Bronx, NY", "phone": "(555) 123-4567" },
+      { "name": "Bronx Park Inn", "distance": "1.2 miles from venue", "address": "456 Park Ave, Bronx, NY", "phone": "(555) 987-6543" },
+      { "name": "The Pelham Grand", "distance": "3 miles from venue", "address": "789 Shore Rd, Bronx, NY", "phone": "(555) 456-7890" }
+    ],
+    "transport": {
+      "car": "The New York Botanical Garden is located at 2900 Southern Blvd, Bronx, NY. There are several parking garages nearby.",
+      "train": "Metro-North Railroad from Grand Central to Botanical Garden Station. The journey takes approximately 20 minutes.",
+      "subway": "Take the 2 or 5 train to Pelham Parkway station, then a short taxi or bus ride to the garden."
+    },
+    "faqs": [
+      { "q": "What is the dress code?", "a": "Details about attire will be shared closer to the date. Stay tuned!" },
+      { "q": "What time should I arrive?", "a": "The ceremony begins promptly at 6:30 PM. We recommend arriving at least 15 minutes early to find your seat." },
+      { "q": "Is there parking available?", "a": "Yes, there is parking available at the New York Botanical Garden. We recommend arriving early as spots fill up." },
+      { "q": "Will there be vegetarian/vegan options?", "a": "Absolutely! We will have a variety of dietary options available." }
+    ]
+  },
+  "india": {
+    "label": "India Wedding",
+    "date": "TBD 2027",
+    "venue": "TBD",
+    "address": "Details coming soon",
+    "timeline": [
+      { "time": "TBD", "label": "Ceremony", "description": "Traditional Indian wedding ceremony" },
+      { "time": "TBD", "label": "Reception", "description": "Dinner and celebration" }
+    ],
+    "dressCode": "Traditional Indian attire encouraged",
+    "hotels": [
+      { "name": "Details coming soon", "distance": "", "address": "", "phone": "" }
+    ],
+    "transport": {
+      "car": "Details coming soon.",
+      "train": "Details coming soon.",
+      "subway": "Details coming soon."
+    },
+    "faqs": [
+      { "q": "What is the dress code for the India wedding?", "a": "Traditional Indian attire is encouraged but not required. More details to come." },
+      { "q": "When will the India wedding details be announced?", "a": "We will share the date and venue details for the India celebration as soon as they are confirmed." }
+    ]
+  }
+}

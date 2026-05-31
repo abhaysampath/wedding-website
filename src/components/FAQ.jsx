@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import faqs from '../data/faq.json'
+import { useAuth } from '../context/AuthContext'
+import weddings from '../data/weddings.json'
 
 function AccordionItem({ item, isOpen, onClick }) {
   return (
@@ -36,9 +37,13 @@ function AccordionItem({ item, isOpen, onClick }) {
 }
 
 export default function FAQ() {
+  const { activeWedding } = useAuth()
+  const w = weddings[activeWedding]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [openIndex, setOpenIndex] = useState(null)
+
+  const faqs = w.faqs || []
 
   return (
     <section id="faq" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>
@@ -55,21 +60,25 @@ export default function FAQ() {
           <div className="w-12 h-[1px] bg-gold mx-auto" />
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-cream-dark border border-gold/10 rounded-sm px-6 md:px-10"
-        >
-          {faqs.map((item, i) => (
-            <AccordionItem
-              key={i}
-              item={item}
-              isOpen={openIndex === i}
-              onClick={() => setOpenIndex(openIndex === i ? null : i)}
-            />
-          ))}
-        </motion.div>
+        {faqs.length === 0 ? (
+          <p className="text-center text-charcoal-light/40 text-sm">FAQs coming soon</p>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-cream-dark border border-gold/10 rounded-sm px-6 md:px-10"
+          >
+            {faqs.map((item, i) => (
+              <AccordionItem
+                key={i}
+                item={item}
+                isOpen={openIndex === i}
+                onClick={() => setOpenIndex(openIndex === i ? null : i)}
+              />
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   )

@@ -1,6 +1,11 @@
 import { motion } from 'framer-motion'
+import { useAuth } from '../context/AuthContext'
+import weddings from '../data/weddings.json'
 
 export default function Hero() {
+  const { activeWedding, user } = useAuth()
+  const w = weddings[activeWedding]
+
   return (
     <section
       id="hero"
@@ -15,7 +20,7 @@ export default function Hero() {
       <div className="relative z-10 text-center px-6 max-w-3xl">
         <motion.p
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: -250 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           className="font-heading text-gold-light text-lg md:text-xl tracking-[0.3em] uppercase mb-4"
         >
@@ -24,13 +29,13 @@ export default function Hero() {
 
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: -270 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="font-heading text-5xl md:text-7xl lg:text-8xl font-light text-cream leading-tight mb-4"
         >
-          Abhay
-          <span className="md:mx-6 text-gold"> & </span>
           Rebecca
+          <span className="mx-4 md:mx-6 text-gold"> & </span>
+          Abhay
         </motion.h1>
 
         <motion.div
@@ -40,23 +45,45 @@ export default function Hero() {
           className="w-16 h-[1px] bg-gold/60 mx-auto mb-6"
         />
 
-        {/* <motion.p
+        <motion.p
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: -500 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
           className="text-cream/90 text-lg md:text-xl tracking-wide mb-2"
         >
-          May 30, 2027
-        </motion.p> */}
+          {w.date}
+        </motion.p>
 
-        {/* <motion.p
+        <motion.p
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: -500 }}
-          transition={{ duration: 0.8, delay: 1.0 }}
-          className="text-cream/70 text-base md:text-lg italic font-heading"
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="text-cream/60 text-sm md:text-base tracking-wide"
         >
-          We can't wait to celebrate with you!
-        </motion.p> */}
+          {w.venue}
+        </motion.p>
+
+        {user && (
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.0 }}
+            className="text-cream/70 text-base md:text-lg italic font-heading mt-4"
+          >
+            Welcome, {user.firstName}
+          </motion.p>
+        )}
+
+        {!user && (
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.0 }}
+            className="text-cream/70 text-base md:text-lg italic font-heading mt-4"
+          >
+            We can't wait to celebrate with you!
+          </motion.p>
+        )}
 
         <motion.div
           initial={{ opacity: 0 }}

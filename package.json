@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "generate-manifest": "node scripts/generate-image-manifest.js",
+    "sync-guests": "node scripts/sync-guests.js",
     "dev": "vite",
     "build": "node scripts/generate-image-manifest.js && vite build",
     "lint": "eslint .",
