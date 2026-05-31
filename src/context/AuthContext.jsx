@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import guests from '../data/guests.json'
+import config from '../data/config.json'
 
 const AuthContext = createContext(null)
 
@@ -54,7 +55,7 @@ export function AuthProvider({ children }) {
       .sort((a, b) => b.score - a.score)
   }, [])
 
-  const signIn = useCallback((guest, remember) => {
+  const signIn = useCallback((guest, remember, phone, email) => {
     const payload = {
       id: guest.id,
       firstName: guest.firstName,
@@ -64,9 +65,10 @@ export function AuthProvider({ children }) {
       relationship: guest.relationship,
       weddings: guest.weddings,
       plusOne: guest.plusOne,
+      phone: phone || '',
+      email: email || '',
     }
     setUser(payload)
-    setShowAuthModal(false)
     const weddings = guest.weddings || []
     if (weddings.length === 1) {
       setActiveWedding(weddings[0])
@@ -76,7 +78,26 @@ export function AuthProvider({ children }) {
     if (remember) {
       localStorage.setItem('wedding_user', JSON.stringify(payload))
     }
+    return payload
   }, [])
+
+  const updateContact = useCallback(async (phone, email) => {
+    if (!user) return
+    const updated = { ...user, phone, email }
+    setUser(updated)
+    const stored = localStorage.getItem('wedding_user')
+    if (stored) {
+      localStorage.setItem('wedding_user', JSON.stringify(updated))
+    }
+    try {
+      const id = user.id
+      await fetch(`/api/guests/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, email }),
+      })
+    } catch { /* api not available — local only */ }
+  }, [user])
 
   const signOut = useCallback(() => {
     setUser(null)
@@ -97,11 +118,13 @@ export function AuthProvider({ children }) {
     activeWedding,
     showAuthModal,
     initialLoading,
+    config,
     setShowAuthModal,
     searchGuests,
     signIn,
     signOut,
     switchWedding,
+    updateContact,
     canSwitch,
     weddingList: user?.weddings || ['us'],
   }

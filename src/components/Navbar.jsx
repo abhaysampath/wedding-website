@@ -10,18 +10,10 @@ const roleLabels = {
   vendor: 'Vendor',
 }
 
-const links = [
-  { href: '#story', label: 'Our Story' },
-  { href: '#details', label: 'Event Details' },
-  { href: '#gallery', label: 'Gallery' },
-  { href: '#travel', label: 'Travel' },
-  { href: '#rsvp', label: 'RSVP' },
-  { href: '#registry', label: 'Registry' },
-  { href: '#faq', label: 'FAQ' },
-]
-
 export default function Navbar() {
-  const { user, setShowAuthModal, signOut, canSwitch, activeWedding, switchWedding } = useAuth()
+  const { user, setShowAuthModal, signOut, canSwitch, activeWedding, switchWedding, config } = useAuth()
+  const groom = config.site.coupleNames.groom
+  const bride = config.site.coupleNames.bride
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -81,7 +73,7 @@ export default function Navbar() {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="overflow-hidden whitespace-nowrap text-base"
           >
-            <span className="pl-1">Abhay & Rebecca</span>
+            <span className="pl-1">{groom} & {bride}</span>
           </motion.span>
         </button>
 

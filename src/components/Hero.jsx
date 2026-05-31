@@ -3,8 +3,10 @@ import { useAuth } from '../context/AuthContext'
 import weddings from '../data/weddings.json'
 
 export default function Hero() {
-  const { activeWedding, user } = useAuth()
+  const { activeWedding, user, config } = useAuth()
   const w = weddings[activeWedding]
+  const bride = config.site.coupleNames.bride
+  const groom = config.site.coupleNames.groom
 
   return (
     <section
@@ -33,9 +35,9 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="font-heading text-5xl md:text-7xl lg:text-8xl font-light text-cream leading-tight mb-4"
         >
-          Rebecca
+          {bride}
           <span className="mx-4 md:mx-6 text-gold"> & </span>
-          Abhay
+          {groom}
         </motion.h1>
 
         <motion.div
