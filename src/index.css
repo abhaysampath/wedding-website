@@ -21,11 +21,24 @@ html {
 
 body {
   margin: 0;
-  background-color: var(--color-cream);
-  color: var(--color-charcoal);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.wedding-page {
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+.wedding-page * {
+  transition: background-color 0.7s ease, color 0.7s ease;
+}
+
+[data-wedding="india"] {
+  --color-cream: #fcf7ee;
+  --color-cream-dark: #f3eee1;
+  --color-charcoal: #3d2e1e;
+  --color-charcoal-light: #5a4530;
 }
 
 ::selection {

@@ -12,7 +12,7 @@ export default function EventDetails() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="details" className="py-24 md:py-32 px-6 bg-cream-dark" ref={ref}>
+    <section id="details" className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -23,9 +23,11 @@ export default function EventDetails() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
             Event Details
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-8" />
+          <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
 
-          <WeddingSwitcher />
+          <div className="flex justify-center mb-8">
+            <WeddingSwitcher />
+          </div>
 
           <div className="inline-block border border-gold/30 rounded-sm px-8 py-6 bg-cream">
             <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-1">

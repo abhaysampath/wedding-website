@@ -11,6 +11,27 @@ import Registry from './components/Registry'
 import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
+
+function PageContent() {
+  const { activeWedding } = useAuth()
+
+  return (
+    <div data-wedding={activeWedding} className="wedding-page min-h-screen">
+      <Navbar />
+      <Hero />
+      <OurStory />
+      <EventDetails />
+      <Gallery />
+      <TravelAccommodations />
+      <RSVP />
+      <Registry />
+      <FAQ />
+      <Footer />
+      <AuthModal />
+    </div>
+  )
+}
+
 function Page() {
   const { initialLoading } = useAuth()
 
@@ -23,19 +44,7 @@ function Page() {
   }
 
   return (
-    <>
-      <Navbar />
-      <Hero />
-      <OurStory />
-      <EventDetails />
-      <Gallery />
-      <TravelAccommodations />
-      <RSVP />
-      <Registry />
-      <FAQ />
-      <Footer />
-      <AuthModal />
-    </>
+    <PageContent />
   )
 }
 

@@ -47,7 +47,7 @@ export default function FAQ() {
   )
 
   return (
-    <section id="faq" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>
+    <section id="faq" className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700" ref={ref}>
       <div className="max-w-2xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -60,7 +60,9 @@ export default function FAQ() {
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
 
-          <WeddingSwitcher />
+          <div className="flex justify-center">
+            <WeddingSwitcher />
+          </div>
         </motion.div>
 
         {faqs.length === 0 ? (

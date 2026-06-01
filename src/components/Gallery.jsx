@@ -36,7 +36,7 @@ export default function Gallery() {
   const visibleImages = images.slice(0, visibleCount)
 
   return (
-    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream" ref={ref}>
+    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream transition-colors duration-700" ref={ref}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

@@ -14,7 +14,7 @@ export default function RSVP() {
   }
 
   return (
-    <section id="rsvp" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>
+    <section id="rsvp" className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700" ref={ref}>
       <div className="max-w-xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}

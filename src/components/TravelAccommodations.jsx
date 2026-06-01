@@ -3,6 +3,7 @@ import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { useAuth } from '../context/useAuth'
 import weddings from '../data/weddings.json'
+import WeddingSwitcher from './WeddingSwitcher'
 
 export default function TravelAccommodations() {
   const { activeWedding } = useAuth()
@@ -11,7 +12,7 @@ export default function TravelAccommodations() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="travel" className="py-24 md:py-32 px-6 bg-cream-dark" ref={ref}>
+    <section id="travel" className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -26,6 +27,10 @@ export default function TravelAccommodations() {
           <p className="text-charcoal-light/60 text-sm max-w-lg mx-auto">
             Whether you're coming from near or far, we want to make your stay as comfortable as possible
           </p>
+
+          <div className="flex justify-center mt-6">
+            <WeddingSwitcher />
+          </div>
         </motion.div>
 
         {w.hotels && w.hotels.length > 0 && (
