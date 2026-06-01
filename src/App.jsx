@@ -1,4 +1,3 @@
-import { ClerkProvider } from '@clerk/clerk-react'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
@@ -13,8 +12,6 @@ import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
 import WeddingSwitcher from './components/WeddingSwitcher'
-
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 function Page() {
   const { initialLoading } = useAuth()
@@ -47,10 +44,8 @@ function Page() {
 
 export default function App() {
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
-      <AuthProvider>
-        <Page />
-      </AuthProvider>
-    </ClerkProvider>
+    <AuthProvider>
+      <Page />
+    </AuthProvider>
   )
 }

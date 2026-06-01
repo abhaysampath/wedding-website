@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSignIn } from '@clerk/clerk-react'
+import { useSignIn } from '@clerk/react'
 import { useAuth } from '../context/useAuth'
 
 const roleLabels = {
