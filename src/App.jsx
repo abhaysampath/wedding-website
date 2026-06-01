@@ -1,4 +1,5 @@
-import { AuthProvider, useAuth } from './context/AuthContext'
+import { AuthProvider } from './context/AuthProvider'
+import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import OurStory from './components/OurStory'

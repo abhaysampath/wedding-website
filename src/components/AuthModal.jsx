@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 
 const roleLabels = {
   bride: 'Bride',
@@ -8,12 +8,6 @@ const roleLabels = {
   close_family: 'Close Family',
   invited_guest: 'Invited Guest',
   vendor: 'Vendor',
-}
-
-function formatRelationship(g) {
-  if (g.role === 'bride' || g.role === 'groom') return 'The Bride'
-  const side = useAuth ? useAuth().config.site.coupleNames[g.side] : g.side
-  return `${side}'s ${g.relationship || roleLabels[g.role]?.toLowerCase()}`
 }
 
 function formatConfirmation(g, sideName) {
@@ -37,6 +31,19 @@ export default function AuthModal() {
   const [contactSaved, setContactSaved] = useState(false)
 
   const sideName = config.site.coupleNames
+
+  const resetState = () => {
+    setFirstName('')
+    setLastName('')
+    setResults([])
+    setSelected(null)
+    setIsPlusOne(false)
+    setSearched(false)
+    setStep('search')
+    setPhone('')
+    setEmail('')
+    setContactSaved(false)
+  }
 
   const handleSearch = useCallback((e) => {
     e.preventDefault()
@@ -67,19 +74,6 @@ export default function AuthModal() {
       resetState()
     }, 1200)
   }, [phone, email, updateContact, setShowAuthModal])
-
-  const resetState = () => {
-    setFirstName('')
-    setLastName('')
-    setResults([])
-    setSelected(null)
-    setIsPlusOne(false)
-    setSearched(false)
-    setStep('search')
-    setPhone('')
-    setEmail('')
-    setContactSaved(false)
-  }
 
   const handleCancel = useCallback(() => {
     setShowAuthModal(false)

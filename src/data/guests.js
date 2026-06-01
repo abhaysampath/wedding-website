@@ -1,0 +1,24 @@
+const guests = [
+  {
+    id: 'g001',
+    firstName: 'Rebecca',
+    lastName: '',
+    side: 'bride',
+    relationship: 'The Bride',
+    role: 'bride',
+    weddings: ['us', 'india'],
+    plusOne: false,
+  },
+  {
+    id: 'g002',
+    firstName: 'Abhay',
+    lastName: '',
+    side: 'groom',
+    relationship: 'The Groom',
+    role: 'groom',
+    weddings: ['us', 'india'],
+    plusOne: false,
+  },
+]
+
+export default guests

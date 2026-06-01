@@ -19,13 +19,7 @@
       "car": "The New York Botanical Garden is located at 2900 Southern Blvd, Bronx, NY. There are several parking garages nearby.",
       "train": "Metro-North Railroad from Grand Central to Botanical Garden Station. The journey takes approximately 20 minutes.",
       "subway": "Take the 2 or 5 train to Pelham Parkway station, then a short taxi or bus ride to the garden."
-    },
-    "faqs": [
-      { "q": "What is the dress code?", "a": "Details about attire will be shared closer to the date. Stay tuned!" },
-      { "q": "What time should I arrive?", "a": "The ceremony begins promptly at 6:30 PM. We recommend arriving at least 15 minutes early to find your seat." },
-      { "q": "Is there parking available?", "a": "Yes, there is parking available at the New York Botanical Garden. We recommend arriving early as spots fill up." },
-      { "q": "Will there be vegetarian/vegan options?", "a": "Absolutely! We will have a variety of dietary options available." }
-    ]
+    }
   },
   "india": {
     "label": "India Wedding",
@@ -44,10 +38,6 @@
       "car": "Details coming soon.",
       "train": "Details coming soon.",
       "subway": "Details coming soon."
-    },
-    "faqs": [
-      { "q": "What is the dress code for the India wedding?", "a": "Traditional Indian attire is encouraged but not required. More details to come." },
-      { "q": "When will the India wedding details be announced?", "a": "We will share the date and venue details for the India celebration as soon as they are confirmed." }
-    ]
+    }
   }
 }

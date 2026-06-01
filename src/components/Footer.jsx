@@ -1,4 +1,4 @@
-import config from '../data/config.json'
+import config from '../config'
 
 export default function Footer() {
   const { bride, groom } = config.site.coupleNames

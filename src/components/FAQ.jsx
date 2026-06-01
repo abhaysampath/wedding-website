@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { useAuth } from '../context/AuthContext'
-import weddings from '../data/weddings.json'
+import { useAuth } from '../context/useAuth'
 
 function AccordionItem({ item, isOpen, onClick }) {
   return (
@@ -37,13 +36,14 @@ function AccordionItem({ item, isOpen, onClick }) {
 }
 
 export default function FAQ() {
-  const { activeWedding } = useAuth()
-  const w = weddings[activeWedding]
+  const { activeWedding, content } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [openIndex, setOpenIndex] = useState(null)
 
-  const faqs = w.faqs || []
+  const faqs = (content.faq || []).filter(
+    (f) => f.wedding === activeWedding || f.wedding === 'both'
+  )
 
   return (
     <section id="faq" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>

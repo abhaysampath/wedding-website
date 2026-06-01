@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 
 const roleLabels = {
   bride: 'Bride',
@@ -9,6 +9,16 @@ const roleLabels = {
   invited_guest: 'Invited Guest',
   vendor: 'Vendor',
 }
+
+const links = [
+  { href: '#story', label: 'Our Story' },
+  { href: '#details', label: 'Event Details' },
+  { href: '#gallery', label: 'Gallery' },
+  { href: '#travel', label: 'Travel' },
+  { href: '#rsvp', label: 'RSVP' },
+  { href: '#registry', label: 'Registry' },
+  { href: '#faq', label: 'FAQ' },
+]
 
 export default function Navbar() {
   const { user, setShowAuthModal, signOut, canSwitch, activeWedding, switchWedding, config } = useAuth()

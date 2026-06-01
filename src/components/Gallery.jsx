@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
-import images from '../data/images.json'
+import { useAuth } from '../context/useAuth'
 
 const offsets = [
   { x: -10, y: -14 },
@@ -16,9 +16,12 @@ const offsets = [
 const hoverMultiplier = 1.8
 
 export default function Gallery() {
+  const { content } = useAuth()
   const ref = useRef(null)
   const [expanded, setExpanded] = useState(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
+
+  const images = content.images || []
 
   return (
     <section id="gallery" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>
@@ -91,7 +94,7 @@ export default function Gallery() {
         </div>
 
         <AnimatePresence>
-          {expanded !== null && (
+          {expanded !== null && images[expanded] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

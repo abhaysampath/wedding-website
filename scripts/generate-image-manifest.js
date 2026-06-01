@@ -5,7 +5,7 @@ import { dirname } from 'path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const publicDir = join(__dirname, '..', 'public')
-const outputFile = join(__dirname, '..', 'src', 'data', 'images.json')
+const outputFile = join(__dirname, '..', 'src', 'data', 'images.js')
 
 const jpgDir = join(publicDir, 'jpg')
 const wobgDir = join(jpgDir, 'wobg')
@@ -39,5 +39,10 @@ const images = jpgFiles.map((jpgFile) => {
   }
 })
 
-writeFileSync(outputFile, JSON.stringify(images, null, 2))
+const lines = images.map((img) =>
+  `  { jpg: '${img.jpg}', png: ${img.png ? `'${img.png}'` : 'null'}, alt: '${img.alt}' }`
+)
+
+const js = `const images = [\n${lines.join(',\n')},\n]\n\nexport default images\n`
+writeFileSync(outputFile, js)
 console.log(`Generated manifest with ${images.length} images (${images.filter(i => i.png).length} with cutouts)`)

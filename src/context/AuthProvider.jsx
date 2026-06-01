@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import guests from '../data/guests.json'
-import config from '../data/config.json'
-
-const AuthContext = createContext(null)
+import { useState, useEffect, useCallback } from 'react'
+import { AuthContext } from './AuthContext'
+import config from '../config'
+import sampleGuests from '../data/guests'
+import sampleFaq from '../data/faq'
+import sampleImages from '../data/images'
 
 function normalize(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -19,32 +20,61 @@ function similarity(a, b) {
   return matches / Math.max(aParts.length, bParts.length)
 }
 
+function loadStoredUser() {
+  try {
+    const stored = localStorage.getItem('wedding_user')
+    if (stored) return JSON.parse(stored)
+  } catch { /* ignore corrupt data */ }
+  return null
+}
+
+function loadStoredWedding(storedUser) {
+  const weddings = storedUser?.weddings || []
+  return weddings.length === 1 ? weddings[0] : 'us'
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [activeWedding, setActiveWedding] = useState('us')
+  const [user, setUser] = useState(loadStoredUser)
+  const [activeWedding, setActiveWedding] = useState(() => loadStoredWedding(user))
   const [showAuthModal, setShowAuthModal] = useState(false)
-  const [initialLoading, setInitialLoading] = useState(true)
+  const [initialLoading] = useState(false)
+  const [content, setContent] = useState({
+    guests: sampleGuests,
+    faq: sampleFaq,
+    images: sampleImages,
+    loaded: false,
+  })
 
   useEffect(() => {
-    const stored = localStorage.getItem('wedding_user')
-    if (stored) {
+    async function loadContent() {
       try {
-        const parsed = JSON.parse(stored)
-        setUser(parsed)
-        const weddings = parsed.weddings || []
-        if (weddings.length === 1) {
-          setActiveWedding(weddings[0])
-        }
-      } catch { /* ignore corrupt data */ }
+        const res = await fetch('/api/content')
+        if (!res.ok) throw new Error('API not available')
+        const data = await res.json()
+        setContent({
+          guests: data.guests || sampleGuests,
+          faq: data.faq || sampleFaq,
+          images: data.images || sampleImages,
+          loaded: true,
+        })
+      } catch {
+        setContent({
+          guests: sampleGuests,
+          faq: sampleFaq,
+          images: sampleImages,
+          loaded: true,
+        })
+      }
     }
-    setInitialLoading(false)
+    loadContent()
   }, [])
 
   const searchGuests = useCallback((firstName, lastName) => {
     const fn = normalize(firstName || '')
     const ln = normalize(lastName || '')
+    const list = content.guests
 
-    return guests
+    return list
       .map((g) => {
         const gf = normalize(g.firstName)
         const gl = normalize(g.lastName)
@@ -53,7 +83,7 @@ export function AuthProvider({ children }) {
       })
       .filter((g) => g.score > 0.3)
       .sort((a, b) => b.score - a.score)
-  }, [])
+  }, [content.guests])
 
   const signIn = useCallback((guest, remember, phone, email) => {
     const payload = {
@@ -119,6 +149,7 @@ export function AuthProvider({ children }) {
     showAuthModal,
     initialLoading,
     config,
+    content,
     setShowAuthModal,
     searchGuests,
     signIn,
@@ -130,10 +161,4 @@ export function AuthProvider({ children }) {
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
-  return ctx
 }
