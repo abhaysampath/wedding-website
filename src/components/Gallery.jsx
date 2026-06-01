@@ -1,36 +1,48 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 
-const offsets = [
-  { x: -10, y: -14 },
-  { x: 12, y: -10 },
-  { x: -8, y: 12 },
-  { x: 14, y: 10 },
-  { x: -12, y: -8 },
-  { x: 10, y: -12 },
-]
+const INITIAL_LOAD = 8
+const LOAD_MORE = 4
 
-const hoverMultiplier = 1.8
+function Skeleton() {
+  return (
+    <div className="shrink-0 w-[260px] md:w-[300px] h-[320px] md:h-[360px] bg-sage-light/20 rounded-sm animate-pulse" />
+  )
+}
 
 export default function Gallery() {
   const { content } = useAuth()
   const ref = useRef(null)
+  const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
-  const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
+  const [loadedImages, setLoadedImages] = useState({})
+  const sectionInView = useInView(ref, { once: true, margin: '-100px' })
+  const needsMore = useInView(sentinelRef, { margin: '200px' })
 
   const images = content.images || []
 
+  useEffect(() => {
+    if (needsMore && visibleCount < images.length) {
+      setVisibleCount((prev) => Math.min(prev + LOAD_MORE, images.length))
+    }
+  }, [needsMore, visibleCount, images.length])
+
+  const handleImageLoad = useCallback((src) => {
+    setLoadedImages((prev) => ({ ...prev, [src]: true }))
+  }, [])
+
+  const visibleImages = images.slice(0, visibleCount)
+
   return (
-    <section id="gallery" className="py-24 md:py-32 px-6 bg-cream" ref={ref}>
+    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream" ref={ref}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          animate={sectionInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-center mb-16"
+          className="text-center mb-12 pr-6"
         >
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
             Gallery
@@ -41,38 +53,35 @@ export default function Gallery() {
           </p>
         </motion.div>
 
-        <div className="columns-2 md:columns-3 gap-4 md:gap-6 space-y-4 md:space-y-6">
-          {images.map((img, i) => {
-            const offset = offsets[i % offsets.length]
-
-            return (
+        {/* Horizontal scroll */}
+        <div className="overflow-x-auto pb-6 -mb-6 scrollbar-thin">
+          <div className="flex gap-4 md:gap-6">
+            {visibleImages.map((img, i) => (
               <motion.div
                 key={img.jpg}
-                initial={{ opacity: 0, y: 30 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.05 * i }}
-                className="break-inside-avoid group cursor-pointer relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, delay: 0.04 * i }}
+                className="shrink-0 w-[260px] md:w-[300px] group cursor-pointer relative"
                 onClick={() => setExpanded(expanded === i ? null : i)}
               >
-                <div className="relative overflow-hidden rounded-sm bg-sage-light/10">
+                <div className="relative overflow-hidden rounded-sm bg-sage-light/10 h-[320px] md:h-[360px]">
+                  {!loadedImages[img.jpg] && <Skeleton />}
                   <img
                     src={img.jpg}
                     alt={img.alt}
-                    className="w-full h-auto object-cover block transition-transform duration-500 ease-out group-hover:duration-300"
+                    className={`w-full h-full object-cover block transition-opacity duration-500 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
                     loading="lazy"
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = `translate(${offset.x * 1.5}px, ${offset.y * 1.5}px) scale(1.05)`
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(1.02)`
-                    }}
+                    onLoad={() => handleImageLoad(img.jpg)}
                   />
-
                   <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition-colors duration-500" />
                 </div>
               </motion.div>
-            )
-          })}
+            ))}
+
+            {/* Sentinel for infinite scroll */}
+            <div ref={sentinelRef} className="shrink-0 w-4" />
+          </div>
         </div>
 
         <AnimatePresence>
