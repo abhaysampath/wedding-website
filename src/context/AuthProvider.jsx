@@ -69,16 +69,21 @@ export function AuthProvider({ children }) {
     loadContent()
   }, [])
 
-  const searchGuests = useCallback((firstName, lastName) => {
-    const fn = normalize(firstName || '')
-    const ln = normalize(lastName || '')
+  const searchGuests = useCallback((term) => {
+    const t = normalize(term || '')
+    if (!t) return []
     const list = content.guests
 
     return list
       .map((g) => {
         const gf = normalize(g.firstName)
         const gl = normalize(g.lastName)
-        const score = (similarity(gf, fn) + similarity(gl, ln)) / 2
+        const full = `${gf} ${gl}`
+        const score = Math.max(
+          similarity(gf, t),
+          similarity(gl, t),
+          similarity(full, t)
+        )
         return { ...g, score }
       })
       .filter((g) => g.score > 0.3)

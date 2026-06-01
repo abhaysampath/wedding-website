@@ -8,7 +8,6 @@ const publicDir = join(__dirname, '..', 'public')
 const outputFile = join(__dirname, '..', 'src', 'data', 'images.js')
 
 const jpgDir = join(publicDir, 'jpg')
-const wobgDir = join(jpgDir, 'wobg')
 
 if (!existsSync(jpgDir)) {
   console.error('public/jpg/ directory not found')
@@ -19,22 +18,16 @@ const jpgFiles = readdirSync(jpgDir).filter(f =>
   /\.(jpg|jpeg)$/i.test(f) && !f.startsWith('.')
 )
 
-const pngFiles = new Set(
-  readdirSync(wobgDir).filter(f => /\.png$/i.test(f) && !f.startsWith('.'))
-)
-
 function baseName(filename) {
   return parse(filename).name
 }
 
 const images = jpgFiles.map((jpgFile) => {
   const base = baseName(jpgFile)
-  const pngName = `${base} Background Removed.png`
-  const hasWobg = pngFiles.has(pngName)
 
   return {
     jpg: `/jpg/${jpgFile}`,
-    png: hasWobg ? `/jpg/wobg/${pngName}` : null,
+    png: null,
     alt: base,
   }
 })
@@ -45,4 +38,4 @@ const lines = images.map((img) =>
 
 const js = `const images = [\n${lines.join(',\n')},\n]\n\nexport default images\n`
 writeFileSync(outputFile, js)
-console.log(`Generated manifest with ${images.length} images (${images.filter(i => i.png).length} with cutouts)`)
+console.log(`Generated manifest with ${images.length} images`)
