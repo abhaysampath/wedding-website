@@ -72,7 +72,7 @@ export default function FAQ() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-cream-dark border border-gold/10 rounded-sm px-6 md:px-10"
+            className="bg-cream-dark border border-gold/10 rounded-sm px-6 md:px-10 transition-wedding"
           >
             {faqs.map((item, i) => (
               <AccordionItem

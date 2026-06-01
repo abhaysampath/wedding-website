@@ -30,7 +30,8 @@ body {
   transition: background-color 0.7s ease, color 0.7s ease;
 }
 
-.wedding-page * {
+.wedding-page section,
+.wedding-page .transition-wedding {
   transition: background-color 0.7s ease, color 0.7s ease;
 }
 

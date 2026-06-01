@@ -84,8 +84,12 @@ export default function AuthModal() {
   }, [searchGuests])
 
   const handleOAuth = useCallback(async (provider) => {
-    if (!clerkLoaded || !clerkSignIn) {
-      setOauthError(`${provider} is not configured. Check your Clerk dashboard.`)
+    if (!clerkLoaded) {
+      setOauthError(`Clerk is still initializing (check VITE_CLERK_PUBLISHABLE_KEY in .env)`)
+      return
+    }
+    if (!clerkSignIn) {
+      setOauthError(`${provider} is not configured. In Clerk dashboard → Social Connections → ${provider}, enable it and add redirect URL http://localhost:5173/`)
       return
     }
     setOauthLoading(provider)
@@ -96,8 +100,9 @@ export default function AuthModal() {
         redirectUrl: '/',
         redirectUrlComplete: '/',
       })
-    } catch {
-      setOauthError(`${provider} sign-in failed.`)
+    } catch (err) {
+      const msg = err?.errors?.[0]?.message || err?.message || 'unknown error'
+      setOauthError(`${provider} sign-in failed: ${msg}`)
       setOauthLoading(null)
     }
   }, [clerkLoaded, clerkSignIn])

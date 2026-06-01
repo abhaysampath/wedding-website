@@ -41,7 +41,7 @@ export default function TravelAccommodations() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.15 * i }}
-                className="bg-cream border border-gold/20 rounded-sm p-6 hover:shadow-lg hover:shadow-sage/5 transition-shadow duration-300"
+                className="bg-cream border border-gold/20 rounded-sm p-6 hover:shadow-lg hover:shadow-sage/5 transition-shadow duration-300 transition-wedding"
               >
                 <div className="w-8 h-[1px] bg-gold mb-4" />
                 <h3 className="font-heading text-xl text-charcoal mb-2">{hotel.name}</h3>
@@ -58,7 +58,7 @@ export default function TravelAccommodations() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="bg-cream border border-gold/20 rounded-sm p-8 max-w-2xl mx-auto"
+            className="bg-cream border border-gold/20 rounded-sm p-8 max-w-2xl mx-auto transition-wedding"
           >
             <h3 className="font-heading text-xl text-charcoal mb-4 text-center">Getting Here</h3>
             <div className="space-y-4 text-sm text-charcoal-light/70 leading-relaxed">

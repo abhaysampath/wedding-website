@@ -29,7 +29,7 @@ export default function EventDetails() {
             <WeddingSwitcher />
           </div>
 
-          <div className="inline-block border border-gold/30 rounded-sm px-8 py-6 bg-cream">
+          <div className="inline-block border border-gold/30 rounded-sm px-8 py-6 bg-cream transition-wedding">
             <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-1">
               {w.date}
             </p>
