@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 
@@ -26,13 +26,10 @@ const authLinks = [
 ]
 
 export default function Navbar() {
-  const { user, setShowAuthModal, signOut, canSwitch, activeWedding, switchWedding, config } = useAuth()
+  const { user, setShowAuthModal, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const [logoHovered, setLogoHovered] = useState(false)
   const [logoClicked, setLogoClicked] = useState(false)
-  const userMenuRef = useRef(null)
 
   const links = user ? authLinks : guestLinks
 
@@ -41,17 +38,6 @@ export default function Navbar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  useEffect(() => {
-    if (!userMenuOpen) return
-    const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setUserMenuOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [userMenuOpen])
 
   return (
     <nav
@@ -63,7 +49,7 @@ export default function Navbar() {
     >
       <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16 md:h-20">
         {/* Nav links - left aligned */}
-        <div className={`flex items-center gap-6 md:gap-8 ${scrolled ? 'text-charcoal-light' : 'text-cream'}`}>
+        <div className={`hidden md:flex items-center gap-6 md:gap-8 ${scrolled ? 'text-charcoal-light' : 'text-cream'}`}>
           {links.map((link) => (
             <a
               key={link.href}
@@ -75,47 +61,68 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* R&A Logo - right side */}
-        <button
-          onClick={() => {
-            if (user) {
-              setUserMenuOpen(!userMenuOpen)
-            } else {
-              setLogoClicked(!logoClicked)
-            }
-          }}
-          onMouseEnter={() => setLogoHovered(true)}
-          onMouseLeave={() => setLogoHovered(false)}
-          className={`relative font-heading font-semibold tracking-wide transition-all duration-300 ${
-            scrolled ? 'text-charcoal' : 'text-cream'
-          }`}
-        >
-          <AnimatePresence mode="wait">
-            {!logoClicked ? (
-              <motion.span
-                key="short"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-sm border currentColor border-current/30 text-sm"
+        {/* R&A Logo + user info - right side */}
+        <div className={`flex items-center gap-3 ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
+          {user && (
+            <div className="hidden md:flex items-center gap-2 text-right">
+              <div>
+                <p className="text-xs font-medium leading-tight">{user.firstName} {user.lastName}</p>
+                <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
+              </div>
+              <button
+                onClick={() => { signOut(); setLogoClicked(false) }}
+                className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
+                title="Sign out"
               >
-                R&A
-              </motion.span>
-            ) : (
-              <motion.span
-                key="full"
-                initial={{ width: 36, opacity: 0 }}
-                animate={{ width: 'auto', opacity: 1 }}
-                exit={{ width: 36, opacity: 0 }}
-                transition={{ duration: 0.4, ease: 'easeInOut' }}
-                className="inline-flex items-center h-9 rounded-sm border currentColor border-current/30 text-sm overflow-hidden whitespace-nowrap"
+                ✕
+              </button>
+            </div>
+          )}
+
+          <button
+            onClick={() => setLogoClicked(!logoClicked)}
+            className="relative font-heading font-semibold tracking-wide transition-all duration-300"
+          >
+            <AnimatePresence mode="wait">
+              {!logoClicked ? (
+                <motion.span
+                  key="short"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-sm border currentColor border-current/30 text-sm"
+                >
+                  R&A
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="full"
+                  initial={{ width: 36, opacity: 0 }}
+                  animate={{ width: 'auto', opacity: 1 }}
+                  exit={{ width: 36, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: 'easeInOut' }}
+                  className="inline-flex items-center h-9 rounded-sm border currentColor border-current/30 text-sm overflow-hidden whitespace-nowrap"
+                >
+                  <span className="px-2">Abhay & Rebecca</span>
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+
+          {user && (
+            <div className="md:hidden flex items-center gap-1.5">
+              <span className="text-xs font-medium">{user.firstName}</span>
+              <button
+                onClick={() => signOut()}
+                className="text-[10px] opacity-40 hover:opacity-80 transition-opacity"
+                title="Sign out"
               >
-                <span className="px-2">Abhay & Rebecca</span>
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile hamburger */}
@@ -128,59 +135,6 @@ export default function Navbar() {
         <span className={`block w-6 h-0.5 bg-current transition-opacity duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
         <span className={`block w-6 h-0.5 bg-current transition-transform duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
       </button>
-
-      {/* User dropdown */}
-      {user && userMenuOpen && (
-        <div
-          ref={userMenuRef}
-          className="absolute top-full right-4 md:right-6 mt-1 w-72 bg-cream border border-gold/10 rounded-sm shadow-xl"
-        >
-          <div className="p-4 border-b border-gold/10">
-            <p className="font-heading text-lg text-charcoal">
-              {user.firstName} {user.lastName}
-            </p>
-            <p className="text-xs text-gold-dark tracking-widest uppercase mt-0.5">
-              {roleLabels[user.role] || 'Guest'}
-            </p>
-            {canSwitch && (
-              <div className="mt-3 flex gap-2">
-                {user.weddings.map((w) => (
-                  <button
-                    key={w}
-                    onClick={() => { switchWedding(w); setUserMenuOpen(false) }}
-                    className={`text-xs tracking-widest uppercase px-3 py-1.5 rounded-sm border transition-colors ${
-                      activeWedding === w
-                        ? 'bg-sage text-cream border-sage'
-                        : 'text-charcoal-light border-gold/20 hover:border-gold/40'
-                    }`}
-                  >
-                    {w === 'us' ? 'US' : 'India'}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div className="p-2">
-            {authLinks.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setUserMenuOpen(false)}
-                className="block px-3 py-2 text-sm text-charcoal-light hover:text-charcoal hover:bg-cream-dark rounded-sm transition-colors"
-              >
-                {l.label}
-              </a>
-            ))}
-            <hr className="my-2 border-gold/10" />
-            <button
-              onClick={() => { signOut(); setUserMenuOpen(false) }}
-              className="block w-full text-left px-3 py-2 text-sm text-charcoal-light/50 hover:text-red-500 hover:bg-cream-dark rounded-sm transition-colors"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Mobile nav panel */}
       {menuOpen && (

@@ -11,8 +11,6 @@ import Registry from './components/Registry'
 import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
-import WeddingSwitcher from './components/WeddingSwitcher'
-
 function Page() {
   const { initialLoading } = useAuth()
 
@@ -29,7 +27,6 @@ function Page() {
       <Navbar />
       <Hero />
       <OurStory />
-      <WeddingSwitcher />
       <EventDetails />
       <Gallery />
       <TravelAccommodations />

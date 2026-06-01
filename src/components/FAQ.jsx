@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { useAuth } from '../context/useAuth'
+import WeddingSwitcher from './WeddingSwitcher'
 
 function AccordionItem({ item, isOpen, onClick }) {
   return (
@@ -57,7 +58,9 @@ export default function FAQ() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
             FAQ
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto" />
+          <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
+
+          <WeddingSwitcher />
         </motion.div>
 
         {faqs.length === 0 ? (

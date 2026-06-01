@@ -3,6 +3,7 @@ import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { useAuth } from '../context/useAuth'
 import weddings from '../data/weddings.json'
+import WeddingSwitcher from './WeddingSwitcher'
 
 export default function EventDetails() {
   const { activeWedding } = useAuth()
@@ -23,6 +24,8 @@ export default function EventDetails() {
             Event Details
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-8" />
+
+          <WeddingSwitcher />
 
           <div className="inline-block border border-gold/30 rounded-sm px-8 py-6 bg-cream">
             <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-1">

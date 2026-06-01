@@ -28,9 +28,15 @@ function loadStoredUser() {
   return null
 }
 
+function getDefaultWedding(weddings) {
+  if (weddings.length === 1) return weddings[0]
+  const indiaEnd = new Date('2027-02-27T00:00:00')
+  return new Date() < indiaEnd ? 'india' : 'us'
+}
+
 function loadStoredWedding(storedUser) {
   const weddings = storedUser?.weddings || []
-  return weddings.length === 1 ? weddings[0] : 'us'
+  return getDefaultWedding(weddings)
 }
 
 export function AuthProvider({ children }) {
@@ -105,11 +111,7 @@ export function AuthProvider({ children }) {
     }
     setUser(payload)
     const weddings = guest.weddings || []
-    if (weddings.length === 1) {
-      setActiveWedding(weddings[0])
-    } else {
-      setActiveWedding('us')
-    }
+    setActiveWedding(getDefaultWedding(weddings))
     if (remember) {
       localStorage.setItem('wedding_user', JSON.stringify(payload))
     }
