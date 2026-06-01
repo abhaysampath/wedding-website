@@ -58,33 +58,15 @@ export default function Gallery() {
                   <img
                     src={img.jpg}
                     alt={img.alt}
-                    className="w-full h-auto object-cover block"
+                    className="w-full h-auto object-cover block transition-transform duration-500 ease-out group-hover:duration-300"
                     loading="lazy"
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = `translate(${offset.x * 1.5}px, ${offset.y * 1.5}px) scale(1.05)`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(1.02)`
+                    }}
                   />
-
-                  {img.png && (
-                    <div className="absolute inset-0 pointer-events-none">
-                      <img
-                        src={img.png}
-                        alt=""
-                        aria-hidden="true"
-                        className="w-full h-full object-cover transition-all duration-500 ease-out group-hover:duration-300"
-                        style={{
-                          filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.12)) drop-shadow(0 2px 4px rgba(0,0,0,0.08))',
-                          transform: `translate(${offset.x}px, ${offset.y}px) scale(1.02)`,
-                          transitionProperty: 'transform, filter',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = `translate(${offset.x * hoverMultiplier}px, ${offset.y * hoverMultiplier}px) scale(1.04)`
-                          e.currentTarget.style.filter = 'drop-shadow(0 12px 32px rgba(0,0,0,0.18)) drop-shadow(0 4px 8px rgba(0,0,0,0.1))'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(1.02)`
-                          e.currentTarget.style.filter = 'drop-shadow(0 4px 16px rgba(0,0,0,0.12)) drop-shadow(0 2px 4px rgba(0,0,0,0.08))'
-                        }}
-                      />
-                    </div>
-                  )}
 
                   <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/10 transition-colors duration-500" />
                 </div>
