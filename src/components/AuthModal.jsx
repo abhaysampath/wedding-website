@@ -84,14 +84,20 @@ export default function AuthModal() {
   }, [searchGuests])
 
   const handleOAuth = useCallback(async (provider) => {
-    if (!clerkLoaded) {
-      setOauthError(`Clerk is still initializing (check VITE_CLERK_PUBLISHABLE_KEY in .env)`)
-      return
+    const WAIT_MS = 8000
+    const pollStart = Date.now()
+
+    // Wait for Clerk to load (with timeout)
+    while (!clerkLoaded || !clerkSignIn) {
+      if (Date.now() - pollStart > WAIT_MS) {
+        setOauthError(
+          `Clerk SDK failed to load. Open browser console (F12 → Console) and check for errors. Key present: ${!!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}`
+        )
+        return
+      }
+      await new Promise((r) => setTimeout(r, 300))
     }
-    if (!clerkSignIn) {
-      setOauthError(`${provider} is not configured. In Clerk dashboard → Social Connections → ${provider}, enable it and add redirect URL http://localhost:5173/`)
-      return
-    }
+
     setOauthLoading(provider)
     setOauthError(null)
     try {
