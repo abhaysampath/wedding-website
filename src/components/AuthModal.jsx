@@ -25,7 +25,8 @@ const providers = [
 
 export default function AuthModal() {
   const { showAuthModal, setShowAuthModal, searchGuests, signIn, updateContact, config } = useAuth()
-  const { signIn: clerkSignIn, isLoaded: clerkLoaded } = useSignIn()
+  const clerkSignIn = useSignIn()
+  const clerkLoaded = !!clerkSignIn
   const [searchTerm, setSearchTerm] = useState('')
   const [results, setResults] = useState([])
   const [selected, setSelected] = useState(null)
@@ -84,24 +85,28 @@ export default function AuthModal() {
   }, [searchGuests])
 
   const handleOAuth = useCallback(async (provider) => {
-    const WAIT_MS = 8000
-    const pollStart = Date.now()
-
-    // Wait for Clerk to load (with timeout)
-    while (!clerkLoaded || !clerkSignIn) {
-      if (Date.now() - pollStart > WAIT_MS) {
-        setOauthError(
-          `Clerk SDK failed to load. Open browser console (F12 → Console) and check for errors. Key present: ${!!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}`
-        )
-        return
+    let si = clerkSignIn
+    if (!si) {
+      // Clerk sign-in might not be ready yet — wait up to 5s polling via a ref
+      for (let i = 0; i < 20; i++) {
+        await new Promise((r) => setTimeout(r, 250))
+        // Re-read from a fresh snapshot by checking a mounted flag
+        // The component re-renders when clerkSignIn changes, but the closure
+        // might have a stale value — poll until it's available
+        try {
+          const fresh = window.Clerk?.client?.signIn
+          if (fresh) { si = fresh; break }
+        } catch {}
       }
-      await new Promise((r) => setTimeout(r, 300))
     }
-
+    if (!si) {
+      setOauthError('Clerk failed to initialize. Check browser console (F12) for errors.')
+      return
+    }
     setOauthLoading(provider)
     setOauthError(null)
     try {
-      await clerkSignIn.authenticateWithRedirect({
+      await si.authenticateWithRedirect({
         strategy: `oauth_${provider}`,
         redirectUrl: '/',
         redirectUrlComplete: '/',
@@ -111,7 +116,7 @@ export default function AuthModal() {
       setOauthError(`${provider} sign-in failed: ${msg}`)
       setOauthLoading(null)
     }
-  }, [clerkLoaded, clerkSignIn])
+  }, [clerkSignIn])
 
   const handleConfirm = useCallback(() => {
     if (selected) {
