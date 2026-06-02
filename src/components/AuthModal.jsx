@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useSignIn } from '@clerk/react'
+import { useClerk } from '@clerk/react'
 import { useAuth } from '../context/useAuth'
 
 const roleLabels = {
@@ -25,8 +25,7 @@ const providers = [
 
 export default function AuthModal() {
   const { showAuthModal, setShowAuthModal, searchGuests, signIn, updateContact, config } = useAuth()
-  const clerkSignIn = useSignIn()
-  const clerkLoaded = !!clerkSignIn
+  const clerk = useClerk()
   const [searchTerm, setSearchTerm] = useState('')
   const [results, setResults] = useState([])
   const [selected, setSelected] = useState(null)
@@ -85,28 +84,22 @@ export default function AuthModal() {
   }, [searchGuests])
 
   const handleOAuth = useCallback(async (provider) => {
-    let si = clerkSignIn
-    if (!si) {
-      // Clerk sign-in might not be ready yet — wait up to 5s polling via a ref
+    let signIn = clerk.client?.signIn
+    if (!signIn) {
       for (let i = 0; i < 20; i++) {
         await new Promise((r) => setTimeout(r, 250))
-        // Re-read from a fresh snapshot by checking a mounted flag
-        // The component re-renders when clerkSignIn changes, but the closure
-        // might have a stale value — poll until it's available
-        try {
-          const fresh = window.Clerk?.client?.signIn
-          if (fresh) { si = fresh; break }
-        } catch {}
+        signIn = window.Clerk?.client?.signIn
+        if (signIn) break
       }
     }
-    if (!si) {
+    if (!signIn) {
       setOauthError('Clerk failed to initialize. Check browser console (F12) for errors.')
       return
     }
     setOauthLoading(provider)
     setOauthError(null)
     try {
-      await si.authenticateWithRedirect({
+      await signIn.authenticateWithRedirect({
         strategy: `oauth_${provider}`,
         redirectUrl: '/',
         redirectUrlComplete: '/',
@@ -116,7 +109,7 @@ export default function AuthModal() {
       setOauthError(`${provider} sign-in failed: ${msg}`)
       setOauthLoading(null)
     }
-  }, [clerkSignIn])
+  }, [clerk.client?.signIn])
 
   const handleConfirm = useCallback(() => {
     if (selected) {
