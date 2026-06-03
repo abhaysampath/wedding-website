@@ -8,6 +8,8 @@ const guests = [
     role: 'bride',
     weddings: ['us', 'india'],
     plusOne: false,
+    email: '',
+    phone: '',
   },
   {
     id: 'g002',
@@ -18,6 +20,8 @@ const guests = [
     role: 'groom',
     weddings: ['us', 'india'],
     plusOne: false,
+    email: '',
+    phone: '',
   },
 ]
 

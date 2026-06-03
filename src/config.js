@@ -1,4 +1,5 @@
 const config = {
+  debug: false,
   site: {
     siteTitle: 'Rebecca & Abhay',
     coupleNames: {

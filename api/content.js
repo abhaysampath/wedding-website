@@ -79,6 +79,8 @@ export default async function handler(req, res) {
         role: ROLE_MAP[roleRaw] || 'invited_guest',
         weddings: parseWeddings(row.invitedTo),
         plusOne: PLUSONE_MAP[plusOneRaw] ?? false,
+        email: row.email || '',
+        phone: row.phone || '',
       }
     })
 

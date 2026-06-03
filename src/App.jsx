@@ -11,6 +11,7 @@ import Registry from './components/Registry'
 import FAQ from './components/FAQ'
 import Footer from './components/Footer'
 import AuthModal from './components/AuthModal'
+import config from './config'
 import DebugSheet from './components/DebugSheet'
 
 function PageContent() {
@@ -52,7 +53,7 @@ function PageContent() {
         )}
       </div>
       <AuthModal />
-      <DebugSheet />
+      {config.debug && <DebugSheet />}
     </div>
   )
 }

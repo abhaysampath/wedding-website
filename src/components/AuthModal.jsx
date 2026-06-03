@@ -167,18 +167,15 @@ export default function AuthModal() {
             className="bg-cream rounded-sm w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-8 md:p-10">
-              <div className="flex items-center justify-between mb-8">
-                <div />
-                <button
-                  onClick={handleCancel}
-                  className="text-charcoal-light/40 hover:text-charcoal transition-colors"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                    <path d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
+            <div className="p-8 md:p-10 relative">
+              <button
+                onClick={handleCancel}
+                className="absolute top-8 md:top-10 right-8 md:right-10 w-[42px] h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
               {/* Sign In — OAuth first, then name entry */}
               {authMode === 'signin' && !selectedMatch && (
@@ -247,6 +244,7 @@ export default function AuthModal() {
               {authMode === 'signin' && selectedMatch && (
                 <div className="space-y-6">
                   <div className="text-center">
+                    <p className="text-sm text-charcoal-light/50 mb-2">Are you</p>
                     <p className="font-heading text-2xl text-charcoal">
                       {selectedMatch.firstName} {selectedMatch.lastName}
                     </p>
