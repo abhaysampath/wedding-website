@@ -11,7 +11,7 @@ const roleLabels = {
 }
 
 const guestLinks = [
-  { href: '#rsvp', label: 'RSVP' },
+  { href: '#story', label: 'Our Story' },
   { href: '#gallery', label: 'Gallery' },
 ]
 

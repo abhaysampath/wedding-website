@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 
 export default function Hero() {
-  const { user, setShowAuthModal } = useAuth()
+  const { user, setShowAuthModal, openSettings } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const searchRef = useRef(null)
 
@@ -40,7 +40,8 @@ export default function Hero() {
             We're getting married
           </motion.p>
 
-          <motion.h1
+          <motion.button
+            onClick={user ? () => openSettings() : undefined}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -49,7 +50,7 @@ export default function Hero() {
             Abhay
             <span className="mx-4 md:mx-6 text-gold"> & </span>
             Rebecca
-          </motion.h1>
+          </motion.button>
         </div>
 
         {/* Bottom anchored section — search */}

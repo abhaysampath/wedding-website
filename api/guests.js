@@ -1,13 +1,26 @@
-/**
- * GET /api/guests
- * Returns the full guest list from a Google Sheet.
- * Protected by a service account — only accessible from authorized Vercel deployments.
- *
- * Environment variables (set in Vercel dashboard):
- *   GOOGLE_SHEET_ID         — ID from the sheet URL
- *   GOOGLE_SERVICE_EMAIL    — service account email
- *   GOOGLE_PRIVATE_KEY      — service account private key
- */
+import SHEET_CONFIG from './sheets-config.js'
+
+const ROLE_MAP = { 'Bride': 'bride', 'Groom': 'groom', 'CloseFamily': 'close_family', 'Br-Family': 'family' }
+const PLUSONE_MAP = { 'N/A': false, 'Allowed+1': true, '+1NOTALLOWED': false }
+
+function inferSide(firstName, lastName, relationship, role) {
+  const full = `${firstName} ${lastName}`.toLowerCase()
+  if (full === 'abhay sampath' || full.startsWith('abhay')) return 'groom'
+  if (full === 'rebecca erde' || full.startsWith('rebecca')) return 'bride'
+  const rel = (relationship || '').toLowerCase()
+  if (rel.includes('abhay')) return 'groom'
+  if (rel.includes('rebecca')) return 'bride'
+  if (role === 'Br-Family') return 'bride'
+  return 'bride'
+}
+
+function parseWeddings(val) {
+  const v = (val || '').toLowerCase()
+  if (v.includes('both')) return ['us', 'india']
+  if (v.includes('us')) return ['us']
+  if (v.includes('india')) return ['india']
+  return ['us']
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -24,12 +37,14 @@ export default async function handler(req, res) {
 
   try {
     const { google } = await import('googleapis')
-    const auth = new google.auth.JWT(serviceEmail, null, privateKey.replace(/\\n/g, '\n'), [
-      'https://www.googleapis.com/auth/spreadsheets.readonly',
-    ])
+    const auth = new google.auth.JWT({
+      email: serviceEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
     const sheets = google.sheets({ version: 'v4', auth })
-    const tabName = process.env.GOOGLE_SHEET_TAB || 'Guest List'
-    const range = `${tabName}!A:H`
+    const tabName = process.env.GOOGLE_SHEET_TAB || SHEET_CONFIG.guests.tab
+    const range = `${tabName}!A:P`
 
     const res_ = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
@@ -41,17 +56,36 @@ export default async function handler(req, res) {
       return res.json({ guests: [] })
     }
 
-    const headers = rows[0].map((h) => h.trim().toLowerCase())
-    const guests = rows.slice(1).map((row, i) => ({
-      id: `g${String(i + 1).padStart(3, '0')}`,
-      firstName: row[headers.indexOf('firstname')] || '',
-      lastName: row[headers.indexOf('lastname')] || '',
-      side: row[headers.indexOf('side')] || 'bride',
-      relationship: row[headers.indexOf('relationship')] || '',
-      role: row[headers.indexOf('role')] || 'invited_guest',
-      weddings: (row[headers.indexOf('weddings')] || 'us').split(',').map((w) => w.trim()),
-      plusOne: (row[headers.indexOf('plusone')] || '').toLowerCase() === 'true',
-    }))
+    const headerRow = rows[0]
+    const indexMap = {}
+    for (const [fieldName, headerLabel] of Object.entries(SHEET_CONFIG.guests.columns)) {
+      const idx = headerRow.findIndex((h) => h.trim().toLowerCase() === headerLabel.toLowerCase())
+      if (idx !== -1) indexMap[fieldName] = idx
+    }
+
+    const guests = rows.slice(1).map((row, i) => {
+      const vals = {}
+      for (const [fieldName, idx] of Object.entries(indexMap)) {
+        vals[fieldName] = (row[idx] || '').trim()
+      }
+      const firstName = vals.firstName || ''
+      const lastName = vals.lastName || ''
+      const relationship = vals.relationship || ''
+      const roleRaw = vals.role || ''
+      const plusOneRaw = vals.plusOne || ''
+      return {
+        id: `g${String(i + 1).padStart(3, '0')}`,
+        firstName,
+        lastName,
+        side: inferSide(firstName, lastName, relationship, roleRaw),
+        relationship,
+        role: ROLE_MAP[roleRaw] || 'invited_guest',
+        weddings: parseWeddings(vals.invitedTo),
+        plusOne: PLUSONE_MAP[plusOneRaw] ?? false,
+        email: vals.email || '',
+        phone: vals.phone || '',
+      }
+    })
 
     return res.json({ guests, source: 'sheet' })
   } catch (err) {

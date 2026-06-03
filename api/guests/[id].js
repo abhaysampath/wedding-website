@@ -21,9 +21,11 @@ export default async function handler(req, res) {
 
   try {
     const { google } = await import('googleapis')
-    const auth = new google.auth.JWT(serviceEmail, null, privateKey.replace(/\\n/g, '\n'), [
-      'https://www.googleapis.com/auth/spreadsheets',
-    ])
+    const auth = new google.auth.JWT({
+      email: serviceEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
     const sheets = google.sheets({ version: 'v4', auth })
     const tabName = process.env.GOOGLE_SHEET_TAB || 'Guest List'
     const range = `${tabName}!A:H`

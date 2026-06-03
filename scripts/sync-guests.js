@@ -70,9 +70,11 @@ async function syncFromSheet() {
     return
   }
 
-  const auth = new google.auth.JWT(serviceEmail, null, privateKey.replace(/\\n/g, '\n'), [
-    'https://www.googleapis.com/auth/spreadsheets.readonly',
-  ])
+  const auth = new google.auth.JWT({
+    email: serviceEmail,
+    key: privateKey.replace(/\\n/g, '\n'),
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
+  })
 
   const sheets = google.sheets({ version: 'v4', auth })
   const range = 'Sheet1!A:H'

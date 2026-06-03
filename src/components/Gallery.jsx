@@ -12,7 +12,7 @@ function Skeleton() {
 }
 
 export default function Gallery() {
-  const { content } = useAuth()
+  const { content, user, setShowAuthModal } = useAuth()
   const ref = useRef(null)
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
@@ -20,6 +20,9 @@ export default function Gallery() {
   const [loadedImages, setLoadedImages] = useState({})
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const needsMore = useInView(sentinelRef, { margin: '200px' })
+  const [showOverlay, setShowOverlay] = useState(false)
+  const focusTimerRef = useRef(null)
+  const returnTimerRef = useRef(null)
 
   const images = content.images || []
 
@@ -29,6 +32,30 @@ export default function Gallery() {
     }
   }, [needsMore, visibleCount, images.length])
 
+  useEffect(() => {
+    if (user) return
+    if (sectionInView) {
+      focusTimerRef.current = setTimeout(() => setShowOverlay(true), 3000)
+    }
+    return () => {
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current)
+    }
+  }, [sectionInView, user])
+
+  useEffect(() => {
+    if (user) {
+      setShowOverlay(false)
+      if (returnTimerRef.current) clearTimeout(returnTimerRef.current)
+      return
+    }
+    if (!showOverlay) {
+      returnTimerRef.current = setTimeout(() => setShowOverlay(true), 10000)
+    }
+    return () => {
+      if (returnTimerRef.current) clearTimeout(returnTimerRef.current)
+    }
+  }, [showOverlay, user])
+
   const handleImageLoad = useCallback((src) => {
     setLoadedImages((prev) => ({ ...prev, [src]: true }))
   }, [])
@@ -36,7 +63,7 @@ export default function Gallery() {
   const visibleImages = images.slice(0, visibleCount)
 
   return (
-    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream transition-colors duration-700" ref={ref}>
+    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream transition-colors duration-700 relative" ref={ref}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -53,7 +80,6 @@ export default function Gallery() {
           </p>
         </motion.div>
 
-        {/* Horizontal scroll */}
         <div className="overflow-x-auto pb-6 -mb-6 scrollbar-thin">
           <div className="flex gap-4 md:gap-6">
             {visibleImages.map((img, i) => (
@@ -79,7 +105,6 @@ export default function Gallery() {
               </motion.div>
             ))}
 
-            {/* Sentinel for infinite scroll */}
             <div ref={sentinelRef} className="shrink-0 w-4" />
           </div>
         </div>
@@ -117,6 +142,39 @@ export default function Gallery() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Sign-in overlay for unauthenticated users */}
+      <AnimatePresence>
+        {showOverlay && !user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute inset-0 bg-gradient-to-b from-transparent via-cream/80 to-cream backdrop-blur-[1px] flex flex-col items-center justify-center"
+          >
+            <button
+              onClick={() => setShowOverlay(false)}
+              className="absolute top-6 right-6 text-charcoal-light/40 hover:text-charcoal transition-colors"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="text-center px-6">
+              <p className="text-charcoal-light/70 text-sm mb-4">
+                Sign in to find your invite and view the full gallery
+              </p>
+              <button
+                onClick={() => { setShowOverlay(false); setShowAuthModal(true) }}
+                className="inline-flex items-center gap-3 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm transition-colors font-medium"
+              >
+                Find Your Invite
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
