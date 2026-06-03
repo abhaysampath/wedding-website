@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { AuthContext } from './AuthContext'
 import config from '../config'
 import { parseCSV } from '../utils/csv'
-import { signInWithGoogle, signInWithFacebook, verifyCurrentUserEmail } from '../firebase'
+import { signInWithGoogle, signInWithFacebook, verifyCurrentUserEmail, verifyEmailByNameUser } from '../firebase'
 import sampleGuests from '../data/guests'
 import sampleFaq from '../data/faq'
 import sampleImages from '../data/images'
@@ -246,6 +246,8 @@ export function AuthProvider({ children }) {
     writeToSheet(user.id, { phone, email, lastLogin: now })
     if (user.uid) {
       await verifyCurrentUserEmail()
+    } else if (email) {
+      await verifyEmailByNameUser(email)
     }
   }, [user])
 

@@ -116,6 +116,8 @@ export default function AuthModal() {
   const handleSelectMatch = useCallback((guest) => {
     setSelectedMatch(guest)
     setShowDropdown(false)
+    setPhone(guest.phone || '')
+    setEmail(guest.email || '')
   }, [])
 
   const handleConfirmName = useCallback(() => {
@@ -240,7 +242,7 @@ export default function AuthModal() {
                 </div>
               )}
 
-              {/* Name confirmation step with masked contact info */}
+              {/* Name confirmation step with inline confirm buttons */}
               {authMode === 'signin' && selectedMatch && (
                 <div className="space-y-6">
                   <div className="text-center">
@@ -257,38 +259,52 @@ export default function AuthModal() {
                     <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
                       Phone Number
                     </label>
-                    <input
-                      type="tel"
-                      value={maskPhone(selectedMatch.phone)}
-                      readOnly
-                      className="w-full bg-cream-dark/50 border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal/60 cursor-default"
-                    />
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => handlePhoneChange(e.target.value)}
+                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                        placeholder="+1 (555) 123-4567"
+                      />
+                      <button
+                        onClick={() => { handleConfirmField('phone'); handleConfirmName() }}
+                        disabled={!validPhone || saving}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                      >
+                        {savedField === 'phone' ? 'Done' : 'Confirm'}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
                       Email Address
                     </label>
-                    <input
-                      type="email"
-                      value={maskEmail(selectedMatch.email)}
-                      readOnly
-                      className="w-full bg-cream-dark/50 border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal/60 cursor-default"
-                    />
+                    <div className="relative">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                        placeholder="you@email.com"
+                      />
+                      <button
+                        onClick={() => { handleConfirmField('email'); handleConfirmName() }}
+                        disabled={!validEmail || saving}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                      >
+                        {savedField === 'email' ? 'Done' : 'Confirm'}
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex pt-2">
                     <button
                       onClick={handleRejectName}
-                      className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
+                      className="w-full py-2.5 border border-gold/20 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
                     >
                       No, that's not me
-                    </button>
-                    <button
-                      onClick={handleConfirmName}
-                      className="flex-1 py-2.5 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase rounded-sm transition-colors font-medium"
-                    >
-                      Yes, that's me
                     </button>
                   </div>
                 </div>
@@ -317,21 +333,15 @@ export default function AuthModal() {
                         type="tel"
                         value={phone}
                         onChange={(e) => handlePhoneChange(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-12 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
                         placeholder="+1 (555) 123-4567"
                       />
                       <button
                         onClick={() => handleConfirmField('phone')}
                         disabled={!validPhone || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-sage disabled:hover:text-charcoal-light/30 transition-colors disabled:cursor-not-allowed"
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
                       >
-                        {savedField === 'phone' ? (
-                          <svg className="w-4 h-4 text-sage" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M20 6L9 17l-5-5" /></svg>
-                        ) : (
-                          <svg className={`w-4 h-4 ${validPhone ? 'text-sage' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
+                        {savedField === 'phone' ? 'Done' : 'Confirm'}
                       </button>
                     </div>
                   </div>
@@ -345,21 +355,15 @@ export default function AuthModal() {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-12 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
                         placeholder="you@email.com"
                       />
                       <button
                         onClick={() => handleConfirmField('email')}
                         disabled={!validEmail || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-sage disabled:hover:text-charcoal-light/30 transition-colors disabled:cursor-not-allowed"
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
                       >
-                        {savedField === 'email' ? (
-                          <svg className="w-4 h-4 text-sage" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M20 6L9 17l-5-5" /></svg>
-                        ) : (
-                          <svg className={`w-4 h-4 ${validEmail ? 'text-sage' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
+                        {savedField === 'email' ? 'Done' : 'Confirm'}
                       </button>
                     </div>
                   </div>

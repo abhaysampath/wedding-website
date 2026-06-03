@@ -4,7 +4,9 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
+  signInAnonymously,
   sendEmailVerification,
+  updateEmail,
 } from 'firebase/auth'
 import config from './config'
 
@@ -62,6 +64,43 @@ export async function verifyCurrentUserEmail() {
   if (!user) return null
   try {
     await sendEmailVerification(user)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export async function verifyEmail(email) {
+  const a = init()
+  if (!a) return false
+  const user = a.currentUser
+  if (user && !user.isAnonymous) {
+    return verifyCurrentUserEmail()
+  }
+  if (!user || user.isAnonymous) {
+    return verifyCurrentUserEmail()
+  }
+  return false
+}
+
+export async function createAnonymousSession() {
+  const a = init()
+  if (!a) return null
+  if (a.currentUser) return a.currentUser
+  try {
+    const result = await signInAnonymously(a)
+    return result.user
+  } catch {
+    return null
+  }
+}
+
+export async function verifyEmailByNameUser(email) {
+  const fbUser = await createAnonymousSession()
+  if (!fbUser) return false
+  try {
+    await updateEmail(fbUser, email)
+    await sendEmailVerification(fbUser)
     return true
   } catch {
     return false
