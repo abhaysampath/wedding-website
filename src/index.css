@@ -42,6 +42,11 @@ body {
   --color-charcoal-light: #5a4530;
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 ::selection {
   background-color: var(--color-sage);
   color: white;
