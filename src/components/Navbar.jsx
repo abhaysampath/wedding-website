@@ -79,10 +79,13 @@ export default function Navbar() {
             </div>
           )}
 
-          <button
-            onClick={() => setLogoClicked(!logoClicked)}
-            className="relative font-heading font-semibold tracking-wide transition-all duration-300"
-          >
+           <button
+             onClick={() => {
+               setLogoClicked(!logoClicked);
+               setShowAuthModal(true);
+             }}
+             className="relative font-heading font-semibold tracking-wide transition-all duration-300"
+           >
             <AnimatePresence mode="wait">
               {!logoClicked ? (
                 <motion.span

@@ -163,7 +163,7 @@ export function AuthProvider({ children }) {
     loadContent()
   }, [])
 
-  const signInAsGuest = useCallback((guest) => {
+  const signInAsGuest = useCallback((guest, overrides = {}) => {
     setFirebaseError(null)
     const now = new Date().toISOString()
     const payload = {
@@ -175,8 +175,8 @@ export function AuthProvider({ children }) {
       relationship: guest.relationship,
       weddings: guest.weddings,
       plusOne: guest.plusOne,
-      phone: guest.phone || '',
-      email: guest.email || '',
+      phone: overrides.phone ?? guest.phone ?? '',
+      email: overrides.email ?? guest.email ?? '',
       lastLogin: now,
       uid: null,
     }
@@ -185,7 +185,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('wedding_user', JSON.stringify(payload))
     writeToSheet(guest.id, { lastLogin: now })
 
-    const hasContact = guest.phone || guest.email
+    const hasContact = payload.phone || payload.email
     if (!hasContact) {
       setAuthMode('contact')
     } else {

@@ -1,6 +1,13 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
+import {
+  createAnonymousSession,
+  sendPhoneCode,
+  linkPhoneCredential,
+  getRecaptchaVerifier,
+  clearRecaptchaVerifier,
+} from '../firebase'
 
 const roleLabels = {
   bride: 'Bride',
@@ -40,6 +47,170 @@ function maskPhone(phone) {
   return `${digits.substring(0, 3)}***${digits[digits.length - 1]}`
 }
 
+function ContactForm({ user, authMode, updateContact, sideName }) {
+  const [phone, setPhone] = useState(user?.phone || '')
+  const [email, setEmail] = useState(user?.email || '')
+  const [saving, setSaving] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [awaitingSmsCode, setAwaitingSmsCode] = useState(false)
+  const [smsCode, setSmsCode] = useState('')
+  const [verificationId, setVerificationId] = useState('')
+  const [sendingSms, setSendingSms] = useState(false)
+  const [verifyingCode, setVerifyingCode] = useState(false)
+  const [fbError, setFbError] = useState(null)
+
+  const validEmail = EMAIL_RE.test(email.trim())
+  const validPhone = phone.replace(/\D/g, '').length >= 7
+
+  const handlePhoneChange = useCallback((raw) => {
+    setPhone(raw.replace(/[^\d\s+\-()]/g, ''))
+  }, [])
+
+  const handleConfirmField = useCallback(async () => {
+    if (saving) return
+    setSaving(true)
+    await updateContact(phone.trim(), email.trim())
+    setSaving(false)
+    setShowConfirmation(true)
+    setTimeout(() => setShowConfirmation(false), 2000)
+  }, [phone, email, updateContact, saving])
+
+  const handlePhoneConfirm = useCallback(async () => {
+    if (saving || sendingSms || !validPhone) return
+    setSendingSms(true)
+    setFbError(null)
+    try {
+      if (!user?.uid) {
+        const fbUser = await createAnonymousSession()
+        if (!fbUser) throw new Error('Failed to create session. Check Firebase Anonymous provider is enabled.')
+      }
+      const verifier = getRecaptchaVerifier('phone-recaptcha-container')
+      if (!verifier) throw new Error('Failed to initialize reCAPTCHA')
+      const result = await sendPhoneCode(phone.trim(), verifier)
+      setVerificationId(result.verificationId)
+      setAwaitingSmsCode(true)
+    } catch (err) {
+      clearRecaptchaVerifier()
+      setFbError(err.message || 'Failed to send verification code')
+    } finally {
+      setSendingSms(false)
+    }
+  }, [phone, validPhone, saving, sendingSms, user])
+
+  const handleVerifySmsCode = useCallback(async () => {
+    if (verifyingCode || smsCode.length < 6) return
+    setVerifyingCode(true)
+    setFbError(null)
+    try {
+      await linkPhoneCredential(verificationId, smsCode)
+      clearRecaptchaVerifier()
+      await updateContact(phone.trim(), email.trim())
+      setShowConfirmation(true)
+      setTimeout(() => setShowConfirmation(false), 2000)
+    } catch (err) {
+      setFbError(err.message || 'Failed to verify code')
+    } finally {
+      setVerifyingCode(false)
+    }
+  }, [verificationId, smsCode, phone, email, updateContact, verifyingCode])
+
+  return (
+    <div className="space-y-5">
+      <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
+        <p className="font-heading text-lg text-charcoal">{user.firstName} {user.lastName}</p>
+        <p className="text-xs text-charcoal-light/50 mt-1">{guestLabel(user, sideName)}</p>
+      </div>
+
+      <p className="text-sm text-charcoal-light/70 leading-relaxed">
+        {authMode === 'contact'
+          ? 'Add your contact info so we can send you wedding updates.'
+          : 'Update your contact info below.'}
+      </p>
+
+      {fbError && (
+        <div className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
+          {fbError}
+        </div>
+      )}
+
+       <div>
+         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+           Phone Number
+         </label>
+         {phone && !awaitingSmsCode && (
+           <p className="mb-2 text-xs text-charcoal-light/40">
+             Current: {maskPhone(phone)}
+           </p>
+         )}
+         {!awaitingSmsCode ? (
+           <div className="relative">
+             <input
+               type="tel"
+               value={phone}
+               onChange={(e) => handlePhoneChange(e.target.value)}
+               disabled={sendingSms}
+               className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+               placeholder="+1 (555) 123-4567"
+             />
+             <button
+               onClick={handlePhoneConfirm}
+               disabled={!validPhone || sendingSms}
+               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+             >
+               {sendingSms ? 'Sending...' : 'Confirm'}
+             </button>
+           </div>
+         ) : (
+           <div className="relative">
+             <input
+               type="text"
+               value={smsCode}
+               onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+               className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors tracking-[0.3em] text-center"
+               placeholder="000000"
+               autoComplete="off"
+             />
+             <button
+               onClick={handleVerifySmsCode}
+               disabled={smsCode.length < 6 || verifyingCode}
+               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+             >
+               {verifyingCode ? 'Verifying...' : 'Verify'}
+             </button>
+           </div>
+         )}
+       </div>
+
+       <div>
+         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+           Email Address
+         </label>
+         {email && (
+           <p className="mb-2 text-xs text-charcoal-light/40">
+             Current: {maskEmail(email)}
+           </p>
+         )}
+         <div className="relative">
+           <input
+             type="email"
+             value={email}
+             onChange={(e) => setEmail(e.target.value)}
+             className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+             placeholder="you@email.com"
+           />
+            <button
+              onClick={handleConfirmField}
+              disabled={!validEmail || saving}
+             className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+           >
+             {showConfirmation && saving ? 'Confirming...' : saving ? 'Saving...' : 'Confirm'}
+           </button>
+         </div>
+       </div>
+    </div>
+  )
+}
+
 export default function AuthModal() {
   const {
     showAuthModal, setShowAuthModal,
@@ -55,7 +226,12 @@ export default function AuthModal() {
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [saving, setSaving] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
-  const [savedField, setSavedField] = useState(null)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [awaitingSmsCode, setAwaitingSmsCode] = useState(false)
+  const [smsCode, setSmsCode] = useState('')
+  const [verificationId, setVerificationId] = useState('')
+  const [sendingSms, setSendingSms] = useState(false)
+  const [verifyingCode, setVerifyingCode] = useState(false)
   const inputRef = useRef(null)
 
   const sideName = config.site.coupleNames
@@ -71,14 +247,6 @@ export default function AuthModal() {
     }).slice(0, 8)
   }, [nameInput, content.guests])
 
-  useEffect(() => {
-    if (!showAuthModal) return
-    if ((authMode === 'contact' || authMode === 'settings') && user) {
-      setPhone(user.phone || '')
-      setEmail(user.email || '')
-    }
-  }, [showAuthModal, authMode, user])
-
   const resetState = () => {
     setPhone('')
     setEmail('')
@@ -86,31 +254,82 @@ export default function AuthModal() {
     setSelectedMatch(null)
     setSaving(false)
     setShowDropdown(false)
-    setSavedField(null)
+    setShowConfirmation(false)
     setFirebaseError(null)
+    setAwaitingSmsCode(false)
+    setSmsCode('')
+    setVerificationId('')
+    setSendingSms(false)
+    setVerifyingCode(false)
+    clearRecaptchaVerifier()
   }
 
   const validEmail = EMAIL_RE.test(email.trim())
   const validPhone = phone.replace(/\D/g, '').length >= 7
 
   const handlePhoneChange = useCallback((raw) => {
-    setPhone(raw.replace(/[^\d\s\+\-\(\)]/g, ''))
+    setPhone(raw.replace(/[^\d\s+\-()]/g, ''))
   }, [])
 
-  const handleConfirmField = useCallback(async (field) => {
+  const handleConfirmField = useCallback(async () => {
     if (saving) return
     setSaving(true)
     await updateContact(phone.trim(), email.trim())
     setSaving(false)
-    setSavedField(field)
-    setTimeout(() => setSavedField(null), 2000)
+    setShowConfirmation(true)
+    setTimeout(() => setShowConfirmation(false), 2000)
   }, [phone, email, updateContact, saving])
+
+  const handlePhoneConfirm = useCallback(async () => {
+    if (saving || sendingSms || !validPhone) return
+    setSendingSms(true)
+    setFirebaseError(null)
+    try {
+      if (!user?.uid) {
+        const fbUser = await createAnonymousSession()
+        if (!fbUser) throw new Error('Failed to create session. Check Firebase Anonymous provider is enabled.')
+      }
+      const verifier = getRecaptchaVerifier('phone-recaptcha-container')
+      if (!verifier) throw new Error('Failed to initialize reCAPTCHA')
+      const result = await sendPhoneCode(phone.trim(), verifier)
+      setVerificationId(result.verificationId)
+      setAwaitingSmsCode(true)
+    } catch (err) {
+      clearRecaptchaVerifier()
+      setFirebaseError(err.message || 'Failed to send verification code')
+    } finally {
+      setSendingSms(false)
+    }
+  }, [phone, validPhone, saving, sendingSms, user, setFirebaseError])
+
+  const handleVerifySmsCode = useCallback(async () => {
+    if (verifyingCode || smsCode.length < 6) return
+    setVerifyingCode(true)
+    setFirebaseError(null)
+    try {
+      await linkPhoneCredential(verificationId, smsCode)
+      clearRecaptchaVerifier()
+      if (selectedMatch) {
+        await updateContact(phone.trim(), email.trim())
+        signInAsGuest(selectedMatch, { phone: phone.trim(), email: email.trim() })
+      } else {
+        await updateContact(phone.trim(), email.trim())
+        setShowConfirmation(true)
+        setTimeout(() => setShowConfirmation(false), 2000)
+      }
+    } catch (err) {
+      setFirebaseError(err.message || 'Failed to verify code')
+    } finally {
+      setVerifyingCode(false)
+    }
+  }, [verificationId, smsCode, phone, email, selectedMatch, signInAsGuest, updateContact, verifyingCode, setFirebaseError])
 
   const handleCancel = useCallback(() => {
     if (user) recordLogin()
     setShowAuthModal(false)
     setAuthMode('signin')
     resetState()
+    clearRecaptchaVerifier()
   }, [user, recordLogin, setShowAuthModal, setAuthMode])
 
   const handleSelectMatch = useCallback((guest) => {
@@ -119,11 +338,6 @@ export default function AuthModal() {
     setPhone(guest.phone || '')
     setEmail(guest.email || '')
   }, [])
-
-  const handleConfirmName = useCallback(() => {
-    if (!selectedMatch) return
-    signInAsGuest(selectedMatch)
-  }, [selectedMatch, signInAsGuest])
 
   const handleRejectName = useCallback(() => {
     setSelectedMatch(null)
@@ -170,9 +384,10 @@ export default function AuthModal() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-8 md:p-10 relative">
+              <div id="phone-recaptcha-container" />
               <button
                 onClick={handleCancel}
-                className="absolute top-8 md:top-10 right-8 md:right-10 w-[42px] h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+                className="absolute top-8 md:top-10 right-8 md:right-6 w-[42px] h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                   <path d="M6 18L18 6M6 6l12 12" />
@@ -185,7 +400,7 @@ export default function AuthModal() {
                   <button
                     onClick={() => handleFirebaseSignIn('google')}
                     disabled={firebaseLoading}
-                    className="w-full flex items-center justify-center gap-3 py-3 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
+                    className="w-[90%] flex items-center justify-center gap-3 py-3 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
                   >
                     {firebaseLoading ? (
                       <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -242,62 +457,97 @@ export default function AuthModal() {
                 </div>
               )}
 
-              {/* Name confirmation step with inline confirm buttons */}
-              {authMode === 'signin' && selectedMatch && (
-                <div className="space-y-6">
-                  <div className="text-center">
-                    <p className="text-sm text-charcoal-light/50 mb-2">Are you</p>
-                    <p className="font-heading text-2xl text-charcoal">
-                      {selectedMatch.firstName} {selectedMatch.lastName}
-                    </p>
-                    <p className="text-sm text-charcoal-light/50 mt-1">
-                      {guestLabel(selectedMatch, sideName)}
-                    </p>
-                  </div>
+               {/* Name confirmation step with inline confirm buttons */}
+               {authMode === 'signin' && selectedMatch && (
+                 <div className="space-y-6">
+                   <div className="text-center">
+                     <p className="text-sm text-charcoal-light/50 mb-2">Are you</p>
+                     <p className="font-heading text-2xl text-charcoal">
+                       {selectedMatch.firstName} {selectedMatch.lastName}
+                     </p>
+                     <p className="text-sm text-charcoal-light/50 mt-1">
+                       {guestLabel(selectedMatch, sideName)}
+                     </p>
+                   </div>
 
-                  <div>
-                    <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => handlePhoneChange(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                        placeholder="+1 (555) 123-4567"
-                      />
-                      <button
-                        onClick={() => { handleConfirmField('phone'); handleConfirmName() }}
-                        disabled={!validPhone || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                      >
-                        {savedField === 'phone' ? 'Done' : 'Confirm'}
-                      </button>
+                   <div>
+                      <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                        Phone Number
+                      </label>
+                      {phone && !awaitingSmsCode && (
+                        <p className="mb-2 text-xs text-charcoal-light/40">
+                          Current: {maskPhone(phone)}
+                        </p>
+                      )}
+                      {!awaitingSmsCode ? (
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={phone}
+                            onChange={(e) => handlePhoneChange(e.target.value)}
+                            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                            placeholder="+1 (555) 123-4567"
+                          />
+                          <button
+                            onClick={handlePhoneConfirm}
+                            disabled={!validPhone || sendingSms}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                          >
+                            {sendingSms ? 'Sending...' : 'Confirm'}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={smsCode}
+                            onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors tracking-[0.3em] text-center"
+                            placeholder="000000"
+                            autoComplete="off"
+                          />
+                          <button
+                            onClick={handleVerifySmsCode}
+                            disabled={smsCode.length < 6 || verifyingCode}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                          >
+                            {verifyingCode ? 'Verifying...' : 'Verify'}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                        placeholder="you@email.com"
-                      />
-                      <button
-                        onClick={() => { handleConfirmField('email'); handleConfirmName() }}
-                        disabled={!validEmail || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                      >
-                        {savedField === 'email' ? 'Done' : 'Confirm'}
-                      </button>
+                    <div>
+                      <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                        Email Address
+                      </label>
+                      {email && (
+                        <p className="mb-2 text-xs text-charcoal-light/40">
+                          Current: {maskEmail(email)}
+                        </p>
+                      )}
+                      <div className="relative">
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          disabled={awaitingSmsCode}
+                          className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+                          placeholder="you@email.com"
+                        />
+                        <button
+                            onClick={async () => {
+                            await handleConfirmField()
+                            if (selectedMatch) signInAsGuest(selectedMatch, { phone: phone.trim(), email: email.trim() })
+                          }}
+
+                          disabled={!validEmail || saving || awaitingSmsCode}
+                          className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                        >
+                          {showConfirmation && saving ? 'Confirming...' : saving ? 'Saving...' : 'Confirm'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
                   <div className="flex pt-2">
                     <button
@@ -312,62 +562,13 @@ export default function AuthModal() {
 
               {/* Contact / Settings — phone + email */}
               {(authMode === 'contact' || authMode === 'settings') && user && (
-                <div className="space-y-5">
-                  <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
-                    <p className="font-heading text-lg text-charcoal">{user.firstName} {user.lastName}</p>
-                    <p className="text-xs text-charcoal-light/50 mt-1">{guestLabel(user, sideName)}</p>
-                  </div>
-
-                  <p className="text-sm text-charcoal-light/70 leading-relaxed">
-                    {authMode === 'contact'
-                      ? 'Add your contact info so we can send you wedding updates.'
-                      : 'Update your contact info below.'}
-                  </p>
-
-                  <div>
-                    <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                      Phone Number
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => handlePhoneChange(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                        placeholder="+1 (555) 123-4567"
-                      />
-                      <button
-                        onClick={() => handleConfirmField('phone')}
-                        disabled={!validPhone || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                      >
-                        {savedField === 'phone' ? 'Done' : 'Confirm'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                        placeholder="you@email.com"
-                      />
-                      <button
-                        onClick={() => handleConfirmField('email')}
-                        disabled={!validEmail || saving}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                      >
-                        {savedField === 'email' ? 'Done' : 'Confirm'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ContactForm
+                  key={`contact-${user.id}`}
+                  user={user}
+                  authMode={authMode}
+                  updateContact={updateContact}
+                  sideName={config.site.coupleNames}
+                />
               )}
             </div>
           </motion.div>

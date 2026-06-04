@@ -7,7 +7,10 @@ import {
   signInAnonymously,
   sendEmailVerification,
   EmailAuthProvider,
+  PhoneAuthProvider,
   linkWithCredential,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
 } from 'firebase/auth'
 import config from './config'
 
@@ -35,13 +38,18 @@ export async function signInWithGoogle() {
   if (!a) throw new Error('Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env')
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  const result = await signInWithPopup(a, provider)
-  const user = result.user
-  return {
-    name: user.displayName || '',
-    email: user.email || '',
-    photo: user.photoURL || '',
-    uid: user.uid,
+  try {
+    const result = await signInWithPopup(a, provider)
+    const user = result.user
+    return {
+      name: user.displayName || '',
+      email: user.email || '',
+      photo: user.photoURL || '',
+      uid: user.uid,
+    }
+  } catch (err) {
+    console.error('signInWithGoogle failed:', err.code, err.message)
+    throw err
   }
 }
 
@@ -50,13 +58,18 @@ export async function signInWithFacebook() {
   if (!a) throw new Error('Firebase not configured')
   const provider = new FacebookAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  const result = await signInWithPopup(a, provider)
-  const user = result.user
-  return {
-    name: user.displayName || '',
-    email: user.email || '',
-    photo: user.photoURL || '',
-    uid: user.uid,
+  try {
+    const result = await signInWithPopup(a, provider)
+    const user = result.user
+    return {
+      name: user.displayName || '',
+      email: user.email || '',
+      photo: user.photoURL || '',
+      uid: user.uid,
+    }
+  } catch (err) {
+    console.error('signInWithFacebook failed:', err.code, err.message)
+    throw err
   }
 }
 
@@ -66,7 +79,8 @@ export async function verifyCurrentUserEmail() {
   try {
     await sendEmailVerification(user)
     return true
-  } catch {
+  } catch (err) {
+    console.error('sendEmailVerification failed:', err.code, err.message)
     return false
   }
 }
@@ -78,7 +92,8 @@ export async function createAnonymousSession() {
   try {
     const result = await signInAnonymously(a)
     return result.user
-  } catch {
+  } catch (err) {
+    console.error('signInAnonymously failed:', err.code, err.message)
     return null
   }
 }
@@ -94,7 +109,57 @@ export async function verifyEmailByNameUser(email) {
     await linkWithCredential(fbUser, credential)
     await sendEmailVerification(fbUser)
     return true
-  } catch {
+  } catch (err) {
+    console.error('verifyEmailByNameUser failed:', err.code, err.message)
     return false
+  }
+}
+
+export async function sendPhoneCode(phoneNumber, recaptchaVerifier) {
+  const a = init()
+  if (!a) throw new Error('Firebase not initialized')
+  try {
+    const confirmationResult = await signInWithPhoneNumber(a, phoneNumber, recaptchaVerifier)
+    return confirmationResult
+  } catch (err) {
+    console.error('signInWithPhoneNumber failed:', err.code, err.message)
+    throw err
+  }
+}
+
+export async function linkPhoneCredential(verificationId, code) {
+  const a = init()
+  if (!a) throw new Error('Firebase not initialized')
+  const user = a.currentUser
+  if (!user) throw new Error('No user signed in')
+  try {
+    const credential = PhoneAuthProvider.credential(verificationId, code)
+    await linkWithCredential(user, credential)
+    return true
+  } catch (err) {
+    console.error('linkPhoneCredential failed:', err.code, err.message)
+    throw err
+  }
+}
+
+let _recaptchaVerifier = null
+
+export function getRecaptchaVerifier(containerId) {
+  clearRecaptchaVerifier()
+  const auth = getAuth()
+  if (!auth) return null
+  _recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+    size: 'invisible',
+    'expired-callback': () => {
+      console.log('reCAPTCHA expired')
+    }
+  })
+  return _recaptchaVerifier
+}
+
+export function clearRecaptchaVerifier() {
+  if (_recaptchaVerifier) {
+    _recaptchaVerifier.clear()
+    _recaptchaVerifier = null
   }
 }
