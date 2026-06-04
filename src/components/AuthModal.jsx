@@ -19,6 +19,14 @@ const roleLabels = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+function formatE164(raw) {
+  const digits = raw.replace(/\D/g, '')
+  if (raw.startsWith('+')) return '+' + digits
+  if (digits.length === 11 && digits.startsWith('1')) return '+' + digits
+  if (digits.length === 10) return '+1' + digits
+  return '+1' + digits
+}
+
 function normalize(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ')
 }
@@ -86,7 +94,7 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
       }
       const verifier = getRecaptchaVerifier('phone-recaptcha-container')
       if (!verifier) throw new Error('Failed to initialize reCAPTCHA')
-      const result = await sendPhoneCode(phone.trim(), verifier)
+      const result = await sendPhoneCode(formatE164(phone), verifier)
       setVerificationId(result.verificationId)
       setAwaitingSmsCode(true)
     } catch (err) {
@@ -291,7 +299,7 @@ export default function AuthModal() {
       }
       const verifier = getRecaptchaVerifier('phone-recaptcha-container')
       if (!verifier) throw new Error('Failed to initialize reCAPTCHA')
-      const result = await sendPhoneCode(phone.trim(), verifier)
+      const result = await sendPhoneCode(formatE164(phone), verifier)
       setVerificationId(result.verificationId)
       setAwaitingSmsCode(true)
     } catch (err) {
