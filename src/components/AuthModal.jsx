@@ -58,6 +58,8 @@ function maskPhone(phone) {
 function ContactForm({ user, authMode, updateContact, sideName }) {
   const [phone, setPhone] = useState(user?.phone || '')
   const [email, setEmail] = useState(user?.email || '')
+  const [phoneFocused, setPhoneFocused] = useState(false)
+  const [emailFocused, setEmailFocused] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [awaitingSmsCode, setAwaitingSmsCode] = useState(false)
@@ -141,25 +143,22 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
         </div>
       )}
 
-       <div>
-         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-           Phone Number
-         </label>
-         {phone && !awaitingSmsCode && (
-           <p className="mb-2 text-xs text-charcoal-light/40">
-             Current: {maskPhone(phone)}
-           </p>
-         )}
-         {!awaitingSmsCode ? (
-           <div className="relative">
-             <input
-               type="tel"
-               value={phone}
-               onChange={(e) => handlePhoneChange(e.target.value)}
-               disabled={sendingSms}
-               className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
-               placeholder="+1 (555) 123-4567"
-             />
+        <div>
+          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+            Phone Number
+          </label>
+          {!awaitingSmsCode ? (
+            <div className="relative">
+              <input
+                type="tel"
+                value={!phoneFocused && phone === (user?.phone || '') ? maskPhone(phone) : phone}
+                onChange={(e) => handlePhoneChange(e.target.value)}
+                onFocus={() => setPhoneFocused(true)}
+                onBlur={() => setPhoneFocused(false)}
+                disabled={sendingSms}
+                className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+                placeholder="+1 (555) 123-4567"
+              />
              <button
                onClick={handlePhoneConfirm}
                disabled={!validPhone || sendingSms}
@@ -189,23 +188,20 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
          )}
        </div>
 
-       <div>
-         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-           Email Address
-         </label>
-         {email && (
-           <p className="mb-2 text-xs text-charcoal-light/40">
-             Current: {maskEmail(email)}
-           </p>
-         )}
-         <div className="relative">
-           <input
-             type="email"
-             value={email}
-             onChange={(e) => setEmail(e.target.value)}
-             className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-             placeholder="you@email.com"
-           />
+        <div>
+          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+            Email Address
+          </label>
+          <div className="relative">
+            <input
+              type="email"
+              value={!emailFocused && email === (user?.email || '') ? maskEmail(email) : email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+              placeholder="you@email.com"
+            />
             <button
               onClick={handleConfirmField}
               disabled={!validEmail || saving}
@@ -240,6 +236,10 @@ export default function AuthModal() {
   const [verificationId, setVerificationId] = useState('')
   const [sendingSms, setSendingSms] = useState(false)
   const [verifyingCode, setVerifyingCode] = useState(false)
+  const [phoneFocused, setPhoneFocused] = useState(false)
+  const [emailFocused, setEmailFocused] = useState(false)
+  const [origPhone, setOrigPhone] = useState('')
+  const [origEmail, setOrigEmail] = useState('')
   const inputRef = useRef(null)
 
   const sideName = config.site.coupleNames
@@ -269,6 +269,10 @@ export default function AuthModal() {
     setVerificationId('')
     setSendingSms(false)
     setVerifyingCode(false)
+    setPhoneFocused(false)
+    setEmailFocused(false)
+    setOrigPhone('')
+    setOrigEmail('')
     clearRecaptchaVerifier()
   }
 
@@ -343,8 +347,14 @@ export default function AuthModal() {
   const handleSelectMatch = useCallback((guest) => {
     setSelectedMatch(guest)
     setShowDropdown(false)
-    setPhone(guest.phone || '')
-    setEmail(guest.email || '')
+    const gPhone = guest.phone || ''
+    const gEmail = guest.email || ''
+    setPhone(gPhone)
+    setEmail(gEmail)
+    setOrigPhone(gPhone)
+    setOrigEmail(gEmail)
+    setPhoneFocused(false)
+    setEmailFocused(false)
   }, [])
 
   const handleRejectName = useCallback(() => {
@@ -493,24 +503,21 @@ export default function AuthModal() {
                      </p>
                    </div>
 
-                   <div>
-                      <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                        Phone Number
-                      </label>
-                      {phone && !awaitingSmsCode && (
-                        <p className="mb-2 text-xs text-charcoal-light/40">
-                          Current: {maskPhone(phone)}
-                        </p>
-                      )}
-                      {!awaitingSmsCode ? (
-                        <div className="relative">
-                          <input
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => handlePhoneChange(e.target.value)}
-                            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                            placeholder="+1 (555) 123-4567"
-                          />
+                    <div>
+                       <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                         Phone Number
+                       </label>
+                       {!awaitingSmsCode ? (
+                         <div className="relative">
+                           <input
+                             type="tel"
+                              value={!phoneFocused && phone === origPhone ? maskPhone(phone) : phone}
+                             onChange={(e) => handlePhoneChange(e.target.value)}
+                             onFocus={() => setPhoneFocused(true)}
+                             onBlur={() => setPhoneFocused(false)}
+                             className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                             placeholder="+1 (555) 123-4567"
+                           />
                           <button
                             onClick={handlePhoneConfirm}
                             disabled={!validPhone || sendingSms}
@@ -540,24 +547,21 @@ export default function AuthModal() {
                       )}
                     </div>
 
-                    <div>
-                      <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                        Email Address
-                      </label>
-                      {email && (
-                        <p className="mb-2 text-xs text-charcoal-light/40">
-                          Current: {maskEmail(email)}
-                        </p>
-                      )}
-                      <div className="relative">
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          disabled={awaitingSmsCode}
-                          className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
-                          placeholder="you@email.com"
-                        />
+                     <div>
+                       <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                         Email Address
+                       </label>
+                       <div className="relative">
+                         <input
+                           type="email"
+                            value={!emailFocused && email === origEmail ? maskEmail(email) : email}
+                           onChange={(e) => setEmail(e.target.value)}
+                           onFocus={() => setEmailFocused(true)}
+                           onBlur={() => setEmailFocused(false)}
+                           disabled={awaitingSmsCode}
+                           className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+                           placeholder="you@email.com"
+                         />
                         <button
                             onClick={async () => {
                             await handleConfirmField()
