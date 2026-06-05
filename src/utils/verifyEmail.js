@@ -7,10 +7,6 @@ export function generateCode() {
 
 let _currentCode = ''
 
-export function getCurrentCode() {
-  return _currentCode
-}
-
 export async function sendVerificationCode(email, name = '') {
   const code = generateCode()
   _currentCode = code

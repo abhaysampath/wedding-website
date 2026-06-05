@@ -4,12 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "generate-manifest": "node scripts/generate-image-manifest.js",
     "sync-guests": "node scripts/sync-guests.js",
     "dev": "vite",
     "dev:api": "node --env-file=.env scripts/dev-server.mjs",
     "sync": "node --env-file=.env scripts/sync-guests.mjs",
     "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -32,6 +33,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vitest": "^4.1.8"
   }
 }

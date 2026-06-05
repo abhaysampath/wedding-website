@@ -9,12 +9,8 @@ import {
   linkWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  onAuthStateChanged,
   browserLocalPersistence,
   setPersistence,
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
 } from 'firebase/auth'
 import config from './config'
 
@@ -23,8 +19,6 @@ const { apiKey, authDomain, projectId } = config.firebase
 let app = null
 let auth = null
 
-// Initialize Firebase app and auth instance
-// Sets persistence to localStorage and disables app verification in dev
 function init() {
   if (!apiKey || !authDomain || !projectId) return null
   if (!auth) {
@@ -36,20 +30,6 @@ function init() {
     }
   }
   return auth
-}
-
-// Export auth utilities
-export { onAuthStateChanged }
-
-// Get initialized Firebase auth instance
-export function getFirebaseAuth() {
-  return init()
-}
-
-// Get current auth user
-export function getAuthUser() {
-  const a = init()
-  return a?.currentUser || null
 }
 
 export async function signInWithGoogle() {
@@ -134,28 +114,4 @@ export function clearRecaptchaVerifier() {
     try { _recaptchaVerifier.clear() } catch { /* verifier may not be rendered */ }
     _recaptchaVerifier = null
   }
-}
-
-export function checkIsEmailLink(url) {
-  const a = init()
-  if (!a) return false
-  return isSignInWithEmailLink(a, url)
-}
-
-export async function completeEmailSignIn(email, url) {
-  const a = init()
-  if (!a) throw new Error('Firebase not initialized')
-  const result = await signInWithEmailLink(a, email, url)
-  return result.user
-}
-
-export async function sendEmailLink(email) {
-  const a = init()
-  if (!a) throw new Error('Firebase not initialized')
-  const actionCodeSettings = {
-    url: window.location.origin + '/',
-    handleCodeInApp: true,
-  }
-  localStorage.setItem('emailForSignIn', email)
-  await sendSignInLinkToEmail(a, email, actionCodeSettings)
 }

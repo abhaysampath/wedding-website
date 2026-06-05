@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { AuthContext } from './AuthContext'
 import config from '../config'
-import { parseCSV } from '../utils/csv'
 import { signInWithGoogle, signInWithFacebook } from '../firebase'
 import sampleGuests from '../data/guests'
 import sampleFaq from '../data/faq'
@@ -47,49 +46,6 @@ function inferSide(firstName, lastName, relationship, role) {
   if (rel.includes('rebecca')) return 'bride'
   if (role === 'Br-Family') return 'bride'
   return 'bride'
-}
-
-function parseWeddings(val) {
-  const v = (val || '').toLowerCase()
-  if (v.includes('both')) return ['us', 'india']
-  if (v.includes('us')) return ['us']
-  if (v.includes('india')) return ['india']
-  return ['us']
-}
-
-function sanitizeCell(val) {
-  const v = (val || '').trim()
-  return v.startsWith('#') ? '' : v
-}
-
-function csvToGuests(rows) {
-  if (!rows || rows.length < 2) return []
-  const headers = rows[0]
-  const idx = {}
-  for (const [field, label] of Object.entries(columns)) {
-    const i = headers.findIndex(h => h.trim().toLowerCase() === label.toLowerCase())
-    if (i !== -1) idx[field] = i
-  }
-  return rows.slice(1).map((row, i) => {
-    const get = (key) => idx[key] !== undefined ? sanitizeCell(row[idx[key]]) : ''
-    const firstName = get('firstName')
-    const lastName = get('lastName')
-    const relationship = get('relationship')
-    const roleRaw = get('role')
-    const plusOneRaw = get('plusOne')
-    return {
-      id: `g${String(i + 1).padStart(3, '0')}`,
-      firstName,
-      lastName,
-      side: inferSide(firstName, lastName, relationship, roleRaw),
-      relationship,
-      role: roleMap[roleRaw] || 'invited_guest',
-      weddings: parseWeddings(get('weddings')),
-      plusOne: plusOneMap[plusOneRaw] ?? false,
-      email: get('email') || '',
-      phone: get('phone') || '',
-    }
-  })
 }
 
 function findGuestByName(guests, name) {
@@ -162,18 +118,6 @@ export function AuthProvider({ children }) {
               loaded: true,
             })
             return
-          }
-        }
-        if (sheets.guestsCsv) {
-          const res = await fetch(sheets.guestsCsv)
-          if (res.ok) {
-            const text = await res.text()
-            const rows = parseCSV(text)
-            const guests = csvToGuests(rows)
-            if (guests.length > 0) {
-              setContent({ guests, faq: sampleFaq, loaded: true })
-              return
-            }
           }
         }
         setContent({ guests: sampleGuests, faq: sampleFaq, loaded: true })
@@ -353,15 +297,12 @@ export function AuthProvider({ children }) {
     setFirebaseError,
     handleFirebaseSignIn,
     signInAsGuest,
-    searchGuests: () => [],
-    signIn: () => {},
     signOut,
     switchWedding,
     updateContact,
     recordLogin,
     openSettings,
     canSwitch,
-    weddingList: user?.weddings || ['us'],
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
