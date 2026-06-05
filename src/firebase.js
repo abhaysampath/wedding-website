@@ -5,12 +5,16 @@ import {
   FacebookAuthProvider,
   signInWithPopup,
   signInAnonymously,
-  sendEmailVerification,
-  EmailAuthProvider,
   PhoneAuthProvider,
   linkWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  onAuthStateChanged,
+  browserLocalPersistence,
+  setPersistence,
+  sendSignInLinkToEmail,
+  isSignInWithEmailLink,
+  signInWithEmailLink,
 } from 'firebase/auth'
 import config from './config'
 
@@ -19,15 +23,30 @@ const { apiKey, authDomain, projectId } = config.firebase
 let app = null
 let auth = null
 
+// Initialize Firebase app and auth instance
+// Sets persistence to localStorage and disables app verification in dev
 function init() {
   if (!apiKey || !authDomain || !projectId) return null
   if (!auth) {
     app = initializeApp({ apiKey, authDomain, projectId })
     auth = getAuth(app)
+    setPersistence(auth, browserLocalPersistence)
+    if (import.meta.env.DEV || config.debug) {
+      auth.settings.appVerificationDisabledForTesting = true
+    }
   }
   return auth
 }
 
+// Export auth utilities
+export { onAuthStateChanged }
+
+// Get initialized Firebase auth instance
+export function getFirebaseAuth() {
+  return init()
+}
+
+// Get current auth user
 export function getAuthUser() {
   const a = init()
   return a?.currentUser || null
@@ -38,19 +57,8 @@ export async function signInWithGoogle() {
   if (!a) throw new Error('Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env')
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  try {
-    const result = await signInWithPopup(a, provider)
-    const user = result.user
-    return {
-      name: user.displayName || '',
-      email: user.email || '',
-      photo: user.photoURL || '',
-      uid: user.uid,
-    }
-  } catch (err) {
-    console.error('signInWithGoogle failed:', err.code, err.message)
-    throw err
-  }
+  const result = await signInWithPopup(a, provider)
+  return result
 }
 
 export async function signInWithFacebook() {
@@ -58,31 +66,8 @@ export async function signInWithFacebook() {
   if (!a) throw new Error('Firebase not configured')
   const provider = new FacebookAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
-  try {
-    const result = await signInWithPopup(a, provider)
-    const user = result.user
-    return {
-      name: user.displayName || '',
-      email: user.email || '',
-      photo: user.photoURL || '',
-      uid: user.uid,
-    }
-  } catch (err) {
-    console.error('signInWithFacebook failed:', err.code, err.message)
-    throw err
-  }
-}
-
-export async function verifyCurrentUserEmail() {
-  const user = getAuthUser()
-  if (!user) return null
-  try {
-    await sendEmailVerification(user)
-    return true
-  } catch (err) {
-    console.error('sendEmailVerification failed:', err.code, err.message)
-    return false
-  }
+  const result = await signInWithPopup(a, provider)
+  return result
 }
 
 export async function createAnonymousSession() {
@@ -95,23 +80,6 @@ export async function createAnonymousSession() {
   } catch (err) {
     console.error('signInAnonymously failed:', err.code, err.message)
     return null
-  }
-}
-
-export async function verifyEmailByNameUser(email) {
-  const fbUser = await createAnonymousSession()
-  if (!fbUser) return false
-  try {
-    const password = Array.from({ length: 24 }, () =>
-      'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor(Math.random() * 36)]
-    ).join('')
-    const credential = EmailAuthProvider.credential(email, password)
-    await linkWithCredential(fbUser, credential)
-    await sendEmailVerification(fbUser)
-    return true
-  } catch (err) {
-    console.error('verifyEmailByNameUser failed:', err.code, err.message)
-    return false
   }
 }
 
@@ -144,12 +112,16 @@ export async function linkPhoneCredential(verificationId, code) {
 
 let _recaptchaVerifier = null
 
-export function getRecaptchaVerifier(containerId) {
-  clearRecaptchaVerifier()
-  const auth = getAuth()
-  if (!auth) return null
-  _recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-    size: 'invisible',
+export function getRecaptchaVerifier(containerElement) {
+  if (_recaptchaVerifier) {
+    try { _recaptchaVerifier.clear() } catch { /* verifier may not be rendered */ }
+    _recaptchaVerifier = null
+  }
+  const a = init()
+  if (!a) return null
+  _recaptchaVerifier = new RecaptchaVerifier(a, containerElement, {
+    size: 'normal',
+    callback: () => {},
     'expired-callback': () => {
       console.log('reCAPTCHA expired')
     }
@@ -159,7 +131,31 @@ export function getRecaptchaVerifier(containerId) {
 
 export function clearRecaptchaVerifier() {
   if (_recaptchaVerifier) {
-    _recaptchaVerifier.clear()
+    try { _recaptchaVerifier.clear() } catch { /* verifier may not be rendered */ }
     _recaptchaVerifier = null
   }
+}
+
+export function checkIsEmailLink(url) {
+  const a = init()
+  if (!a) return false
+  return isSignInWithEmailLink(a, url)
+}
+
+export async function completeEmailSignIn(email, url) {
+  const a = init()
+  if (!a) throw new Error('Firebase not initialized')
+  const result = await signInWithEmailLink(a, email, url)
+  return result.user
+}
+
+export async function sendEmailLink(email) {
+  const a = init()
+  if (!a) throw new Error('Firebase not initialized')
+  const actionCodeSettings = {
+    url: window.location.origin + '/',
+    handleCodeInApp: true,
+  }
+  localStorage.setItem('emailForSignIn', email)
+  await sendSignInLinkToEmail(a, email, actionCodeSettings)
 }

@@ -106,6 +106,11 @@ export default async function handler(req, res) {
   }
 }
 
+function sanitizeCell(val) {
+  const v = (val || '').trim()
+  return v.startsWith('#') ? '' : v
+}
+
 function parseSheet(values, columnConfig, mapper) {
   if (!values || values.length < 2) return []
   const [headerRow, ...dataRows] = values
@@ -121,7 +126,7 @@ function parseSheet(values, columnConfig, mapper) {
   return dataRows.map((row, i) => {
     const obj = {}
     for (const [fieldName, idx] of Object.entries(indexMap)) {
-      obj[fieldName] = (row[idx] || '').trim()
+      obj[fieldName] = sanitizeCell(row[idx])
     }
     return mapper(obj, i)
   })

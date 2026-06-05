@@ -8,7 +8,6 @@ const PORT = process.env.API_PORT || 3001
 
 const routes = {
   '/api/content': 'api/content.js',
-  '/api/guests': 'api/guests.js',
 }
 const guestRe = /^\/api\/guest\/(\w+)$/
 
@@ -26,7 +25,7 @@ const server = createServer(async (req, res) => {
   if (req.method === 'OPTIONS') return res.end()
 
   try {
-    if (req.url === '/api/content' || req.url === '/api/guests') {
+    if (req.url === '/api/content') {
       const handler = (await import(resolve(root, routes[req.url]))).default
       await handler(req, compat(req, res).res)
     } else if (guestRe.test(req.url)) {

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { AuthContext } from './AuthContext'
 import config from '../config'
 import { parseCSV } from '../utils/csv'
-import { signInWithGoogle, signInWithFacebook, verifyCurrentUserEmail, verifyEmailByNameUser } from '../firebase'
+import { signInWithGoogle, signInWithFacebook } from '../firebase'
 import sampleGuests from '../data/guests'
 import sampleFaq from '../data/faq'
 import sampleImages from '../data/images'
@@ -58,6 +58,11 @@ function parseWeddings(val) {
   return ['us']
 }
 
+function sanitizeCell(val) {
+  const v = (val || '').trim()
+  return v.startsWith('#') ? '' : v
+}
+
 function csvToGuests(rows) {
   if (!rows || rows.length < 2) return []
   const headers = rows[0]
@@ -67,7 +72,7 @@ function csvToGuests(rows) {
     if (i !== -1) idx[field] = i
   }
   return rows.slice(1).map((row, i) => {
-    const get = (key) => idx[key] !== undefined ? (row[idx[key]] || '').trim() : ''
+    const get = (key) => idx[key] !== undefined ? sanitizeCell(row[idx[key]]) : ''
     const firstName = get('firstName')
     const lastName = get('lastName')
     const relationship = get('relationship')
@@ -99,6 +104,25 @@ function findGuestByName(guests, name) {
     if (score > bestScore && score > 0.4) { bestScore = score; best = g }
   }
   return best
+}
+
+function findGuestByEmail(guests, email) {
+  if (!email) return null
+  const t = email.trim().toLowerCase()
+  return guests.find(g => g.email.toLowerCase() === t) || null
+}
+
+function getGuestSlug(guest) {
+  if (!guest) return ''
+  return `${guest.firstName} ${guest.lastName}`.trim().toLowerCase().replace(/\s+/g, '-')
+}
+
+function updateUrlSlug(slug) {
+  if (!slug) {
+    window.history.replaceState({}, '', '/')
+  } else {
+    window.history.replaceState({}, '', `/g/${encodeURIComponent(slug)}`)
+  }
 }
 
 async function writeToSheet(guestId, data) {
@@ -163,6 +187,58 @@ export function AuthProvider({ children }) {
     loadContent()
   }, [])
 
+  useEffect(() => {
+    const stored = loadStoredUser()
+    const hasSlug = window.location.pathname.startsWith('/g/')
+    if (stored) {
+      updateUrlSlug(getGuestSlug(stored))
+    } else if (hasSlug) {
+      updateUrlSlug('')
+    }
+  }, [])
+
+  const [pendingFbUser, setPendingFbUser] = useState(null)
+
+  const processSignIn = useCallback((guest, fbUser) => {
+    setFirebaseError(null)
+    const now = new Date().toISOString()
+    const payload = {
+      id: guest.id,
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+      side: guest.side,
+      role: guest.role,
+      relationship: guest.relationship,
+      weddings: guest.weddings,
+      plusOne: guest.plusOne,
+      phone: guest.phone || '',
+      email: guest.email || '',
+      lastLogin: now,
+      uid: fbUser.uid,
+    }
+    setUser(payload)
+    setActiveWedding(getDefaultWedding(guest.weddings))
+    localStorage.setItem('wedding_user', JSON.stringify(payload))
+    writeToSheet(guest.id, { lastLogin: now })
+    updateUrlSlug(getGuestSlug(guest))
+
+    setAuthMode('settings')
+    setShowAuthModal(true)
+  }, [])
+
+  useEffect(() => {
+    if (!pendingFbUser || !content.guests?.length) return
+    const guest = findGuestByName(content.guests, pendingFbUser.name) || findGuestByEmail(content.guests, pendingFbUser.email)
+    if (!guest) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFirebaseError(`Could not find "${pendingFbUser.name}" on the guest list. Try a different account or contact the couple.`)
+      setPendingFbUser(null)
+      return
+    }
+    setPendingFbUser(null)
+    processSignIn(guest, pendingFbUser)
+  }, [pendingFbUser, content.guests, processSignIn])
+
   const signInAsGuest = useCallback((guest, overrides = {}) => {
     setFirebaseError(null)
     const now = new Date().toISOString()
@@ -184,12 +260,13 @@ export function AuthProvider({ children }) {
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
     writeToSheet(guest.id, { lastLogin: now })
+    updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
     if (!hasContact) {
       setAuthMode('contact')
     } else {
-      setShowAuthModal(false)
+      setAuthMode('settings')
     }
   }, [])
 
@@ -197,58 +274,44 @@ export function AuthProvider({ children }) {
     setFirebaseLoading(true)
     setFirebaseError(null)
     try {
-      const fbUser = provider === 'google' ? await signInWithGoogle() : await signInWithFacebook()
-      const guest = findGuestByName(content.guests, fbUser.name)
-      if (!guest) {
-        setFirebaseError(`Could not find "${fbUser.name}" on the guest list. Try a different account or contact the couple.`)
-        setFirebaseLoading(false)
-        return
-      }
-      const now = new Date().toISOString()
-      const payload = {
-        id: guest.id,
-        firstName: guest.firstName,
-        lastName: guest.lastName,
-        side: guest.side,
-        role: guest.role,
-        relationship: guest.relationship,
-        weddings: guest.weddings,
-        plusOne: guest.plusOne,
-        phone: guest.phone || '',
-        email: guest.email || '',
-        lastLogin: now,
-        uid: fbUser.uid,
-      }
-      setUser(payload)
-      setActiveWedding(getDefaultWedding(guest.weddings))
-      localStorage.setItem('wedding_user', JSON.stringify(payload))
-      writeToSheet(guest.id, { lastLogin: now })
-
-      const hasContact = guest.phone || guest.email
-      if (!hasContact) {
-        setAuthMode('contact')
+      let result
+      if (provider === 'google') {
+        result = await signInWithGoogle()
       } else {
-        setShowAuthModal(false)
+        result = await signInWithFacebook()
       }
-      setFirebaseLoading(false)
+      if (result?.user) {
+        const fbUser = {
+          name: result.user.displayName || '',
+          email: result.user.email || '',
+          photo: result.user.photoURL || '',
+          uid: result.user.uid,
+        }
+        console.log('[Auth] User info from provider:', { name: fbUser.name, email: fbUser.email, uid: fbUser.uid })
+        const guest = content.guests?.length
+          ? (findGuestByName(content.guests, fbUser.name) || findGuestByEmail(content.guests, fbUser.email))
+          : null
+        if (guest) {
+          processSignIn(guest, fbUser)
+        } else {
+          setPendingFbUser(fbUser)
+        }
+      }
     } catch (err) {
       setFirebaseError(err.message || 'Sign in failed')
+    } finally {
       setFirebaseLoading(false)
     }
   }, [content.guests])
 
   const updateContact = useCallback(async (phone, email) => {
     if (!user) return
+    const cleanedPhone = (phone || '').replace(/\D/g, '')
     const now = new Date().toISOString()
-    const updated = { ...user, phone, email, lastLogin: now }
+    const updated = { ...user, phone: cleanedPhone, email, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
-    writeToSheet(user.id, { phone, email, lastLogin: now })
-    if (user.uid) {
-      await verifyCurrentUserEmail()
-    } else if (email) {
-      await verifyEmailByNameUser(email)
-    }
+    writeToSheet(user.id, { phone: cleanedPhone, email, lastLogin: now })
   }, [user])
 
   const recordLogin = useCallback(() => {
@@ -264,6 +327,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     setActiveWedding('us')
     localStorage.removeItem('wedding_user')
+    updateUrlSlug('')
   }, [])
 
   const switchWedding = useCallback((w) => {

@@ -26,7 +26,7 @@ const authLinks = [
 ]
 
 export default function Navbar() {
-  const { user, setShowAuthModal, signOut } = useAuth()
+  const { user, setShowAuthModal, openSettings, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [logoClicked, setLogoClicked] = useState(false)
@@ -82,7 +82,11 @@ export default function Navbar() {
            <button
              onClick={() => {
                setLogoClicked(!logoClicked);
-               setShowAuthModal(true);
+               if (user) {
+                 openSettings();
+               } else {
+                 setShowAuthModal(true);
+               }
              }}
              className="relative font-heading font-semibold tracking-wide transition-all duration-300"
            >
