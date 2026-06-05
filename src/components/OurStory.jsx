@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import config from '../config'
 
 function SectionTitle({ children }) {
   return (
@@ -16,6 +17,23 @@ function SectionTitle({ children }) {
 export default function OurStory() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  const storyConfig = config.images.ourStory
+  const slides = storyConfig.slides.map(s => ({
+    src: storyConfig.dir + s.file,
+    alt: s.alt,
+  }))
+
+  const storyTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (!isInView) return
+    storyTimerRef.current = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % slides.length)
+    }, 5000)
+    return () => clearInterval(storyTimerRef.current)
+  }, [isInView, slides.length])
 
   return (
     <section id="story" className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700" ref={ref}>
@@ -33,10 +51,30 @@ export default function OurStory() {
             initial={{ opacity: 0, x: -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="aspect-[4/5] bg-sage-light/20 rounded-sm overflow-hidden"
+            className="aspect-[4/5] rounded-sm overflow-hidden bg-sage-light/20 relative"
           >
-            <div className="w-full h-full flex items-center justify-center text-sage/40 font-heading text-lg">
-              Your Photo Here
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentIndex}
+                src={slides[currentIndex]?.src}
+                alt={slides[currentIndex]?.alt}
+                initial={{ opacity: 0, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.8 }}
+                className="w-full h-full object-cover absolute inset-0"
+                draggable={false}
+              />
+            </AnimatePresence>
+            <div className="absolute bottom-3 right-3 flex gap-1.5">
+              {slides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-cream w-3' : 'bg-cream/40 hover:bg-cream/60'}`}
+                  aria-label={`Story photo ${i + 1}`}
+                />
+              ))}
             </div>
           </motion.div>
 

@@ -5,7 +5,6 @@ import { parseCSV } from '../utils/csv'
 import { signInWithGoogle, signInWithFacebook } from '../firebase'
 import sampleGuests from '../data/guests'
 import sampleFaq from '../data/faq'
-import sampleImages from '../data/images'
 
 const { sheets } = config
 const { columns, roleMap, plusOneMap } = sheets
@@ -145,7 +144,6 @@ export function AuthProvider({ children }) {
   const [content, setContent] = useState({
     guests: sampleGuests,
     faq: sampleFaq,
-    images: sampleImages,
     loaded: false,
   })
   const [firebaseLoading, setFirebaseLoading] = useState(false)
@@ -161,7 +159,6 @@ export function AuthProvider({ children }) {
             setContent({
               guests: data.guests?.length ? data.guests : sampleGuests,
               faq: data.faq?.length ? data.faq : sampleFaq,
-              images: data.images?.length ? data.images : sampleImages,
               loaded: true,
             })
             return
@@ -174,14 +171,14 @@ export function AuthProvider({ children }) {
             const rows = parseCSV(text)
             const guests = csvToGuests(rows)
             if (guests.length > 0) {
-              setContent({ guests, faq: sampleFaq, images: sampleImages, loaded: true })
+              setContent({ guests, faq: sampleFaq, loaded: true })
               return
             }
           }
         }
-        setContent({ guests: sampleGuests, faq: sampleFaq, images: sampleImages, loaded: true })
+        setContent({ guests: sampleGuests, faq: sampleFaq, loaded: true })
       } catch {
-        setContent({ guests: sampleGuests, faq: sampleFaq, images: sampleImages, loaded: true })
+        setContent({ guests: sampleGuests, faq: sampleFaq, loaded: true })
       }
     }
     loadContent()

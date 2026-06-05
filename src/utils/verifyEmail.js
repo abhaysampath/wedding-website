@@ -19,7 +19,10 @@ export async function sendVerificationCode(email, name = '') {
   sessionStorage.setItem('pending_email_addr', email)
   sessionStorage.setItem('pending_email_name', name)
 
-  const verifyUrl = `${window.location.origin}${window.location.pathname}?code=${code}`
+  const slug = name.trim().toLowerCase().replace(/\s+/g, '-')
+  const verifyUrl = slug
+    ? `${window.location.origin}/g/${encodeURIComponent(slug)}?code=${code}`
+    : `${window.location.origin}${window.location.pathname}?code=${code}`
 
   const { serviceId, templateId, publicKey } = config.emailjs
   if (serviceId && templateId && publicKey) {

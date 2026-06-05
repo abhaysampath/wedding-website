@@ -1,9 +1,19 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
+import config from '../config'
 
-const INITIAL_LOAD = 8
+const INITIAL_LOAD = 10
 const LOAD_MORE = 4
+const TIER_SCALE = { 1: 1, 2: 0.82, 3: 0.66 }
+const BASE_W = { mobile: 280, desktop: 320 }
+const BASE_H = { mobile: 340, desktop: 380 }
+
+const DIR_MAP = {
+  home: '/jpg/home/',
+  gallery: '/jpg/gallery/',
+  vert: '/jpg/vert/',
+}
 
 function formatCaption(alt) {
   return alt
@@ -22,7 +32,7 @@ function Skeleton() {
 }
 
 export default function Gallery() {
-  const { content, user, setShowAuthModal } = useAuth()
+  const { user, setShowAuthModal } = useAuth()
   const ref = useRef(null)
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
@@ -31,9 +41,24 @@ export default function Gallery() {
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const [showOverlay, setShowOverlay] = useState(false)
   const overlayShown = useRef(false)
-  const scrollRef = useRef(null)
 
-  const images = content.images || []
+  const allImages = useMemo(() => {
+    const { gallery } = config.images
+    const result = []
+    for (const [section, images] of Object.entries(gallery)) {
+      const dir = DIR_MAP[section] || '/jpg/'
+      images.forEach(img => {
+        result.push({
+          jpg: dir + img.file,
+          alt: img.alt,
+          tier: img.tier || 2,
+        })
+      })
+    }
+    return result
+  }, [])
+
+  const visibleImages = allImages.slice(0, visibleCount)
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -41,14 +66,14 @@ export default function Gallery() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, images.length))
+          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, allImages.length))
         }
       },
       { rootMargin: '200px' }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [images.length])
+  }, [allImages.length])
 
   useEffect(() => {
     if (user) return
@@ -71,12 +96,12 @@ export default function Gallery() {
   }, [])
 
   const goNext = useCallback(() => {
-    setExpanded((prev) => (prev < images.length - 1 ? prev + 1 : 0))
-  }, [images.length])
+    setExpanded((prev) => (prev < allImages.length - 1 ? prev + 1 : 0))
+  }, [allImages.length])
 
   const goPrev = useCallback(() => {
-    setExpanded((prev) => (prev > 0 ? prev - 1 : images.length - 1))
-  }, [images.length])
+    setExpanded((prev) => (prev > 0 ? prev - 1 : allImages.length - 1))
+  }, [allImages.length])
 
   useEffect(() => {
     if (expanded === null) return
@@ -88,8 +113,6 @@ export default function Gallery() {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [expanded, goNext, goPrev])
-
-  const visibleImages = images.slice(0, visibleCount)
 
   return (
     <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream relative" ref={ref}>
@@ -110,22 +133,34 @@ export default function Gallery() {
         </motion.div>
 
         <div
-          ref={scrollRef}
           className="overflow-x-auto pb-6 -mb-6 scrollbar-thin scroll-smooth"
           style={{ scrollSnapType: 'x mandatory' }}
         >
           <div className="flex gap-4 md:gap-6">
-            {visibleImages.map((img, i) => (
+            {visibleImages.map((img, i) => {
+              const scale = TIER_SCALE[img.tier] || 0.66
+              const wMob = `calc(${BASE_W.mobile}px * ${scale})`
+              const hMob = `calc(${BASE_H.mobile}px * ${scale})`
+              const opacity = 0.5 + scale * 0.5
+              return (
               <motion.div
                 key={img.jpg}
                 initial={{ opacity: 0, y: 20 }}
                 animate={sectionInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.04 * i }}
-                className="shrink-0 w-[260px] md:w-[300px] group cursor-pointer relative"
-                style={{ scrollSnapAlign: 'start' }}
+                className="shrink-0 group cursor-pointer relative"
+                style={{
+                  scrollSnapAlign: 'start',
+                  width: wMob,
+                  height: hMob,
+                  opacity,
+                }}
                 onClick={() => setExpanded(i)}
               >
-                <div className="relative overflow-hidden rounded-sm bg-sage-light/10 h-[320px] md:h-[360px]">
+                <div
+                  className="relative overflow-hidden rounded-sm bg-sage-light/10"
+                  style={{ width: '100%', height: '100%' }}
+                >
                   {!loadedImages[img.jpg] && <Skeleton />}
                   <img
                     src={img.jpg}
@@ -143,14 +178,14 @@ export default function Gallery() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            )})}
 
             <div ref={sentinelRef} className="shrink-0 w-4" />
           </div>
         </div>
 
         <AnimatePresence>
-          {expanded !== null && images[expanded] && (
+          {expanded !== null && allImages[expanded] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -173,7 +208,7 @@ export default function Gallery() {
                   Close <span className="text-cream/30 ml-1">(Esc)</span>
                 </button>
 
-                {images.length > 1 && (
+                {allImages.length > 1 && (
                   <>
                     <button
                       onClick={goPrev}
@@ -195,14 +230,14 @@ export default function Gallery() {
                 )}
 
                 <img
-                  src={images[expanded].jpg}
-                  alt={images[expanded].alt}
+                  src={allImages[expanded].jpg}
+                  alt={allImages[expanded].alt}
                   className="w-full h-auto max-h-[85vh] object-contain rounded-sm select-none"
                   draggable={false}
                 />
 
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-cream/40 text-[11px] tracking-wider">
-                  {expanded + 1} / {images.length}
+                  {expanded + 1} / {allImages.length}
                 </div>
               </motion.div>
             </motion.div>
@@ -210,7 +245,6 @@ export default function Gallery() {
         </AnimatePresence>
       </div>
 
-      {/* Sign-in overlay for unauthenticated users */}
       <AnimatePresence>
         {showOverlay && !user && (
           <motion.div

@@ -17,8 +17,7 @@ const config = {
     sheetUrl: 'https://docs.google.com/spreadsheets/d/17A-I1oIBfbG9c4oAiUqCr11RhOWFCXvkZM_IyzgKgqc/edit?usp=sharing',
   },
   sheets: {
-    mode: 'api', // 'api' → /api/content (Google Sheets API, needs billing)
-                  // 'csv' → published CSV URL (no billing needed)
+    mode: 'api',
     guestsCsv: null,
     columns: {
       firstName: 'First Name',
@@ -52,6 +51,67 @@ const config = {
     serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
     templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
     publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
+  },
+  images: {
+    hero: {
+      dir: '/jpg/home/',
+      slides: [
+        { file: 'hero.jpeg', alt: 'Hero' },
+        { file: 'home1.jpeg', alt: 'Home 1' },
+        { file: 'home2.JPG', alt: 'Home 2' },
+        { file: 'home3.JPG', alt: 'Home 3' },
+      ],
+      interval: 10000,
+      personalized: {
+        groom: { file: 'ra-and-ak.JPG', alt: 'Ra & Ak' },
+        bride: { file: 'kiss.jpg', alt: 'Kiss' },
+      },
+    },
+    ourStory: {
+      dir: '/jpg/vert/',
+      slides: [
+        { file: 'diwali.jpeg', alt: 'Diwali' },
+        { file: 'hero1.JPG', alt: 'Hero 1' },
+        { file: 'IMG_1197.jpeg', alt: '1197' },
+        { file: 'IMG_1781.jpeg', alt: '1781' },
+        { file: 'IMG_3031.jpeg', alt: '3031' },
+        { file: 'IMG_3982.JPG', alt: '3982' },
+        { file: 'IMG_4340.jpeg', alt: '4340' },
+        { file: 'IMG_4388.JPG', alt: '4388' },
+        { file: 'IMG_6034.JPG', alt: '6034' },
+      ],
+    },
+    gallery: {
+      home: [
+        { file: 'hero.jpeg', alt: 'Hero', tier: 1 },
+        { file: 'home1.jpeg', alt: 'Home 1', tier: 1 },
+        { file: 'home2.JPG', alt: 'Home 2', tier: 2 },
+        { file: 'home3.JPG', alt: 'Home 3', tier: 2 },
+        { file: 'kiss.jpg', alt: 'Kiss', tier: 1 },
+        { file: 'ra-and-ak.JPG', alt: 'Ra & Ak', tier: 1 },
+      ],
+      gallery: [
+        { file: 'eng-smiles.jpeg', alt: 'Eng Smiles', tier: 2 },
+        { file: 'IMG_0623.jpeg', alt: '0623', tier: 2 },
+        { file: 'IMG_1732.jpeg', alt: '1732', tier: 2 },
+        { file: 'IMG_4705.jpeg', alt: '4705', tier: 2 },
+        { file: 'IMG_4816.jpeg', alt: '4816', tier: 2 },
+        { file: 'IMG_6747.jpeg', alt: '6747', tier: 3 },
+        { file: 'nich.jpeg', alt: 'Nich', tier: 2 },
+        { file: 'ra-and-steve.jpeg', alt: 'Ra & Steve', tier: 2 },
+      ],
+      vert: [
+        { file: 'diwali.jpeg', alt: 'Diwali', tier: 3 },
+        { file: 'hero1.JPG', alt: 'Hero 1', tier: 2 },
+        { file: 'IMG_1197.jpeg', alt: '1197', tier: 1 },
+        { file: 'IMG_1781.jpeg', alt: '1781', tier: 1 },
+        { file: 'IMG_3031.jpeg', alt: '3031', tier: 1 },
+        { file: 'IMG_3982.JPG', alt: '3982', tier: 1 },
+        { file: 'IMG_4340.jpeg', alt: '4340', tier: 1 },
+        { file: 'IMG_4388.JPG', alt: '4388', tier: 1 },
+        { file: 'IMG_6034.JPG', alt: '6034', tier: 1 },
+      ],
+    },
   },
 }
 

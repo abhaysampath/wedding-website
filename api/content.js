@@ -3,7 +3,6 @@ import SHEET_CONFIG from './sheets-config.js'
 const TAB_RANGES = {
   guests: 'A:P',
   faq: 'A:C',
-  images: 'A:C',
 }
 
 const ROLE_MAP = { 'Bride': 'bride', 'Groom': 'groom', 'CloseFamily': 'close_family', 'Br-Family': 'family' }
@@ -38,7 +37,7 @@ export default async function handler(req, res) {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
 
   if (!sheetId || !serviceEmail || !privateKey) {
-    return res.status(200).json({ source: 'sample', error: 'Missing GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, or GOOGLE_PRIVATE_KEY env vars', guests: [], faq: [], images: [] })
+    return res.status(200).json({ source: 'sample', error: 'Missing GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, or GOOGLE_PRIVATE_KEY env vars', guests: [], faq: [] })
   }
 
   try {
@@ -58,10 +57,9 @@ export default async function handler(req, res) {
           return { data: { values: null } }
         })
 
-    const [guestsRes, faqRes, imagesRes] = await Promise.all([
+    const [guestsRes, faqRes] = await Promise.all([
       read(SHEET_CONFIG.guests.tab, TAB_RANGES.guests),
       read(SHEET_CONFIG.faq.tab, TAB_RANGES.faq),
-      read(SHEET_CONFIG.images.tab, TAB_RANGES.images),
     ])
 
     const guests = parseSheet(guestsRes.data.values, SHEET_CONFIG.guests.columns, (row, i) => {
@@ -90,19 +88,13 @@ export default async function handler(req, res) {
       wedding: row.wedding || 'both',
     }))
 
-    const images = parseSheet(imagesRes.data.values, SHEET_CONFIG.images.columns, (row) => ({
-      jpg: row.jpg || '',
-      png: row.png || '',
-      alt: row.alt || '',
-    }))
-
-    const body = { source: 'sheet', guests, faq, images }
+    const body = { source: 'sheet', guests, faq }
     if (sheetErrors.length > 0) body.error = sheetErrors.join('; ')
     return res.json(body)
   } catch (err) {
     console.error('Sheet read failed:', err)
     const msg = err?.response?.data?.error?.message || err?.message || 'unknown error'
-    return res.status(200).json({ source: 'sample', error: msg, guests: [], faq: [], images: [] })
+    return res.status(200).json({ source: 'sample', error: msg, guests: [], faq: [] })
   }
 }
 
