@@ -24,14 +24,6 @@ const SHEET_CONFIG = {
       wedding: 'Wedding',
     },
   },
-  images: {
-    tab: 'IMAGES',
-    columns: {
-      jpg: 'JPG',
-      png: 'PNG',
-      alt: 'Alt',
-    },
-  },
 }
 
 export default SHEET_CONFIG
