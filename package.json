@@ -9,7 +9,7 @@
     "dev": "vite",
     "dev:api": "node --env-file=.env scripts/dev-server.mjs",
     "sync": "node --env-file=.env scripts/sync-guests.mjs",
-    "build": "node scripts/generate-image-manifest.js && vite build",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
