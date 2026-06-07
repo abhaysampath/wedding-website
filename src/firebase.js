@@ -9,6 +9,7 @@ import {
   linkWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  signInWithCredential,
   browserLocalPersistence,
   setPersistence,
 } from 'firebase/auth'
@@ -80,11 +81,15 @@ export async function linkPhoneCredential(verificationId, code) {
   if (!a) throw new Error('Firebase not initialized')
   const user = a.currentUser
   if (!user) throw new Error('No user signed in')
+  const credential = PhoneAuthProvider.credential(verificationId, code)
   try {
-    const credential = PhoneAuthProvider.credential(verificationId, code)
     await linkWithCredential(user, credential)
-    return true
+    return { linked: true }
   } catch (err) {
+    if (err.code === 'auth/account-exists-with-different-credential') {
+      const result = await signInWithCredential(a, credential)
+      return { linked: false, user: result.user }
+    }
     console.error('linkPhoneCredential failed:', err.code, err.message)
     throw err
   }
