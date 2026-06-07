@@ -48,31 +48,31 @@ export default function EventDetails() {
   }
 
   return (
-    <section id="details" className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
+    <section id="details" className="py-20 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-center mb-14 md:mb-16"
+          className="text-center mb-14 md:mb-20"
         >
-          <h2 className="font-heading text-3xl md:text-5xl text-charcoal font-light mb-3">
+          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-4 tracking-wide">
             Event Details
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
+          <div className="w-16 h-[1.5px] bg-gold mx-auto mb-8" />
 
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-10 md:mb-12">
             <WeddingSwitcher />
           </div>
 
-          <div className="inline-block w-full md:w-auto border border-gold/30 rounded-sm px-6 md:px-8 py-6 bg-cream transition-wedding">
-            <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-1">
+          <div className="inline-block w-full md:w-auto border border-gold/30 rounded-sm px-6 md:px-10 py-6 md:py-8 bg-cream transition-wedding shadow-sm">
+            <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2">
               {w.date}
             </p>
             <p className="text-charcoal-light text-sm md:text-base tracking-wide">
               {w.venue}
             </p>
-            <p className="text-charcoal-light/60 text-xs md:text-sm mt-1">
+            <p className="text-charcoal-light/60 text-xs md:text-sm mt-1.5">
               {w.address}
             </p>
           </div>
@@ -80,9 +80,9 @@ export default function EventDetails() {
 
         {w.timeline.length > 0 && (
           <div className="relative">
-            <div className="absolute left-[18px] md:left-1/2 top-0 bottom-0 w-[1px] bg-gold/20 -translate-x-1/2" />
+            <div className="absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-gold/30 via-gold/10 to-transparent -translate-x-1/2" />
 
-            <div className="space-y-6 md:space-y-10">
+            <div className="space-y-8 md:space-y-12">
               {w.timeline.map((event, i) => {
                 const isExpanded = expanded === i
                 return (
@@ -91,29 +91,30 @@ export default function EventDetails() {
                     initial={{ opacity: 0, y: 40 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
-                    className={`relative flex flex-col md:flex-row items-start gap-4 md:gap-0 ${
+                    className={`relative flex flex-col md:flex-row items-start gap-5 md:gap-0 ${
                       i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                     }`}
                   >
                     <div
-                      className={`flex-1 pl-14 md:pl-0 cursor-pointer ${
+                      className={`flex-1 pl-16 md:pl-0 cursor-pointer ${
                         i % 2 === 0
-                          ? 'md:text-right md:pr-14'
-                          : 'md:text-left md:pl-14'
+                          ? 'md:text-right md:pr-16'
+                          : 'md:text-left md:pl-16'
                       }`}
                       onClick={() => toggleEvent(i)}
                       role="button"
                       tabIndex={0}
+                      aria-expanded={isExpanded}
                       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleEvent(i) }}
                     >
                       <div className={`inline-block w-full ${i % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}>
-                        <span className="inline-flex items-center gap-2 bg-gold/10 text-gold-dark text-xs font-medium tracking-wider uppercase px-3 py-1 rounded-sm mb-2">
+                        <span className="inline-flex items-center gap-2 bg-gold/10 text-gold-dark text-xs font-medium tracking-wider uppercase px-3 py-1.5 rounded-sm mb-3">
                           {event.time}
                         </span>
-                        <h3 className="font-heading text-xl md:text-2xl text-charcoal mt-1">
+                        <h3 className="font-heading text-xl md:text-2xl text-charcoal mt-1 mb-2">
                           {event.label}
                         </h3>
-                        <p className="text-charcoal-light/70 text-sm md:text-base mt-1 leading-relaxed">
+                        <p className="text-charcoal-light/70 text-sm md:text-base leading-relaxed">
                           {event.description}
                         </p>
                       </div>
@@ -124,16 +125,26 @@ export default function EventDetails() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 1 }}
                             className="overflow-hidden"
                           >
-                            <div className="mt-4 pt-4 border-t border-gold/10 space-y-3">
+                            <motion.div
+                              initial={{ y: -8, opacity: 0 }}
+                              animate={{ y: 0, opacity: 1 }}
+                              transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 25 }}
+                              className="mt-5 pt-5 border-t border-gold/10 space-y-4"
+                            >
                               {event.details && (
                                 <p className="text-charcoal-light/80 text-sm md:text-base leading-relaxed">
                                   {event.details}
                                 </p>
                               )}
-                              <div className="flex flex-wrap gap-4 text-xs text-charcoal-light/60">
+                              <motion.div
+                                initial={{ y: -4, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 25 }}
+                                className="flex flex-wrap gap-4 text-xs text-charcoal-light/60"
+                              >
                                 {event.location && (
                                   <span className="inline-flex items-center gap-1.5">
                                     <PinIcon />
@@ -146,31 +157,38 @@ export default function EventDetails() {
                                     {event.duration}
                                   </span>
                                 )}
-                              </div>
-                            </div>
+                              </motion.div>
+                            </motion.div>
                           </motion.div>
                         )}
                       </AnimatePresence>
 
                       <button
                         onClick={(e) => { e.stopPropagation(); toggleEvent(i) }}
-                        className="mt-2 inline-flex items-center gap-1 text-[10px] tracking-widest uppercase text-gold-dark/50 hover:text-gold-dark transition-colors"
+                        className="mt-3 inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-gold-dark/60 hover:text-gold-dark transition-colors py-1"
                       >
                         {isExpanded ? 'Show Less' : 'More Details'}
                         <ChevronIcon open={isExpanded} />
                       </button>
                     </div>
 
-                    <div
-                      className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-9 h-9 rounded-full border-2 border-gold bg-cream flex items-center justify-center z-10 cursor-pointer transition-shadow hover:shadow-md"
+                    <motion.div
+                      animate={{
+                        scale: isExpanded ? 1.15 : 1,
+                        borderColor: isExpanded ? 'rgb(201, 169, 110)' : 'rgba(201, 169, 110, 0.5)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                      className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-11 h-11 rounded-full border-2 border-gold/50 bg-cream flex items-center justify-center z-10 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
                       onClick={() => toggleEvent(i)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       <motion.div
-                        animate={{ scale: isExpanded ? 1.3 : 1 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-3 h-3 rounded-full bg-gold"
+                        animate={{ scale: isExpanded ? 1.4 : 1 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                        className="w-3.5 h-3.5 rounded-full bg-gold"
                       />
-                    </div>
+                    </motion.div>
 
                     <div className="flex-1 hidden md:block" />
                   </motion.div>
@@ -184,12 +202,12 @@ export default function EventDetails() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-16"
+          className="text-center mt-20"
         >
-          <p className="text-charcoal-light/60 text-sm italic flex items-center justify-center gap-2">
-            <span className="w-6 h-[1px] bg-gold/20" />
+          <p className="text-charcoal-light/60 text-sm italic flex items-center justify-center gap-3">
+            <span className="w-8 h-[1px] bg-gold/20" />
             Attire: {w.dressCode}
-            <span className="w-6 h-[1px] bg-gold/20" />
+            <span className="w-8 h-[1px] bg-gold/20" />
           </p>
         </motion.div>
       </div>
