@@ -85,34 +85,28 @@ async function main() {
     const scrollErrors = pageErrors.length - preScrollErrors
     assert('No errors during scroll', scrollErrors === 0, `${scrollErrors} error(s)`)
 
-    // Test 2: Gallery heading exists (now lazy-loaded after scroll)
-    await page.evaluate(() => window.scrollTo(0, 0))
-    await new Promise(r => setTimeout(r, 500))
-    const heading = await page.$eval('h2', els =>
-      Array.from(els).find(el => el.textContent === 'Gallery')
-    ).catch(() => null)
-    assert('Gallery heading present', !!heading)
+    // Test 2: Gallery heading exists (lazy-loaded — wait for it)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForSelector('h2', { timeout: 8000 })
+    const headings = await page.$$eval('h2', els => els.map(el => el.textContent))
+    assert('Gallery heading present', headings.some(h => h === 'Gallery'))
 
     // Test 3: Sign In text exists in Hero
-    const signInText = await page.$eval('span', els =>
-      Array.from(els).find(el => el.textContent.includes('Sign in to find'))
-    ).catch(() => null)
-    assert('Sign In text present', !!signInText)
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await page.waitForFunction(() =>
+      document.body.innerText.includes('Sign in to find your invite'),
+      { timeout: 5000 }
+    )
+    assert('Sign In text present', true)
 
     // Test 4: Auth modal opens
-    const signInDiv = await page.$('div[onclick]')
-    if (signInDiv) {
-      // Click the search area to open auth modal
-      await page.evaluate(() => {
-        const searchTrigger = document.querySelector('[cursor-text], [class*="cursor-text"]')?.closest('div')
-        if (searchTrigger) searchTrigger.click()
-      })
-      await new Promise(r => setTimeout(r, 500))
-      const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
-      assert('Auth modal opens on click', !!modal)
-    } else {
-      assert('Auth modal opens on click', false, 'No search trigger found')
-    }
+    await page.evaluate(() => {
+      const el = document.querySelector('[class*="cursor-text"], [cursor-text]')
+      if (el) el.closest('div').click()
+    })
+    await new Promise(r => setTimeout(r, 800))
+    const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
+    assert('Auth modal opens on click', !!modal)
 
     // Test 5: Console errors filtered for noise
     const appErrors = consoleErrors.filter(e =>
