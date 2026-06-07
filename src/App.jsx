@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { MotionConfig } from 'framer-motion'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'

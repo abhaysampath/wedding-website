@@ -366,7 +366,10 @@ export default function AuthModal() {
   }, [showAuthModal])
 
   useEffect(() => {
-    setHighlightedIndex(showDropdown && matches.length > 0 ? 0 : -1)
+    const id = requestAnimationFrame(() => {
+      setHighlightedIndex(showDropdown && matches.length > 0 ? 0 : -1)
+    })
+    return () => cancelAnimationFrame(id)
   }, [showDropdown, matches.length])
 
   useEffect(() => {

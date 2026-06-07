@@ -69,16 +69,6 @@ export default function Gallery() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!eagerReady) return
-    preload(allImages.slice(0, FIRST_BATCH))
-  }, [eagerReady, allImages])
-
-  useEffect(() => {
-    if (!sectionInView) return
-    preload(allImages.slice(FIRST_BATCH, FIRST_BATCH + PRELOAD_SIZE))
-  }, [sectionInView, allImages])
-
   function shuffle(arr) {
     const a = [...arr]
     for (let i = a.length - 1; i > 0; i--) {
@@ -103,6 +93,16 @@ export default function Gallery() {
     }
     return shuffle(result)
   }, [])
+
+  useEffect(() => {
+    if (!eagerReady) return
+    preload(allImages.slice(0, FIRST_BATCH))
+  }, [eagerReady, allImages])
+
+  useEffect(() => {
+    if (!sectionInView) return
+    preload(allImages.slice(FIRST_BATCH, FIRST_BATCH + PRELOAD_SIZE))
+  }, [sectionInView, allImages])
 
   const visibleImages = allImages.slice(0, visibleCount)
 
