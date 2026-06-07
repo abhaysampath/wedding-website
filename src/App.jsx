@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
 import { MotionConfig } from 'framer-motion'
+import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
@@ -296,6 +297,7 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <AuthProvider>
         <Page />
+        <Analytics />
       </AuthProvider>
     </MotionConfig>
   )
