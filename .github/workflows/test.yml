@@ -74,7 +74,7 @@ jobs:
 
       # Step 7: Deploy to Vercel production
       - name: Deploy to Vercel
-        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       # Step 8: Smoke test against production
       - name: E2E smoke test on production
