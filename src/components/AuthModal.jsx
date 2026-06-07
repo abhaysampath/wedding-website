@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
+import ContactForm from './ContactForm'
 import {
   createAnonymousSession,
   sendPhoneCode,
@@ -10,20 +11,7 @@ import {
 } from '../firebase'
 import { sendVerificationCode, verifyCode } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
-
-const roleLabels = {
-  bride: 'Bride',
-  groom: 'Groom',
-  close_family: 'Close Family',
-  invited_guest: 'Invited Guest',
-  vendor: 'Vendor',
-}
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function stripPhone(raw) {
-  return (raw || '').replace(/\D/g, '')
-}
+import { stripPhone, guestLabel } from '../utils/guest'
 
 function isUsNumber(raw) {
   const digits = stripPhone(raw)
@@ -41,214 +29,6 @@ function normalize(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-function guestLabel(guest, sideName) {
-  if (!guest) return ''
-  if (guest.role === 'bride') return 'The Bride'
-  if (guest.role === 'groom') return 'The Groom'
-  if (guest.relationship) return guest.relationship
-  return `${sideName[guest.side]}'s ${(roleLabels[guest.role] || '').toLowerCase()}`
-}
-
-function ContactForm({ user, authMode, updateContact, sideName }) {
-  const { setShowAuthModal } = useAuth()
-  const [phone, setPhone] = useState(stripPhone(user?.phone))
-  const [email, setEmail] = useState(user?.email || '')
-  const [address, setAddress] = useState(user?.address || '')
-  const [dietaryPreferences, setDietaryPreferences] = useState(user?.dietaryPreferences || '')
-  const [phoneFocused, setPhoneFocused] = useState(false)
-  const [emailFocused, setEmailFocused] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [saveStatus, setSaveStatus] = useState(null)
-
-  const validEmail = EMAIL_RE.test(email.trim())
-  const validPhone = stripPhone(phone).length >= 10
-
-  const handlePhoneChange = useCallback((raw) => {
-    setPhone(raw.replace(/\D/g, ''))
-  }, [])
-
-  const handleConfirmField = useCallback(async () => {
-    if (saving) return
-    setSaving(true)
-    await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
-    setSaving(false)
-    setShowConfirmation(true)
-    setTimeout(() => setShowConfirmation(false), 2000)
-  }, [phone, email, address, dietaryPreferences, updateContact, saving])
-
-  const handleSave = useCallback(async () => {
-    if (saveStatus === 'saving') return
-    setSaveStatus('saving')
-    try {
-      await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus(null), 2500)
-    } catch {
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
-    }
-  }, [phone, email, address, dietaryPreferences, updateContact, saveStatus])
-
-  const handleMessageClick = useCallback(async () => {
-    setSaveStatus('saving')
-    try {
-      await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
-      const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
-      window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }))
-      setShowAuthModal(false)
-      setTimeout(() => {
-        const el = document.getElementById('contact')
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 300)
-    } catch {
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
-    }
-  }, [phone, email, address, dietaryPreferences, updateContact, setShowAuthModal])
-
-  const handleClose = useCallback(() => {
-    setShowAuthModal(false)
-  }, [setShowAuthModal])
-
-  return (
-    <div className="space-y-5">
-      <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
-        <p className="font-heading text-lg text-charcoal">{user.firstName} {user.lastName}</p>
-        <p className="text-xs text-charcoal-light/50 mt-1">{guestLabel(user, sideName)}</p>
-      </div>
-
-      <p className="text-sm text-charcoal-light/70 leading-relaxed">
-        {authMode === 'contact'
-          ? 'Add your contact info so we can send you wedding updates.'
-          : 'Update your contact info below.'}
-      </p>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Phone Number
-          </label>
-          <div className="relative">
-            <input
-              type="tel"
-              value={!phoneFocused && phone === stripPhone(user?.phone) ? maskPhone(phone) : phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              onFocus={() => setPhoneFocused(true)}
-              onBlur={() => setPhoneFocused(false)}
-              disabled={saving}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
-              placeholder="5551234567"
-            />
-            <button
-              onClick={handleConfirmField}
-              disabled={!validPhone || saving}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-            >
-              {saving ? 'Saving...' : 'Save'}
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Email Address
-          </label>
-          <div className="relative">
-            <input
-              type="email"
-              value={!emailFocused && email === (user?.email || '') ? maskEmail(email) : email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-              placeholder="you@email.com"
-            />
-            <button
-              onClick={handleConfirmField}
-              disabled={!validEmail || saving}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-            >
-              {showConfirmation && saving ? 'Confirming...' : saving ? 'Saving...' : 'Confirm'}
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Relationship
-          </label>
-          <input
-            type="text"
-            value={user?.relationship || ''}
-            readOnly
-            className="w-full bg-cream-dark border border-gold/10 rounded-sm px-4 py-3 text-sm text-charcoal-light/60 cursor-default"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Mailing Address
-          </label>
-          <textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            rows={2}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-            placeholder="123 Main St, City, State ZIP"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Dietary Preferences
-          </label>
-          <textarea
-            value={dietaryPreferences}
-            onChange={(e) => setDietaryPreferences(e.target.value)}
-            rows={2}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-            placeholder="Any dietary restrictions or preferences"
-          />
-        </div>
-
-        {saveStatus === 'saved' && (
-          <div className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center transition-all">
-            Saved successfully!
-          </div>
-        )}
-        {saveStatus === 'error' && (
-          <div className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center transition-all">
-            Failed to save. Please try again.
-          </div>
-        )}
-
-        {authMode === 'settings' && (
-          <div className="flex items-center gap-3 pt-2">
-            <button
-              onClick={handleClose}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light/50 hover:text-charcoal-light hover:bg-cream-dark transition-colors"
-            >
-              Close
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saveStatus === 'saving'}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
-            >
-              {saveStatus === 'saving' ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              onClick={handleMessageClick}
-              disabled={saveStatus === 'saving'}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
-            >
-              {saveStatus === 'saving' ? 'Saving...' : 'Message'}
-            </button>
-          </div>
-        )}
-      </div>
-  )
-}
 
 
 export default function AuthModal() {
@@ -576,19 +356,21 @@ export default function AuthModal() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[10vh] bg-charcoal/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end md:items-start md:justify-center md:pt-[10vh] bg-charcoal/60 backdrop-blur-sm overscroll-contain"
           onClick={handleCancel}
+          style={{ overscrollBehavior: 'contain' }}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-             className="bg-cream rounded-sm w-full max-w-lg shadow-2xl"
-             onClick={(e) => e.stopPropagation()}
-           >
-              <div className="p-8 md:p-10 relative max-h-[85vh] overflow-y-auto">
-               <div ref={recaptchaContainerRef} />
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            className="bg-cream w-full max-w-lg shadow-2xl rounded-t-xl md:rounded-sm max-h-[90vh] md:max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+             <div className="p-6 pb-8 md:p-10 relative">
+              <div ref={recaptchaContainerRef} />
               <button
                 onClick={handleCancel}
                 className="absolute top-8 md:top-10 right-8 md:right-6 w-[42px] h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
