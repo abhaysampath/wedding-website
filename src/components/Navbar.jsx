@@ -129,18 +129,18 @@ export default function Navbar() {
       <div className="md:hidden flex items-center justify-between px-6 h-16">
         <div className="w-10" />
         <div className={`flex items-center ${scrolled || menuOpen ? 'text-charcoal' : 'text-cream'}`}>
-          <LogoButton logoClicked={logoClicked} onClick={handleLogoClick} />
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="font-heading font-semibold tracking-wide"
+            aria-label="Toggle menu"
+            aria-expanded={menuOpen}
+          >
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-sm border currentColor border-current/30 text-sm">
+              R&A
+            </span>
+          </button>
         </div>
-        <button
-          className={`flex flex-col gap-1.5 p-2 ${scrolled || menuOpen ? 'text-charcoal' : 'text-cream'}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-          aria-expanded={menuOpen}
-        >
-          <span className={`block w-6 h-0.5 bg-current transition-transform duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-          <span className={`block w-5 h-0.5 bg-current transition-opacity duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block w-6 h-0.5 bg-current transition-transform duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-        </button>
+        <div className="w-10" />
       </div>
 
       {/* Mobile nav panel */}
@@ -159,7 +159,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-full max-w-xs bg-cream/95 backdrop-blur-xl h-full flex flex-col items-end gap-6 px-8 pt-28 shadow-2xl"
+              className="w-[200px] bg-cream/60 backdrop-blur-xl h-full flex flex-col items-end gap-6 px-8 pt-28 shadow-2xl"
               role="dialog"
               aria-modal="true"
               aria-label="Navigation menu"

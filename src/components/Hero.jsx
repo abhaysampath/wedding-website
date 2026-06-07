@@ -140,7 +140,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 w-full max-w-sm px-6"
+          className="absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-full max-w-sm px-6"
         >
           <div className="bg-cream/10 backdrop-blur-md rounded-sm border border-cream/20 p-4">
             <div className="flex items-center gap-3">
