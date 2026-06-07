@@ -60,7 +60,6 @@ function LogoButton({ logoClicked, onClick }) {
 export default function Navbar() {
   const { user, setShowAuthModal, setAuthMode, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
   const [logoClicked, setLogoClicked] = useState(false)
 
   const links = user ? authLinks : guestLinks
@@ -125,72 +124,12 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile layout */}
-      <div className="md:hidden flex items-center justify-between px-6 h-16">
-        <div className="w-10" />
-        <div className={`flex items-center ${scrolled || menuOpen ? 'text-charcoal' : 'text-cream'}`}>
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="font-heading font-semibold tracking-wide"
-            aria-label="Toggle menu"
-            aria-expanded={menuOpen}
-          >
-            <span className="inline-flex items-center justify-center w-9 h-9 rounded-sm border currentColor border-current/30 text-sm">
-              R&A
-            </span>
-          </button>
+      {/* Mobile layout — icon top-right, no menu */}
+      <div className="md:hidden flex items-center justify-end px-6 h-16">
+        <div className={`flex items-center ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
+          <LogoButton logoClicked={logoClicked} onClick={handleLogoClick} />
         </div>
-        <div className="w-10" />
       </div>
-
-      {/* Mobile nav panel */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden fixed inset-0 z-40 flex"
-          >
-            <div className="flex-1" onClick={() => setMenuOpen(false)} aria-hidden="true" />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="w-[200px] bg-cream/60 backdrop-blur-xl h-full flex flex-col items-end gap-6 px-8 pt-28 shadow-2xl"
-              role="dialog"
-              aria-modal="true"
-              aria-label="Navigation menu"
-            >
-              {links.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-sm tracking-widest uppercase font-medium text-charcoal-light hover:text-gold transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-              {user && (
-                <>
-                  <div className="w-full border-t border-gold/10 pt-4 mt-2 flex flex-col items-end gap-4">
-                    <span className="text-xs text-charcoal-light/60">{user.firstName} {user.lastName}</span>
-                    <button
-                      onClick={() => { signOut(); setMenuOpen(false) }}
-                      className="text-sm tracking-widest uppercase text-charcoal-light/50 hover:text-red-500 transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                </>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </nav>
   )
 }
