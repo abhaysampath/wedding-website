@@ -427,7 +427,7 @@ export default function AuthModal() {
       clearRecaptchaVerifier()
       setShowAuthModal(false)
       setTimeout(() => {
-        const el = document.getElementById('sign-in-section')
+        const el = document.getElementById('hero')
         if (el) el.scrollIntoView({ behavior: 'smooth' })
       }, 100)
     }
