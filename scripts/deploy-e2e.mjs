@@ -112,7 +112,8 @@ async function main() {
     const appErrors = consoleErrors.filter(e =>
       !e.includes('runtime.lastError') &&
       !e.includes('Receiving end does not exist') &&
-      !e.includes('extension')
+      !e.includes('extension') &&
+      !e.includes('/_vercel/')  // Vercel Speed Insights/Analytics only work on Vercel platform
     )
     assert('No app console errors', appErrors.length === 0,
       appErrors.length > 0 ? appErrors[0] : undefined)
