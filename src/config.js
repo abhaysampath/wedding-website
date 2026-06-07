@@ -14,33 +14,11 @@ const config = {
     },
   },
   google: {
-    sheetUrl: 'https://docs.google.com/spreadsheets/d/17A-I1oIBfbG9c4oAiUqCr11RhOWFCXvkZM_IyzgKgqc/edit?usp=sharing',
+    sheetUrl: `https://docs.google.com/spreadsheets/d/${import.meta.env.GOOGLE_SHEET_ID || ''}/edit?usp=sharing`,
   },
   sheets: {
     mode: 'api',
     guestsCsv: null,
-    columns: {
-      firstName: 'First Name',
-      lastName: 'Last Name',
-      relationship: 'Relationship',
-      role: 'Role',
-      weddings: 'Invited To',
-      plusOne: 'Plus One',
-      email: 'Email Address',
-      phone: 'Phone Number',
-      lastLogin: 'LastLogin',
-    },
-    roleMap: {
-      'Bride': 'bride',
-      'Groom': 'groom',
-      'CloseFamily': 'close_family',
-      'Br-Family': 'family',
-    },
-    plusOneMap: {
-      'N/A': false,
-      'Allowed+1': true,
-      '+1NOTALLOWED': false,
-    },
   },
   firebase: {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
@@ -51,6 +29,9 @@ const config = {
     serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
     templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
     publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
+  },
+  recaptcha: {
+    siteKey: import.meta.env.VITE_RECAPTCHA_SITE_KEY || '',
   },
   images: {
     hero: {
@@ -65,6 +46,15 @@ const config = {
       personalized: {
         groom: { file: 'ra-and-ak.JPG', alt: 'Ra & Ak' },
         bride: { file: 'kiss.jpg', alt: 'Kiss' },
+      },
+      contact: {
+        reasons: [
+          { value: 'wishes', label: 'Wishes to the Couple' },
+          { value: 'travel', label: 'Questions about Travel/Visa' },
+          { value: 'login', label: 'Login Trouble' },
+          { value: 'rsvp', label: 'RSVP Issue' },
+          { value: 'other', label: 'Other' },
+        ],
       },
     },
     ourStory: {

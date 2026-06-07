@@ -13,6 +13,7 @@ const SHEET_CONFIG = {
       email: 'Email Address',
       phone: 'Phone Number',
       address: 'Mailing Address',
+      dietaryPreferences: 'Dietary Preferences',
       lastLogin: 'LastLogin',
     },
   },
@@ -21,7 +22,7 @@ const SHEET_CONFIG = {
     columns: {
       question: 'Question',
       answer: 'Answer',
-      wedding: 'Wedding',
+      wedding: 'WhichWedding',
     },
   },
 }

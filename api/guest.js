@@ -61,6 +61,12 @@ export default async function handler(req, res) {
     if (data.email !== undefined && colMap.email !== undefined) {
       updates.push({ range: `${tabName}!${colLetter(colMap.email)}${sheetRow}`, values: [[data.email]] })
     }
+    if (data.address !== undefined && colMap.address !== undefined) {
+      updates.push({ range: `${tabName}!${colLetter(colMap.address)}${sheetRow}`, values: [[data.address]] })
+    }
+    if (data.dietaryPreferences !== undefined && colMap.dietaryPreferences !== undefined) {
+      updates.push({ range: `${tabName}!${colLetter(colMap.dietaryPreferences)}${sheetRow}`, values: [[data.dietaryPreferences]] })
+    }
     if (data.lastLogin !== undefined && colMap.lastLogin !== undefined) {
       updates.push({ range: `${tabName}!${colLetter(colMap.lastLogin)}${sheetRow}`, values: [[data.lastLogin]] })
     }

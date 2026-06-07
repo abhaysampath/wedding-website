@@ -9,6 +9,7 @@ import {
   clearRecaptchaVerifier,
 } from '../firebase'
 import { sendVerificationCode, verifyCode } from '../utils/verifyEmail'
+import { maskEmail, maskPhone } from '../utils/mask'
 
 const roleLabels = {
   bride: 'Bride',
@@ -48,29 +49,17 @@ function guestLabel(guest, sideName) {
   return `${sideName[guest.side]}'s ${(roleLabels[guest.role] || '').toLowerCase()}`
 }
 
-function maskEmail(email) {
-  if (!email) return ''
-  const at = email.indexOf('@')
-  if (at <= 3) return email
-  const local = email.substring(0, at)
-  const domain = email.substring(at)
-  return `${local.substring(0, 3)}***${local[local.length - 1]}${domain}`
-}
-
-function maskPhone(phone) {
-  if (!phone) return ''
-  const digits = phone.replace(/\D/g, '')
-  if (digits.length < 4) return phone
-  return `${digits.substring(0, 3)}***${digits[digits.length - 1]}`
-}
-
 function ContactForm({ user, authMode, updateContact, sideName }) {
+  const { setShowAuthModal } = useAuth()
   const [phone, setPhone] = useState(stripPhone(user?.phone))
   const [email, setEmail] = useState(user?.email || '')
+  const [address, setAddress] = useState(user?.address || '')
+  const [dietaryPreferences, setDietaryPreferences] = useState(user?.dietaryPreferences || '')
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [emailFocused, setEmailFocused] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [saveStatus, setSaveStatus] = useState(null)
 
   const validEmail = EMAIL_RE.test(email.trim())
   const validPhone = stripPhone(phone).length >= 10
@@ -82,11 +71,45 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
   const handleConfirmField = useCallback(async () => {
     if (saving) return
     setSaving(true)
-    await updateContact(stripPhone(phone), email.trim())
+    await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
     setSaving(false)
     setShowConfirmation(true)
     setTimeout(() => setShowConfirmation(false), 2000)
-  }, [phone, email, updateContact, saving])
+  }, [phone, email, address, dietaryPreferences, updateContact, saving])
+
+  const handleSave = useCallback(async () => {
+    if (saveStatus === 'saving') return
+    setSaveStatus('saving')
+    try {
+      await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus(null), 2500)
+    } catch {
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus(null), 3000)
+    }
+  }, [phone, email, address, dietaryPreferences, updateContact, saveStatus])
+
+  const handleMessageClick = useCallback(async () => {
+    setSaveStatus('saving')
+    try {
+      await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
+      const msg = `Postal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
+      window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: msg }))
+      setShowAuthModal(false)
+      setTimeout(() => {
+        const el = document.getElementById('contact')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
+    } catch {
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus(null), 3000)
+    }
+  }, [phone, email, address, dietaryPreferences, updateContact, setShowAuthModal])
+
+  const handleClose = useCallback(() => {
+    setShowAuthModal(false)
+  }, [setShowAuthModal])
 
   return (
     <div className="space-y-5">
@@ -149,6 +172,80 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
             </button>
           </div>
         </div>
+
+        <div>
+          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+            Relationship
+          </label>
+          <input
+            type="text"
+            value={user?.relationship || ''}
+            readOnly
+            className="w-full bg-cream-dark border border-gold/10 rounded-sm px-4 py-3 text-sm text-charcoal-light/60 cursor-default"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+            Mailing Address
+          </label>
+          <textarea
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            rows={2}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            placeholder="123 Main St, City, State ZIP"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+            Dietary Preferences
+          </label>
+          <textarea
+            value={dietaryPreferences}
+            onChange={(e) => setDietaryPreferences(e.target.value)}
+            rows={2}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            placeholder="Any dietary restrictions or preferences"
+          />
+        </div>
+
+        {saveStatus === 'saved' && (
+          <div className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center transition-all">
+            Saved successfully!
+          </div>
+        )}
+        {saveStatus === 'error' && (
+          <div className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center transition-all">
+            Failed to save. Please try again.
+          </div>
+        )}
+
+        {authMode === 'settings' && (
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={handleClose}
+              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light/50 hover:text-charcoal-light hover:bg-cream-dark transition-colors"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saveStatus === 'saving'}
+              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
+            >
+              {saveStatus === 'saving' ? 'Saving...' : 'Save'}
+            </button>
+            <button
+              onClick={handleMessageClick}
+              disabled={saveStatus === 'saving'}
+              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
+            >
+              {saveStatus === 'saving' ? 'Saving...' : 'Message'}
+            </button>
+          </div>
+        )}
       </div>
   )
 }
@@ -163,26 +260,27 @@ export default function AuthModal() {
     content,
   } = useAuth()
 
-   const [phone, setPhone] = useState('')
-   const [email, setEmail] = useState('')
    const [nameInput, setNameInput] = useState('')
    const [selectedMatch, setSelectedMatch] = useState(null)
    const [saving, setSaving] = useState(false)
    const [showDropdown, setShowDropdown] = useState(false)
-   const [showConfirmation, setShowConfirmation] = useState(false)
-   const [awaitingSmsCode, setAwaitingSmsCode] = useState(false)
-    const [awaitingEmailLink, setAwaitingEmailLink] = useState(false)
-    const [emailCode, setEmailCode] = useState(Array(4).fill(''))
+    const [awaitingSmsCode, setAwaitingSmsCode] = useState(() => !!sessionStorage.getItem('awaiting_sms'))
+    const [awaitingEmailLink, setAwaitingEmailLink] = useState(() => !!sessionStorage.getItem('awaiting_email'))
+    const [emailCode, setEmailCode] = useState(Array(6).fill(''))
     const emailCodeRefs = useRef([])
-    const [smsCode, setSmsCode] = useState(Array(4).fill(''))
+    const [smsCode, setSmsCode] = useState(Array(6).fill(''))
     const smsCodeRefs = useRef([])
     const [verificationId, setVerificationId] = useState('')
     const [sendingSms, setSendingSms] = useState(false)
     const [verifyingCode, setVerifyingCode] = useState(false)
-    const [origPhone, setOrigPhone] = useState('')
-    const [origEmail, setOrigEmail] = useState('')
+    const [guestPhone, setGuestPhone] = useState('')
+    const [guestEmail, setGuestEmail] = useState('')
+    const [smsResendable, setSmsResendable] = useState(true)
+    const [emailResendable, setEmailResendable] = useState(true)
     const inputRef = useRef(null)
     const recaptchaContainerRef = useRef(null)
+    const urlCodeRef = useRef(null)
+    const urlSlugRef = useRef(null)
 
   const sideName = config.site.coupleNames
 
@@ -197,50 +295,50 @@ export default function AuthModal() {
     }).slice(0, 8)
   }, [nameInput, content.guests])
 
-   const resetState = useCallback(() => {
-     setPhone('')
-     setEmail('')
-     setNameInput('')
-     setSelectedMatch(null)
-     setSaving(false)
-     setShowDropdown(false)
-     setShowConfirmation(false)
-     setFirebaseError(null)
-     setAwaitingSmsCode(false)
-     setAwaitingEmailLink(false)
-      setEmailCode(Array(4).fill(''))
-      emailCodeRefs.current = []
-      setSmsCode(Array(4).fill(''))
-      smsCodeRefs.current = []
-      setVerificationId('')
-     setSendingSms(false)
-     setVerifyingCode(false)
-     setOrigPhone('')
-     setOrigEmail('')
-     clearRecaptchaVerifier()
-   }, [setFirebaseError])
+    const resetState = useCallback(() => {
+      setNameInput('')
+      setSelectedMatch(null)
+      setSaving(false)
+       setShowDropdown(false)
+       setFirebaseError(null)
+      setAwaitingSmsCode(false)
+      setAwaitingEmailLink(false)
+       setEmailCode(Array(6).fill(''))
+       emailCodeRefs.current = []
+       setSmsCode(Array(6).fill(''))
+       smsCodeRefs.current = []
+       setVerificationId('')
+      setSendingSms(false)
+      setVerifyingCode(false)
+       setGuestPhone('')
+       setGuestEmail('')
+       sessionStorage.removeItem('awaiting_sms')
+       sessionStorage.removeItem('awaiting_email')
+       sessionStorage.removeItem('sms_sent_at')
+       sessionStorage.removeItem('email_sent_at')
+       sessionStorage.removeItem('pending_guest_id')
+       sessionStorage.removeItem('pending_guest_phone')
+       sessionStorage.removeItem('pending_guest_email')
+       clearRecaptchaVerifier()
+    }, [setFirebaseError])
 
-  const validEmail = EMAIL_RE.test(email.trim())
-  const validPhone = stripPhone(phone).length >= 10
-  const isUs = isUsNumber(phone)
 
-  const handlePhoneChange = useCallback((raw) => {
-    setPhone(raw.replace(/\D/g, ''))
-  }, [])
 
    const handleEmailConfirm = useCallback(async () => {
-     if (saving || !validEmail || !selectedMatch) return
-     setSaving(true)
-     setFirebaseError(null)
-     try {
-       await sendVerificationCode(email.trim(), `${selectedMatch.firstName} ${selectedMatch.lastName}`.trim())
-       setAwaitingEmailLink(true)
-     } catch (err) {
-       setFirebaseError(err.message || 'Failed to send verification code')
-     } finally {
-       setSaving(false)
-     }
-   }, [email, selectedMatch, saving, validEmail, setFirebaseError])
+      if (saving || !guestEmail || !selectedMatch) return
+      setSaving(true)
+      setFirebaseError(null)
+      try {
+        await sendVerificationCode(guestEmail, selectedMatch.firstName.trim())
+        setAwaitingEmailLink(true)
+        sessionStorage.setItem('awaiting_email', '1')
+        sessionStorage.setItem('email_sent_at', String(Date.now()))
+      } catch (err) {
+        setFirebaseError(err.message || 'Failed to send verification code')
+      } finally {
+        setSaving(false)
+      }
+    }, [guestEmail, selectedMatch, saving, setFirebaseError])
 
   const handleEmailCodeComplete = useCallback(async (code) => {
     if (!verifyCode(code)) {
@@ -251,8 +349,8 @@ export default function AuthModal() {
     setFirebaseError(null)
     try {
       if (selectedMatch) {
-        await updateContact(phone.trim(), email.trim())
-        signInAsGuest(selectedMatch, { phone: phone.trim(), email: email.trim() })
+        await updateContact({ phone: guestPhone, email: guestEmail })
+        signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
       }
       setShowAuthModal(false)
     } catch (err) {
@@ -260,62 +358,62 @@ export default function AuthModal() {
     } finally {
       setSaving(false)
     }
-  }, [phone, email, selectedMatch, updateContact, signInAsGuest, setShowAuthModal])
+  }, [guestPhone, guestEmail, selectedMatch, updateContact, signInAsGuest, setShowAuthModal, setFirebaseError])
 
    const handlePhoneConfirm = useCallback(async () => {
-     if (saving || sendingSms || !isUs) return
-     setSendingSms(true)
-     setFirebaseError(null)
-     try {
-       if (!user?.uid) {
-         const fbUser = await createAnonymousSession()
-         if (!fbUser) throw new Error('Failed to create session. Check Firebase Anonymous provider is enabled.')
-       }
-       if (!recaptchaContainerRef.current) {
-         throw new Error('reCAPTCHA container not ready')
-       }
-       const verifier = getRecaptchaVerifier(recaptchaContainerRef.current)
-       if (!verifier) {
-         throw new Error('Failed to initialize reCAPTCHA')
-       }
-       const result = await sendPhoneCode(formatE164(phone), verifier)
-       setVerificationId(result.verificationId)
-       setAwaitingSmsCode(true)
-     } catch (err) {
-       console.error('Phone auth error:', err)
-       if (err.code === 'auth/captcha-check-failed') {
-         setFirebaseError('reCAPTCHA verification failed. Please check your internet connection and try again. In development, you can use test phone numbers from Firebase Console.')
-       } else {
-         setFirebaseError(err.message || 'Failed to send verification code')
-       }
-     } finally {
-       clearRecaptchaVerifier()
-       setSendingSms(false)
-     }
-    }, [phone, isUs, saving, sendingSms, user, setFirebaseError, recaptchaContainerRef])
+      if (saving || sendingSms || !isUsNumber(guestPhone)) return
+      setSendingSms(true)
+      setFirebaseError(null)
+      try {
+        if (!user?.uid) {
+          const fbUser = await createAnonymousSession()
+          if (!fbUser) throw new Error('Failed to create session. Check Firebase Anonymous provider is enabled.')
+        }
+        if (!recaptchaContainerRef.current) {
+          throw new Error('reCAPTCHA container not ready')
+        }
+        const verifier = getRecaptchaVerifier(recaptchaContainerRef.current)
+        if (!verifier) {
+          throw new Error('Failed to initialize reCAPTCHA')
+        }
+        const result = await sendPhoneCode(formatE164(guestPhone), verifier)
+        setVerificationId(result.verificationId)
+        setAwaitingSmsCode(true)
+        sessionStorage.setItem('awaiting_sms', '1')
+        sessionStorage.setItem('sms_sent_at', String(Date.now()))
+      } catch (err) {
+        console.error('Phone auth error:', err)
+        if (err.code === 'auth/captcha-check-failed') {
+          setFirebaseError('reCAPTCHA verification failed. Please check your internet connection and try again. In development, you can use test phone numbers from Firebase Console.')
+        } else {
+          setFirebaseError(err.message || 'Failed to send verification code')
+        }
+      } finally {
+        clearRecaptchaVerifier()
+        setSendingSms(false)
+      }
+     }, [guestPhone, saving, sendingSms, user, setFirebaseError, recaptchaContainerRef])
 
   const handleVerifySmsCode = useCallback(async (code) => {
     const codeStr = code || smsCode.join('')
-    if (verifyingCode || codeStr.length < 4) return
+    if (verifyingCode || codeStr.length < 6) return
     setVerifyingCode(true)
     setFirebaseError(null)
     try {
       await linkPhoneCredential(verificationId, codeStr)
       clearRecaptchaVerifier()
       if (selectedMatch) {
-        await updateContact(phone.trim(), email.trim())
-        signInAsGuest(selectedMatch, { phone: phone.trim(), email: email.trim() })
+        await updateContact({ phone: guestPhone, email: guestEmail })
+        signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
       } else {
-        await updateContact(phone.trim(), email.trim())
-        setShowConfirmation(true)
-        setTimeout(() => setShowConfirmation(false), 2000)
+        await updateContact({ phone: guestPhone, email: guestEmail })
       }
     } catch (err) {
       setFirebaseError(err.message || 'Failed to verify code')
     } finally {
       setVerifyingCode(false)
     }
-  }, [verificationId, smsCode, phone, email, selectedMatch, signInAsGuest, updateContact, verifyingCode, setFirebaseError])
+  }, [verificationId, smsCode, guestPhone, guestEmail, selectedMatch, signInAsGuest, updateContact, verifyingCode, setFirebaseError])
 
   const handleCancel = useCallback(() => {
     if (user) recordLogin()
@@ -325,15 +423,40 @@ export default function AuthModal() {
     clearRecaptchaVerifier()
   }, [user, recordLogin, setShowAuthModal, setAuthMode, resetState])
 
+  const handleNeedHelp = useCallback(() => {
+    const msg = `I'm having trouble signing in to the wedding website. I tried signing in but couldn't complete the process. Please help me get access.`
+    window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: msg }))
+    setShowAuthModal(false)
+    setTimeout(() => {
+      const el = document.getElementById('contact')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }, 300)
+  }, [setShowAuthModal])
+
+  useEffect(() => {
+    const storedGuestId = sessionStorage.getItem('pending_guest_id')
+    const storedPhone = sessionStorage.getItem('pending_guest_phone')
+    const storedEmail = sessionStorage.getItem('pending_guest_email')
+    if (storedGuestId && content.guests?.length) {
+      const guest = content.guests.find(g => g.id === storedGuestId)
+      if (guest) {
+        setTimeout(() => {
+          setSelectedMatch(guest)
+          setGuestPhone(storedPhone || '')
+          setGuestEmail(storedEmail || '')
+        }, 0)
+      }
+    }
+  }, [content.guests])
+
   const handleSelectMatch = useCallback((guest) => {
     setSelectedMatch(guest)
     setShowDropdown(false)
-    const gPhone = stripPhone(guest.phone)
-    const gEmail = guest.email || ''
-    setPhone(gPhone)
-    setEmail(gEmail)
-    setOrigPhone(gPhone)
-    setOrigEmail(gEmail)
+    setGuestPhone(stripPhone(guest.phone))
+    setGuestEmail(guest.email || '')
+    sessionStorage.setItem('pending_guest_id', guest.id)
+    sessionStorage.setItem('pending_guest_phone', stripPhone(guest.phone))
+    sessionStorage.setItem('pending_guest_email', guest.email || '')
   }, [])
 
   const handleRejectName = useCallback(() => {
@@ -358,39 +481,77 @@ export default function AuthModal() {
   }, [matches, handleSelectMatch])
 
   const handleEmailCodeCompleteRef = useRef(handleEmailCodeComplete)
-  handleEmailCodeCompleteRef.current = handleEmailCodeComplete
+  useEffect(() => {
+    handleEmailCodeCompleteRef.current = handleEmailCodeComplete
+  })
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const urlCode = params.get('code')
-    if (urlCode && urlCode.length === 4) {
+    if (urlCode && urlCode.length === 6) {
       window.history.replaceState({}, '', window.location.pathname)
-      setEmailCode(urlCode.split('').concat(Array(4 - urlCode.length).fill('')))
-      setAwaitingEmailLink(true)
-      if (!showAuthModal) setShowAuthModal(true)
-
+      sessionStorage.setItem('awaiting_email', '1')
+      sessionStorage.setItem('pending_email_code', urlCode)
+      urlCodeRef.current = urlCode
       const slug = window.location.pathname.match(/\/g\/(.+)/)?.[1]
-      if (slug && content.guests?.length) {
-        const target = decodeURIComponent(slug)
+      urlSlugRef.current = slug ? decodeURIComponent(slug) : null
+      setTimeout(() => {
+        setAwaitingEmailLink(true)
+        setShowAuthModal(true)
+      }, 0)
+    }
+  }, [setShowAuthModal])
+
+  useEffect(() => {
+    const code = urlCodeRef.current
+    if (!code || !content.guests?.length) return
+    urlCodeRef.current = null
+    const slug = urlSlugRef.current
+    urlSlugRef.current = null
+    setTimeout(() => {
+      if (slug) {
         const guest = content.guests.find(g => {
           const gs = `${g.firstName} ${g.lastName}`.trim().toLowerCase().replace(/\s+/g, '-')
-          return gs === target
+          return gs === slug
         })
         if (guest) {
-          const gPhone = stripPhone(guest.phone)
-          const gEmail = guest.email || ''
           setSelectedMatch(guest)
-          setShowDropdown(false)
-          setPhone(gPhone)
-          setEmail(gEmail)
-          setOrigPhone(gPhone)
-          setOrigEmail(gEmail)
+          setGuestPhone(stripPhone(guest.phone))
+          setGuestEmail(guest.email || '')
         }
       }
+      setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
+      setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
+    }, 0)
+  }, [content.guests])
 
-      setTimeout(() => handleEmailCodeCompleteRef.current(urlCode), 200)
+  useEffect(() => {
+    if (!awaitingSmsCode) return
+    const sentAt = sessionStorage.getItem('sms_sent_at')
+    if (!sentAt) { setTimeout(() => setSmsResendable(true), 0); return }
+    const elapsed = Date.now() - parseInt(sentAt, 10)
+    if (elapsed > 15 * 60 * 1000) {
+      setTimeout(() => setSmsResendable(true), 0)
+    } else {
+      setTimeout(() => setSmsResendable(false), 0)
+      const timer = setTimeout(() => setSmsResendable(true), 15 * 60 * 1000 - elapsed)
+      return () => clearTimeout(timer)
     }
-  }, [])
+  }, [awaitingSmsCode])
+
+  useEffect(() => {
+    if (!awaitingEmailLink) return
+    const sentAt = sessionStorage.getItem('email_sent_at')
+    if (!sentAt) { setTimeout(() => setEmailResendable(true), 0); return }
+    const elapsed = Date.now() - parseInt(sentAt, 10)
+    if (elapsed > 15 * 60 * 1000) {
+      setTimeout(() => setEmailResendable(true), 0)
+    } else {
+      setTimeout(() => setEmailResendable(false), 0)
+      const timer = setTimeout(() => setEmailResendable(true), 15 * 60 * 1000 - elapsed)
+      return () => clearTimeout(timer)
+    }
+  }, [awaitingEmailLink])
 
   useEffect(() => {
     if (!showAuthModal) return
@@ -503,6 +664,15 @@ export default function AuthModal() {
                       {firebaseError}
                     </div>
                   )}
+
+                  <div className="text-center pt-2">
+                    <button
+                      onClick={handleNeedHelp}
+                      className="text-[10px] tracking-widest uppercase text-charcoal-light/30 hover:text-charcoal-light transition-colors"
+                    >
+                      Having trouble? Contact us
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -554,171 +724,195 @@ export default function AuthModal() {
                       <div className="flex-1 h-px bg-gold/10" />
                     </div>
 
-                     <div>
-                        <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                          Phone Number
-                       </label>
-                       {!awaitingSmsCode ? (
+                     {/* Phone — input visible but empty, Send uses stored value */}
+                     {guestPhone && isUsNumber(guestPhone) && !awaitingSmsCode && (
+                       <div>
+                         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                           Phone Number
+                         </label>
                          <div className="relative">
-                             <input
-                               type="tel"
-                               value={origPhone && phone ? maskPhone(phone) : phone}
-                               onChange={(e) => handlePhoneChange(e.target.value)}
-                               readOnly={!!origPhone && !!phone}
-                              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                               placeholder="5551234567"
-                             />
-                            <button
+                            <input
+                              type="tel"
+                              value={maskPhone(guestPhone)}
+                              readOnly
+                              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
+                            />
+                           <button
                              onClick={handlePhoneConfirm}
-                              disabled={!isUs || sendingSms || awaitingEmailLink}
+                              disabled={sendingSms}
                              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
                            >
                              {sendingSms ? 'Sending...' : 'Send Log-In Code'}
                            </button>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
-                            <span className="text-sm text-charcoal-light/50 font-mono select-none">code:</span>
-                             <div className="flex gap-1.5">
-                               {[0, 1, 2, 3].map((i) => (
-                                 <input
-                                   key={i}
-                                   ref={(el) => { if (el) smsCodeRefs.current[i] = el }}
-                                   type="text"
-                                   inputMode="numeric"
-                                   maxLength={1}
-                                   value={smsCode[i] || ''}
-                                   onChange={(e) => {
-                                     const val = e.target.value.replace(/\D/g, '')
-                                     if (!val) return
-                                     const next = [...smsCode]
-                                     next[i] = val
-                                     setSmsCode(next)
-                                     if (i < 3) smsCodeRefs.current[i + 1]?.focus()
-                                     if (i === 3 || (val && i < 3 && !next[i + 1])) {
-                                       const full = next.join('')
-                                       if (full.length === 4) handleVerifySmsCode(full)
-                                     }
-                                   }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Backspace') {
-                                      const next = [...smsCode]
-                                      if (next[i]) {
-                                        next[i] = ''
-                                        setSmsCode(next)
-                                      } else if (i > 0) {
-                                        next[i - 1] = ''
-                                        setSmsCode(next)
-                                        smsCodeRefs.current[i - 1]?.focus()
-                                      }
-                                    }
-                                  }}
-                                  onPaste={(e) => {
-                                     e.preventDefault()
-                                     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
-                                     const next = pasted.split('')
-                                     while (next.length < 4) next.push('')
-                                     setSmsCode(next)
-                                     if (pasted.length === 4) handleVerifySmsCode(pasted)
-                                     else smsCodeRefs.current[pasted.length]?.focus()
-                                   }}
-                                  className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                                  autoComplete="off"
-                                />
-                              ))}
-                            </div>
-                          </div>
-                          <div className="mt-2 text-center">
-                            <button
-                              onClick={handleVerifySmsCode}
-                              disabled={smsCode.join('').length < 4 || verifyingCode}
-                              className="w-full py-2 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                              {verifyingCode ? 'Verifying...' : 'Verify'}
-                            </button>
-                          </div>
-                        </div>)}
-                    </div>
-
-                      <div>
-                        <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-                          Email Address
-                        </label>
-                        <div className="relative">
-                             <input
-                               type="email"
-                               value={origEmail && email ? maskEmail(email) : email}
-                               onChange={(e) => setEmail(e.target.value)}
-                               readOnly={!!origEmail && !!email}
-                                disabled={awaitingSmsCode || awaitingEmailLink}
-                             className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
-                             placeholder="you@email.com"
-                           />
-                          <button
-                             onClick={handleEmailConfirm}
-                             disabled={!validEmail || saving || awaitingSmsCode || awaitingEmailLink}
-                             className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                           >
-                             {awaitingEmailLink ? 'Code Sent' : saving ? 'Sending...' : 'Send Log-In Code'}
-                        </button>
+                         </div>
                        </div>
-                       {awaitingEmailLink && (
-                         <div className="mt-3">
-                           <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
-                             <span className="text-sm text-charcoal-light/50 font-mono select-none">code:</span>
-                             <div className="flex gap-1.5">
-                               {[0, 1, 2, 3].map((i) => (
-                                 <input
-                                   key={i}
-                                   ref={(el) => { if (el) emailCodeRefs.current[i] = el }}
-                                   type="text"
-                                   inputMode="numeric"
-                                   maxLength={1}
-                                   value={emailCode[i] || ''}
-                                   onChange={(e) => {
-                                     const val = e.target.value.replace(/\D/g, '')
-                                     if (!val) return
-                                     const next = [...emailCode]
-                                     next[i] = val
-                                     setEmailCode(next)
-                                     if (i < 3) emailCodeRefs.current[i + 1]?.focus()
-                                     if (i === 3 || (val && i < 3 && !next[i + 1])) {
-                                       const full = next.join('')
-                                       if (full.length === 4) handleEmailCodeComplete(full)
+                     )}
+
+                     {/* SMS code input + resend */}
+                     {awaitingSmsCode && (
+                       <div>
+                         <p className="text-[10px] text-charcoal-light/50 mb-2 text-center">
+                           A verification code was sent to your phone
+                         </p>
+                         <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                           <span className="text-sm text-charcoal-light/50 font-mono select-none">code:</span>
+                           <div className="flex gap-1.5">
+                             {[0, 1, 2, 3, 4, 5].map((i) => (
+                               <input
+                                 key={i}
+                                 ref={(el) => { if (el) smsCodeRefs.current[i] = el }}
+                                 type="text"
+                                 inputMode="numeric"
+                                 maxLength={1}
+                                 value={smsCode[i] || ''}
+                                 onChange={(e) => {
+                                   const val = e.target.value.replace(/\D/g, '')
+                                   if (!val) return
+                                   const next = [...smsCode]
+                                   next[i] = val
+                                   setSmsCode(next)
+                                   if (i < 5) smsCodeRefs.current[i + 1]?.focus()
+                                   if (i === 5 || (val && i < 3 && !next[i + 1])) {
+                                     const full = next.join('')
+                                     if (full.length === 6) handleVerifySmsCode(full)
+                                   }
+                                 }}
+                                 onKeyDown={(e) => {
+                                   if (e.key === 'Backspace') {
+                                     const next = [...smsCode]
+                                     if (next[i]) {
+                                       next[i] = ''
+                                       setSmsCode(next)
+                                     } else if (i > 0) {
+                                       next[i - 1] = ''
+                                       setSmsCode(next)
+                                       smsCodeRefs.current[i - 1]?.focus()
                                      }
-                                   }}
-                                   onKeyDown={(e) => {
-                                     if (e.key === 'Backspace') {
-                                       const next = [...emailCode]
-                                       if (next[i]) {
-                                         next[i] = ''
-                                         setEmailCode(next)
-                                       } else if (i > 0) {
-                                         next[i - 1] = ''
-                                         setEmailCode(next)
-                                         emailCodeRefs.current[i - 1]?.focus()
-                                       }
-                                     }
-                                   }}
-                                   onPaste={(e) => {
-                                     e.preventDefault()
-                                     const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 4)
-                                     const next = pasted.split('')
-                                     while (next.length < 4) next.push('')
-                                     setEmailCode(next)
-                                     if (pasted.length === 4) handleEmailCodeComplete(pasted)
-                                     else emailCodeRefs.current[pasted.length]?.focus()
-                                   }}
-                                   className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                                   autoComplete="off"
-                                 />
-                               ))}
-                             </div>
+                                   }
+                                 }}
+                                 onPaste={(e) => {
+                                   e.preventDefault()
+                                   const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+                                   const next = pasted.split('')
+                                   while (next.length < 6) next.push('')
+                                   setSmsCode(next)
+                                   if (pasted.length === 6) handleVerifySmsCode(pasted)
+                                   else smsCodeRefs.current[pasted.length]?.focus()
+                                 }}
+                                 className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                 autoComplete="off"
+                               />
+                             ))}
                            </div>
                          </div>
-                       )}
-                     </div> {/* end email section */}
+                           <div className="mt-2 flex items-center justify-center gap-3">
+                             {smsResendable ? (
+                                <button
+                                  onClick={handlePhoneConfirm}
+                                  disabled={sendingSms}
+                                  className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                >
+                                  {sendingSms ? 'Sending...' : 'Resend Code'}
+                                </button>
+                              ) : null}
+                         </div>
+                       </div>
+                     )}
+
+                     {/* Email — input visible but empty, Send uses stored value */}
+                     {guestEmail && !awaitingEmailLink && (
+                       <div>
+                         <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                           Email Address
+                         </label>
+                         <div className="relative">
+                            <input
+                              type="email"
+                              value={maskEmail(guestEmail)}
+                              readOnly
+                              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
+                            />
+                           <button
+                             onClick={handleEmailConfirm}
+                              disabled={saving}
+                             className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                           >
+                             {saving ? 'Sending...' : 'Send Log-In Code'}
+                           </button>
+                         </div>
+                       </div>
+                     )}
+
+                     {/* Email code input + resend */}
+                     {awaitingEmailLink && (
+                       <div>
+                         <p className="text-[10px] text-charcoal-light/50 mb-2 text-center">
+                           A verification code was sent to your email
+                         </p>
+                         <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                           <span className="text-sm text-charcoal-light/50 font-mono select-none">code:</span>
+                           <div className="flex gap-1.5">
+                             {[0, 1, 2, 3, 4, 5].map((i) => (
+                               <input
+                                 key={i}
+                                 ref={(el) => { if (el) emailCodeRefs.current[i] = el }}
+                                 type="text"
+                                 inputMode="numeric"
+                                 maxLength={1}
+                                 value={emailCode[i] || ''}
+                                 onChange={(e) => {
+                                   const val = e.target.value.replace(/\D/g, '')
+                                   if (!val) return
+                                   const next = [...emailCode]
+                                   next[i] = val
+                                   setEmailCode(next)
+                                   if (i < 5) emailCodeRefs.current[i + 1]?.focus()
+                                   if (i === 5 || (val && i < 3 && !next[i + 1])) {
+                                     const full = next.join('')
+                                     if (full.length === 6) handleEmailCodeComplete(full)
+                                   }
+                                 }}
+                                 onKeyDown={(e) => {
+                                   if (e.key === 'Backspace') {
+                                     const next = [...emailCode]
+                                     if (next[i]) {
+                                       next[i] = ''
+                                       setEmailCode(next)
+                                     } else if (i > 0) {
+                                       next[i - 1] = ''
+                                       setEmailCode(next)
+                                       emailCodeRefs.current[i - 1]?.focus()
+                                     }
+                                   }
+                                 }}
+                                 onPaste={(e) => {
+                                   e.preventDefault()
+                                   const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+                                   const next = pasted.split('')
+                                   while (next.length < 6) next.push('')
+                                   setEmailCode(next)
+                                   if (pasted.length === 6) handleEmailCodeComplete(pasted)
+                                   else emailCodeRefs.current[pasted.length]?.focus()
+                                 }}
+                                 className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                 autoComplete="off"
+                               />
+                             ))}
+                           </div>
+                         </div>
+                           <div className="mt-2 flex items-center justify-center gap-3">
+                             {emailResendable ? (
+                                <button
+                                  onClick={handleEmailConfirm}
+                                  disabled={saving}
+                                  className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                >
+                                  {saving ? 'Sending...' : 'Resend Code'}
+                                </button>
+                              ) : null}
+                         </div>
+                       </div>
+                     )}
 
                    {firebaseError && (
                      <div className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">

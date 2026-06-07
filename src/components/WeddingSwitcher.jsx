@@ -42,14 +42,21 @@ export default function WeddingSwitcher() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-current/10">
+      <div
+        className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-current/10"
+        role="radiogroup"
+        aria-label="Select wedding"
+      >
         {OPTIONS.map((opt) => {
           const isOn = activeWedding === opt.value
           return (
             <button
               key={opt.value}
               onClick={() => toggle(opt.value)}
-              className={`relative flex-1 text-[9px] tracking-widest uppercase rounded-sm py-0.5 transition-all duration-700 ${
+              role="radio"
+              aria-checked={isOn}
+              aria-label={`${opt.label} wedding${isOn ? ' (selected)' : ''}`}
+              className={`relative flex-1 text-[11px] tracking-widest uppercase rounded-sm py-2 transition-all duration-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
                 isOn
                   ? isIndia
                     ? 'text-[#7c5c3e] font-medium'

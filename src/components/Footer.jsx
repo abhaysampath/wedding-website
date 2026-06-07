@@ -16,6 +16,11 @@ export default function Footer() {
         <p className="text-xs text-cream/30">
           Made with love &mdash; thank you for being part of our story
         </p>
+        <div className="flex justify-center gap-4 mt-6 text-[10px] text-cream/20">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-cream/50 transition-colors">Privacy</a>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-cream/50 transition-colors">Terms</a>
+          <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-cream/50 transition-colors">Data Deletion</a>
+        </div>
       </div>
     </footer>
   )

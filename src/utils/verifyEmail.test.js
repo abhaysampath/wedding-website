@@ -35,9 +35,9 @@ afterAll(() => {
 })
 
 describe('generateCode', () => {
-  it('returns a 4-digit string', () => {
+  it('returns a 6-digit string', () => {
     const code = generateCode()
-    expect(code).toMatch(/^\d{4}$/)
+    expect(code).toMatch(/^\d{6}$/)
   })
 
   it('returns different codes on successive calls', () => {
@@ -57,13 +57,13 @@ describe('verifyCode', () => {
   it('verifies from sessionStorage fallback', async () => {
     await sendVerificationCode('test2@example.com', 'Test User 2')
     const stored = globalThis.sessionStorage.getItem('pending_email_code')
-    expect(stored).toMatch(/^\d{4}$/)
+    expect(stored).toMatch(/^\d{6}$/)
     expect(verifyCode(stored)).toBe(true)
   })
 
   it('returns false for an incorrect code', async () => {
     await sendVerificationCode('test3@example.com', 'Test User 3')
-    expect(verifyCode('0000')).toBe(false)
+    expect(verifyCode('000000')).toBe(false)
   })
 
   it('clears the pending code after successful verification', async () => {

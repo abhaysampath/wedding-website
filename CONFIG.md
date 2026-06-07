@@ -105,7 +105,7 @@ EmailJS account, add an Email Service, and create a Transactional template.
 The template should accept these variables:
 - `{{email}}` — recipient address
 - `{{name}}` — recipient name
-- `{{code}}` — 4-digit verification code
+- `{{code}}` — 6-digit verification code
 - `{{verify_link}}` — full URL including `?code=XXXX`
 
 ---
@@ -126,6 +126,7 @@ Controls the full-screen hero slideshow on the home page.
 | `interval` | number | `10000` | Milliseconds between auto-advance |
 | `personalized.groom` | object | `ra-and-ak.JPG` | First image shown to Abhay's family |
 | `personalized.bride` | object | `kiss.jpg` | First image shown to Rebecca's family |
+| `contact.reasons` | array | 5 reasons | Dropdown options for the contact form on the last slide |
 
 Each `slide` / personalized entry needs `{ file, alt }`:
 
@@ -133,10 +134,17 @@ Each `slide` / personalized entry needs `{ file, alt }`:
 { file: 'hero.jpeg', alt: 'Hero' }
 ```
 
+Each contact reason needs `{ value, label }` — the label appears in the dropdown
+and is prepended to the email subject when a message is sent:
+
+```js
+{ value: 'login', label: 'Login Trouble' }
+```
+
 **How to populate:** Place JPG files in `public/jpg/home/`. List them in
 `slides[]` with a descriptive `alt`. Set `personalized` if you want different
-first images per family side. Remove or null `personalized.groom`/`bride` to
-disable the feature.
+first images per family side. Edit `contact.reasons` to change the dropdown
+options — the `label` is used as `[Label]` prefix in the email subject.
 
 ---
 

@@ -26,11 +26,8 @@ describe('config', () => {
     expect(config.emailjs.publicKey).toBeDefined()
   })
 
-  it('has sheets config with required columns', () => {
-    expect(config.sheets.columns.firstName).toBe('First Name')
-    expect(config.sheets.columns.lastName).toBe('Last Name')
-    expect(config.sheets.columns.email).toBe('Email Address')
-    expect(config.sheets.columns.phone).toBe('Phone Number')
+  it('has sheets mode set to api', () => {
+    expect(config.sheets.mode).toBe('api')
   })
 
   it('has images.hero section', () => {

@@ -89,22 +89,6 @@ export default function RSVP() {
 
             <div>
               <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-2">
-                Number of Guests
-              </label>
-              <select
-                className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                defaultValue=""
-                required
-              >
-                <option value="" disabled>Select...</option>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-2">
                 Dietary Restrictions
               </label>
               <textarea

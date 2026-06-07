@@ -2,7 +2,7 @@ import emailjs from '@emailjs/browser'
 import config from '../config'
 
 export function generateCode() {
-  return String(Math.floor(1000 + Math.random() * 9000))
+  return String(Math.floor(100000 + Math.random() * 900000))
 }
 
 let _currentCode = ''

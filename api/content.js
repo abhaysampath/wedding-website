@@ -79,16 +79,31 @@ export default async function handler(req, res) {
         plusOne: PLUSONE_MAP[plusOneRaw] ?? false,
         email: row.email || '',
         phone: row.phone || '',
+        address: row.address || '',
+        dietaryPreferences: row.dietaryPreferences || '',
       }
     })
 
+    const faqHeaders = faqRes.data.values?.[0] || []
+    const faqWeddingLabel = SHEET_CONFIG.faq.columns.wedding.toLowerCase()
+    const faqWeddingColFound = faqHeaders.some(h => h.trim().toLowerCase() === faqWeddingLabel)
+    if (!faqWeddingColFound && faqHeaders.length > 0) {
+      console.warn(`FAQ sheet is missing a column with header "${SHEET_CONFIG.faq.columns.wedding}" — FAQ filtering by wedding will not work until you add it`)
+    }
+    function parseFaqWedding(val) {
+      const v = (val || '').trim().toLowerCase()
+      if (v.includes('both')) return 'both'
+      if (v.includes('india')) return 'india'
+      if (v.includes('us')) return 'us'
+      return 'both'
+    }
     const faq = parseSheet(faqRes.data.values, SHEET_CONFIG.faq.columns, (row) => ({
       q: row.question || '',
       a: row.answer || '',
-      wedding: row.wedding || 'both',
+      wedding: parseFaqWedding(row.wedding),
     }))
 
-    const body = { source: 'sheet', guests, faq }
+    const body = { source: 'sheet', guests, faq, faqWeddingColFound, faqHeaderRow: faqHeaders }
     if (sheetErrors.length > 0) body.error = sheetErrors.join('; ')
     return res.json(body)
   } catch (err) {

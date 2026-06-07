@@ -3,10 +3,8 @@ import { AuthContext } from './AuthContext'
 import config from '../config'
 import { signInWithGoogle, signInWithFacebook } from '../firebase'
 import sampleGuests from '../data/guests'
-import sampleFaq from '../data/faq'
 
 const { sheets } = config
-const { columns, roleMap, plusOneMap } = sheets
 
 function normalize(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -35,17 +33,6 @@ function getDefaultWedding(weddings) {
   if (weddings.length === 1) return weddings[0]
   const indiaEnd = new Date('2027-02-27T00:00:00')
   return new Date() < indiaEnd ? 'india' : 'us'
-}
-
-function inferSide(firstName, lastName, relationship, role) {
-  const full = `${firstName} ${lastName}`.toLowerCase()
-  if (full === 'abhay sampath' || full.startsWith('abhay')) return 'groom'
-  if (full === 'rebecca erde' || full.startsWith('rebecca')) return 'bride'
-  const rel = (relationship || '').toLowerCase()
-  if (rel.includes('abhay')) return 'groom'
-  if (rel.includes('rebecca')) return 'bride'
-  if (role === 'Br-Family') return 'bride'
-  return 'bride'
 }
 
 function findGuestByName(guests, name) {
@@ -81,14 +68,17 @@ function updateUrlSlug(slug) {
 }
 
 async function writeToSheet(guestId, data) {
-  if (!guestId) return
+  if (!guestId) return true
   try {
-    await fetch(`/api/guest/${guestId}`, {
+    const res = await fetch(`/api/guest/${guestId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-  } catch { /* api not available */ }
+    if (!res.ok) return false
+    const body = await res.json()
+    return body.updated > 0
+  } catch { return false }
 }
 
 export function AuthProvider({ children }) {
@@ -99,7 +89,7 @@ export function AuthProvider({ children }) {
   const [initialLoading] = useState(false)
   const [content, setContent] = useState({
     guests: sampleGuests,
-    faq: sampleFaq,
+    faq: [],
     loaded: false,
   })
   const [firebaseLoading, setFirebaseLoading] = useState(false)
@@ -114,15 +104,16 @@ export function AuthProvider({ children }) {
             const data = await res.json()
             setContent({
               guests: data.guests?.length ? data.guests : sampleGuests,
-              faq: data.faq?.length ? data.faq : sampleFaq,
+              faq: data.faq?.length ? data.faq : [],
+              faqWeddingColFound: data.faqWeddingColFound,
               loaded: true,
             })
             return
           }
         }
-        setContent({ guests: sampleGuests, faq: sampleFaq, loaded: true })
+        setContent({ guests: sampleGuests, faq: [], loaded: true })
       } catch {
-        setContent({ guests: sampleGuests, faq: sampleFaq, loaded: true })
+        setContent({ guests: sampleGuests, faq: [], loaded: true })
       }
     }
     loadContent()
@@ -154,6 +145,8 @@ export function AuthProvider({ children }) {
       plusOne: guest.plusOne,
       phone: guest.phone || '',
       email: guest.email || '',
+      address: guest.address || '',
+      dietaryPreferences: guest.dietaryPreferences || '',
       lastLogin: now,
       uid: fbUser.uid,
     }
@@ -165,6 +158,10 @@ export function AuthProvider({ children }) {
 
     setAuthMode('settings')
     setShowAuthModal(true)
+    setTimeout(() => {
+      const el = document.getElementById('details')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }, 300)
   }, [])
 
   useEffect(() => {
@@ -194,6 +191,8 @@ export function AuthProvider({ children }) {
       plusOne: guest.plusOne,
       phone: overrides.phone ?? guest.phone ?? '',
       email: overrides.email ?? guest.email ?? '',
+      address: overrides.address ?? guest.address ?? '',
+      dietaryPreferences: overrides.dietaryPreferences ?? guest.dietaryPreferences ?? '',
       lastLogin: now,
       uid: null,
     }
@@ -209,6 +208,10 @@ export function AuthProvider({ children }) {
     } else {
       setAuthMode('settings')
     }
+    setTimeout(() => {
+      const el = document.getElementById('details')
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    }, 300)
   }, [])
 
   const handleFirebaseSignIn = useCallback(async (provider) => {
@@ -243,16 +246,22 @@ export function AuthProvider({ children }) {
     } finally {
       setFirebaseLoading(false)
     }
-  }, [content.guests])
+  }, [content.guests, processSignIn])
 
-  const updateContact = useCallback(async (phone, email) => {
+  const updateContact = useCallback(async (data) => {
     if (!user) return
-    const cleanedPhone = (phone || '').replace(/\D/g, '')
     const now = new Date().toISOString()
-    const updated = { ...user, phone: cleanedPhone, email, lastLogin: now }
+    const cleanedPhone = (data.phone || '').replace(/\D/g, '')
+    const sheetData = { lastLogin: now }
+    if (data.phone !== undefined) sheetData.phone = cleanedPhone
+    if (data.email !== undefined) sheetData.email = data.email
+    if (data.address !== undefined) sheetData.address = data.address
+    if (data.dietaryPreferences !== undefined) sheetData.dietaryPreferences = data.dietaryPreferences
+    const updated = { ...user, ...sheetData, phone: cleanedPhone || user.phone, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
-    writeToSheet(user.id, { phone: cleanedPhone, email, lastLogin: now })
+    const ok = await writeToSheet(user.id, sheetData)
+    if (!ok) throw new Error('Failed to save to sheet')
   }, [user])
 
   const recordLogin = useCallback(() => {

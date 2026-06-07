@@ -43,7 +43,7 @@ export default function OurStory() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
         >
-          <SectionTitle>Our Story</SectionTitle>
+          <SectionTitle>Rebecca & Abhay</SectionTitle>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
@@ -84,28 +84,31 @@ export default function OurStory() {
             transition={{ duration: 0.7, delay: 0.4 }}
           >
             <p className="font-heading text-lg md:text-xl text-gold-dark italic mb-6">
-              From the moment we met, we knew...
+              No wonder we felt like we were already home from the start...
             </p>
             <div className="space-y-5 text-charcoal-light leading-relaxed text-[15px] md:text-base">
               <p>
-                Our story began in the most unexpected way — a shared glance across a crowded room,
-                a conversation that lasted until the cafe closed, and a connection that felt like
-                coming home.
+                Our story began in the modern way: a dating app, no expectations, and somehow, against
+                all odds, our soulmates on the other side of the screen.
               </p>
               <p>
-                Through countless adventures, shared laughter, and quiet moments in between, our
-                love has grown deeper with every passing day. From exploring new cities to cooking
-                dinner together on a Tuesday night, every moment with each other has been a treasure.
+                From the very first conversation, something felt different. As we got to know each other,
+                it became clear why: Rebecca has one of the biggest, most loving hearts of anyone I'd ever known.
               </p>
               <p>
-                On a golden autumn evening, surrounded by the changing leaves, Abhay got down on one
-                knee and asked the question that would change everything. And with tears of joy,
-                Rebecca said yes.
+                And it didn't take long to see where it comes from. Our moms share that same warmth and care, and
+                our dads, in one of life's strange coincidences, ended up in very similar careers.
+                No wonder we felt like we were already home from the start.
+              </p>
+              <p>
+                Last December, we escaped the New York winter for the warm waters and open skies of Belize.
+                On a perfect evening, Abhay got down on one knee and asked the question that changed everything.
+                With a full heart, Rebecca said yes.
+              </p>
+              <p>
+                Now we can't wait to begin our greatest adventure yet, as husband and wife, surrounded by everyone
+                we love most at our wedding in 2027!!
                 <span className="text-gold ml-1">❤</span>
-              </p>
-              <p>
-                Now, we can't wait to begin our greatest adventure yet — as husband and wife —
-                surrounded by the people we love most.
               </p>
             </div>
           </motion.div>

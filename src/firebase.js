@@ -100,7 +100,8 @@ export function getRecaptchaVerifier(containerElement) {
   const a = init()
   if (!a) return null
   _recaptchaVerifier = new RecaptchaVerifier(a, containerElement, {
-    size: 'normal',
+    size: 'invisible',
+    siteKey: config.recaptcha.siteKey || undefined,
     callback: () => {},
     'expired-callback': () => {
       console.log('reCAPTCHA expired')

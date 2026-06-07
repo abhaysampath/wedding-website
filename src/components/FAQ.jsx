@@ -37,14 +37,17 @@ function AccordionItem({ item, isOpen, onClick }) {
 }
 
 export default function FAQ() {
-  const { activeWedding, content } = useAuth()
+  const { user, content } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [openIndex, setOpenIndex] = useState(null)
 
-  const faqs = (content.faq || []).filter(
-    (f) => f.wedding === activeWedding || f.wedding === 'both'
-  )
+  const weddings = user?.weddings || []
+  const faqs = (content.faq || []).filter((f) => {
+    if (!f.q || !f.a) return false
+    if (f.wedding === 'both') return true
+    return weddings.includes(f.wedding)
+  })
 
   return (
     <section id="faq" className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700" ref={ref}>
@@ -64,6 +67,12 @@ export default function FAQ() {
             <WeddingSwitcher />
           </div>
         </motion.div>
+
+        {content.faq?.length > 0 && content.faq.every(f => f.wedding === 'both') && (
+          <div className="max-w-2xl mx-auto mb-6 p-4 border border-amber-200 bg-amber-50/60 rounded-sm text-xs text-amber-800 text-center">
+            FAQ filtering by wedding is not active — ensure your FAQ sheet has values like &ldquo;US Wedding&rdquo;, &ldquo;India Wedding&rdquo;, or &ldquo;Both Weddings&rdquo; in the &ldquo;WhichWedding&rdquo; column.
+          </div>
+        )}
 
         {faqs.length === 0 ? (
           <p className="text-center text-charcoal-light/40 text-sm">FAQs coming soon</p>
