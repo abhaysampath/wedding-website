@@ -1,5 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
 import { MotionConfig } from 'framer-motion'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
@@ -297,6 +298,7 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <AuthProvider>
         <Page />
+        <SpeedInsights />
         <Analytics />
       </AuthProvider>
     </MotionConfig>

@@ -78,23 +78,35 @@ async function main() {
     assert('No critical page errors', criticalErrors.length === 0,
       criticalErrors.length > 0 ? criticalErrors[0] : undefined)
 
-    // Test 2: Gallery heading exists
-    const heading = await page.$eval('h2', els =>
-      Array.from(els).find(el => el.textContent === 'Gallery')
-    ).catch(() => null)
-    assert('Gallery heading present', !!heading)
-
-    // Test 3: Scroll full page without errors
+    // Scroll full page to trigger lazy-loaded sections
+    console.log('\n📋 Scrolling through entire page...')
     const preScrollErrors = pageErrors.length
     await autoScroll(page)
     const scrollErrors = pageErrors.length - preScrollErrors
     assert('No errors during scroll', scrollErrors === 0, `${scrollErrors} error(s)`)
 
-    // Test 4: Sign In button exists
-    const signInBtns = await page.$$('button').then(btns =>
-      Promise.all(btns.map(b => b.evaluate(el => el.textContent)))
-    ).then(texts => texts.filter(t => /sign.?in/i.test(t)))
-    assert('Sign In button present', signInBtns.length > 0)
+    // Test 2: Gallery heading exists (lazy-loaded — wait for it)
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await page.waitForSelector('h2', { timeout: 8000 })
+    const headings = await page.$$eval('h2', els => els.map(el => el.textContent))
+    assert('Gallery heading present', headings.some(h => h === 'Gallery'))
+
+    // Test 3: Sign In text exists in Hero
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await page.waitForFunction(() =>
+      document.body.innerText.includes('Sign in to find your invite'),
+      { timeout: 5000 }
+    )
+    assert('Sign In text present', true)
+
+    // Test 4: Auth modal opens
+    await page.evaluate(() => {
+      const el = document.querySelector('[class*="cursor-text"], [cursor-text]')
+      if (el) el.closest('div').click()
+    })
+    await new Promise(r => setTimeout(r, 800))
+    const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
+    assert('Auth modal opens on click', !!modal)
 
     // Test 5: Console errors filtered for noise
     const appErrors = consoleErrors.filter(e =>
