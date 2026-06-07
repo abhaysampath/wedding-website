@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting...</title>
+  <script>
+    var params = window.location.search
+    var slug = window.location.pathname.match(/\/g\/(.+)/)
+    var dest = '/'
+    if (slug) {
+      dest = '/?' + (params ? params.slice(1) + '&' : '') + 'g=' + encodeURIComponent(slug[1])
+    } else if (params) {
+      dest = '/' + params
+    }
+    window.location.replace(dest)
+  </script>
+</head>
+<body>
+  <p>Redirecting to home page...</p>
+</body>
+</html>

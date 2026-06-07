@@ -503,7 +503,7 @@ export default function AuthModal() {
       sessionStorage.setItem('awaiting_email', '1')
       sessionStorage.setItem('pending_email_code', urlCode)
       urlCodeRef.current = urlCode
-      const slug = window.location.pathname.match(/\/g\/(.+)/)?.[1]
+      const slug = window.location.pathname.match(/\/g\/(.+)/)?.[1] || params.get('g')
       urlSlugRef.current = slug ? decodeURIComponent(slug) : null
       setTimeout(() => {
         setAwaitingEmailLink(true)
