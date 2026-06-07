@@ -51,8 +51,8 @@ export default function Gallery() {
   const lastTap = useRef(0)
 
   function preload(images) {
-    images.forEach(img => {
-      if (!img) return
+    (images || []).forEach(img => {
+      if (!img?.jpg) return
       if (preloaded.current.has(img.jpg)) return
       preloaded.current.add(img.jpg)
       const pre = new Image()
@@ -73,6 +73,7 @@ export default function Gallery() {
   function seededShuffle(arr) {
     const a = [...arr]
     const seed = arr.reduce((acc, item) => {
+      if (!item?.jpg) return acc
       let h = 0
       for (let i = 0; i < item.jpg.length; i++) {
         h = ((h << 5) - h + item.jpg.charCodeAt(i)) | 0
