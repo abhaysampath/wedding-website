@@ -29,7 +29,7 @@ function normalize(str) {
   return str.trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 export default function AuthModal() {
   const {
@@ -61,6 +61,8 @@ export default function AuthModal() {
     const recaptchaContainerRef = useRef(null)
     const urlCodeRef = useRef(null)
     const urlSlugRef = useRef(null)
+    const modalRef = useRef(null)
+    const [highlightedIndex, setHighlightedIndex] = useState(-1)
 
   const sideName = config.site.coupleNames
 
@@ -266,10 +268,23 @@ export default function AuthModal() {
   }, [nameInput])
 
   const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' && matches.length === 1) {
-      handleSelectMatch(matches[0])
+    if (e.key === 'ArrowDown' && showDropdown && matches.length > 0) {
+      e.preventDefault()
+      setHighlightedIndex(prev => (prev < matches.length - 1 ? prev + 1 : 0))
+    } else if (e.key === 'ArrowUp' && showDropdown && matches.length > 0) {
+      e.preventDefault()
+      setHighlightedIndex(prev => (prev > 0 ? prev - 1 : matches.length - 1))
+    } else if (e.key === 'Enter') {
+      if (showDropdown && highlightedIndex >= 0) {
+        e.preventDefault()
+        handleSelectMatch(matches[highlightedIndex])
+      } else if (matches.length === 1) {
+        handleSelectMatch(matches[0])
+      }
+    } else if (e.key === 'Escape') {
+      setShowDropdown(false)
     }
-  }, [matches, handleSelectMatch])
+  }, [matches, handleSelectMatch, showDropdown, highlightedIndex])
 
   const handleEmailCodeCompleteRef = useRef(handleEmailCodeComplete)
   useEffect(() => {
@@ -346,13 +361,48 @@ export default function AuthModal() {
 
   useEffect(() => {
     if (!showAuthModal) return
-    if (inputRef.current) inputRef.current.focus()
+    const timer = setTimeout(() => inputRef.current?.focus(), 50)
+    return () => clearTimeout(timer)
+  }, [showAuthModal])
+
+  useEffect(() => {
+    setHighlightedIndex(showDropdown && matches.length > 0 ? 0 : -1)
+  }, [showDropdown, matches.length])
+
+  useEffect(() => {
+    if (highlightedIndex < 0 || !showDropdown) return
+    const el = modalRef.current?.querySelector(`[data-index="${highlightedIndex}"]`)
+    if (el) el.scrollIntoView({ block: 'nearest' })
+  }, [highlightedIndex, showDropdown])
+
+  useEffect(() => {
+    if (!showAuthModal) return
+    const el = modalRef.current
+    if (!el) return
+    const focusables = () => Array.from(el.querySelectorAll(FOCUSABLE)).filter(el => el.offsetParent !== null)
+    const handler = (e) => {
+      if (e.key !== 'Tab') return
+      const els = focusables()
+      if (els.length === 0) return
+      const first = els[0]
+      const last = els[els.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [showAuthModal])
 
   return (
     <>
       {showAuthModal && (
         <div
+          ref={modalRef}
           className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm overflow-y-auto md:flex md:items-start md:justify-center md:pt-[10vh] overscroll-contain"
           onClick={handleCancel}
           style={{ overscrollBehavior: 'contain' }}
@@ -417,33 +467,43 @@ export default function AuthModal() {
 
                    <p className="text-sm text-charcoal-light/70">Find your invite by name</p>
 
-                  <div className="relative">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={nameInput}
-                      onChange={handleNameChange}
-                      onFocus={handleNameFocus}
-                      onKeyDown={handleKeyDown}
-                      className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                      placeholder="Start typing your name"
-                      autoComplete="off"
-                    />
-                    {showDropdown && matches.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-10">
-                        {matches.map((g) => (
-                          <button
-                            key={g.id}
-                            onClick={() => handleSelectMatch(g)}
-                            className="w-full text-left px-4 py-2.5 text-sm text-charcoal hover:bg-cream-dark transition-colors border-b border-gold/5 last:border-b-0"
-                          >
-                            <span className="font-medium">{g.firstName} {g.lastName}</span>
-                            <span className="text-charcoal-light/50 ml-2">{guestLabel(g, sideName)}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                   <div className="relative">
+                     <input
+                       ref={inputRef}
+                       type="text"
+                       value={nameInput}
+                       onChange={handleNameChange}
+                       onFocus={handleNameFocus}
+                       onKeyDown={handleKeyDown}
+                       role="combobox"
+                       aria-expanded={showDropdown && matches.length > 0}
+                       aria-controls="name-dropdown"
+                       aria-activedescendant={highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined}
+                       className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                       placeholder="Start typing your name"
+                       autoComplete="off"
+                     />
+                     {showDropdown && matches.length > 0 && (
+                       <div id="name-dropdown" role="listbox" className="absolute top-full left-0 right-0 mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-10">
+                         {matches.map((g, i) => (
+                           <button
+                             key={g.id}
+                             role="option"
+                             aria-selected={i === highlightedIndex}
+                             data-index={i}
+                             onMouseEnter={() => setHighlightedIndex(i)}
+                             onClick={() => handleSelectMatch(g)}
+                             className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gold/5 last:border-b-0 ${
+                               i === highlightedIndex ? 'bg-gold/10 text-charcoal' : 'text-charcoal hover:bg-cream-dark'
+                             }`}
+                           >
+                             <span className="font-medium">{g.firstName} {g.lastName}</span>
+                             <span className="text-charcoal-light/50 ml-2">{guestLabel(g, sideName)}</span>
+                           </button>
+                         ))}
+                       </div>
+                     )}
+                   </div>
 
                   {firebaseError && (
                     <div className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
