@@ -1,4 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
+import { MotionConfig } from 'framer-motion'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
@@ -106,6 +107,12 @@ function PageContent() {
 
   return (
     <div data-wedding={activeWedding} className="wedding-page min-h-screen">
+      <a
+        href="#story"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
+      >
+        Skip to content
+      </a>
       <ScrollProgress />
       <Navbar />
       <Hero />
@@ -144,8 +151,10 @@ function Page() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Page />
-    </AuthProvider>
+    <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <Page />
+      </AuthProvider>
+    </MotionConfig>
   )
 }

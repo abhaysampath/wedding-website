@@ -413,6 +413,11 @@ export default function AuthModal() {
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="p-4 pb-6 md:p-10 relative">
+              <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+                {authMode === 'signin' ? 'Sign in' : authMode === 'contact' ? 'Contact information' : authMode === 'settings' ? 'Settings' : ''}
+                {selectedMatch ? ` — signed in as ${selectedMatch.firstName} ${selectedMatch.lastName}` : ''}
+                {firebaseError ? ` — error: ${firebaseError}` : ''}
+              </div>
               <div ref={recaptchaContainerRef} />
               <button
                 onClick={handleCancel}
@@ -506,7 +511,7 @@ export default function AuthModal() {
                    </div>
 
                   {firebaseError && (
-                    <div className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
+                    <div role="alert" className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
                       {firebaseError}
                     </div>
                   )}
@@ -760,13 +765,13 @@ export default function AuthModal() {
                        </div>
                      )}
 
-                   {firebaseError && (
-                     <div className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
-                       {firebaseError}
-                     </div>
-                   )}
+                    {firebaseError && (
+                      <div role="alert" className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">
+                        {firebaseError}
+                      </div>
+                    )}
 
-                   <div className="flex pt-2">
+                    <div className="flex pt-2">
                     <button
                       onClick={handleRejectName}
                       className="w-full py-2.5 border border-gold/20 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
