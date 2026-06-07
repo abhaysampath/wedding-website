@@ -166,12 +166,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         </div>
 
         {saveStatus === 'saved' && (
-          <div className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center transition-all">
+          <div className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center transition-all" aria-live="polite">
             Saved successfully!
           </div>
         )}
         {saveStatus === 'error' && (
-          <div className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center transition-all">
+          <div className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center transition-all" aria-live="polite">
             Failed to save. Please try again.
           </div>
         )}

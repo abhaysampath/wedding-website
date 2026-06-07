@@ -26,7 +26,7 @@ function init() {
     app = initializeApp({ apiKey, authDomain, projectId })
     auth = getAuth(app)
     setPersistence(auth, browserLocalPersistence)
-    if (import.meta.env.DEV || config.debug) {
+    if (import.meta.env.DEV) {
       auth.settings.appVerificationDisabledForTesting = true
     }
   }

@@ -1,6 +1,7 @@
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
 import { useAuth } from '../context/useAuth'
-import ContactForm from './ContactForm'
+
+const ContactForm = lazy(() => import('./ContactForm'))
 import {
   createAnonymousSession,
   sendPhoneCode,
@@ -718,13 +719,30 @@ export default function AuthModal() {
 
               {/* Contact / Settings — phone + email */}
               {(authMode === 'contact' || authMode === 'settings') && user && (
-                <ContactForm
-                  key={`contact-${user.id}`}
-                  user={user}
-                  authMode={authMode}
-                  updateContact={updateContact}
-                  sideName={config.site.coupleNames}
-                />
+                <Suspense fallback={
+                  <div className="space-y-5 animate-pulse">
+                    <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
+                      <div className="h-6 bg-cream border border-gold/10 rounded-sm w-1/2" />
+                      <div className="h-4 bg-cream border border-gold/10 rounded-sm w-1/3 mt-2" />
+                    </div>
+                    <div className="h-12 bg-cream-dark border border-gold/20 rounded-sm" />
+                    <div className="h-12 bg-cream-dark border border-gold/20 rounded-sm" />
+                    <div className="h-24 bg-cream-dark border border-gold/20 rounded-sm" />
+                    <div className="h-24 bg-cream-dark border border-gold/20 rounded-sm" />
+                    <div className="flex gap-3">
+                      <div className="flex-1 h-10 bg-cream-dark border border-gold/20 rounded-sm" />
+                      <div className="flex-1 h-10 bg-cream-dark border border-gold/20 rounded-sm" />
+                    </div>
+                  </div>
+                }>
+                  <ContactForm
+                    key={`contact-${user.id}`}
+                    user={user}
+                    authMode={authMode}
+                    updateContact={updateContact}
+                    sideName={config.site.coupleNames}
+                  />
+                </Suspense>
               )}
             </div>
           </div>

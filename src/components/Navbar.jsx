@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-
-const roleLabels = {
-  bride: 'Bride',
-  groom: 'Groom',
-  close_family: 'Close Family',
-  invited_guest: 'Invited Guest',
-  vendor: 'Vendor',
-}
+import { roleLabels } from '../utils/guest'
 
 const guestLinks = [
   { href: '#story', label: 'Our Story' },

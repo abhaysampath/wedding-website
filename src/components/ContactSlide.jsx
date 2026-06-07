@@ -49,7 +49,7 @@ async function verifyRecaptchaToken(token) {
     })
     return res.ok
   } catch {
-    return true
+    return false
   }
 }
 
@@ -206,7 +206,7 @@ export default function ContactSlide() {
           </div>
 
           {status === 'error' && (
-            <p className="text-xs text-red-400 text-center">Failed to send. Please try again later.</p>
+            <p className="text-xs text-red-400 text-center" aria-live="polite">Failed to send. Please try again later.</p>
           )}
 
           <button

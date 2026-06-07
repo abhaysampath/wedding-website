@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
   const [activeWedding, setActiveWedding] = useState(() => getDefaultWedding(user?.weddings || []))
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState('signin') // 'signin' | 'contact' | 'settings'
-  const [initialLoading] = useState(false)
+
   const [content, setContent] = useState({
     guests: sampleGuests,
     faq: [],
@@ -232,7 +232,7 @@ export function AuthProvider({ children }) {
           photo: result.user.photoURL || '',
           uid: result.user.uid,
         }
-        console.log('[Auth] User info from provider:', { name: fbUser.name, email: fbUser.email, uid: fbUser.uid })
+
         const guest = content.guests?.length
           ? (findGuestByName(content.guests, fbUser.name) || findGuestByEmail(content.guests, fbUser.email))
           : null
@@ -297,7 +297,6 @@ export function AuthProvider({ children }) {
     activeWedding,
     showAuthModal,
     authMode,
-    initialLoading,
     firebaseLoading,
     firebaseError,
     config,

@@ -10,7 +10,6 @@ let _currentCode = ''
 export async function sendVerificationCode(email, name = '') {
   const code = generateCode()
   _currentCode = code
-  window.__emailCode = code
   sessionStorage.setItem('pending_email_code', code)
   sessionStorage.setItem('pending_email_addr', email)
   sessionStorage.setItem('pending_email_name', name)
@@ -33,28 +32,18 @@ export async function sendVerificationCode(email, name = '') {
       }, publicKey)
     } catch (error) {
       console.error('EmailJS error:', error)
-      console.log('Email verification code for', email, ':', code)
-      console.log('Verify URL:', verifyUrl)
-      if (import.meta.env.DEV) {
-        window.__emailCode = code
-      }
       throw error
     }
   } else {
-    console.log('Email verification code for', email, ':', code)
-    console.log('Verify URL:', verifyUrl)
-    if (import.meta.env.DEV) {
-      window.__emailCode = code
-    }
+
   }
 }
 
 export function verifyCode(input) {
-  const expected = _currentCode || sessionStorage.getItem('pending_email_code') || window.__emailCode || ''
+  const expected = _currentCode || sessionStorage.getItem('pending_email_code') || ''
   const valid = input === expected
   if (valid) {
     _currentCode = ''
-    window.__emailCode = ''
     sessionStorage.removeItem('pending_email_code')
     sessionStorage.removeItem('pending_email_addr')
     sessionStorage.removeItem('pending_email_name')

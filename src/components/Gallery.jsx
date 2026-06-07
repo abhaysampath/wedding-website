@@ -169,6 +169,7 @@ export default function Gallery() {
                     className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
                     loading="lazy"
                     onLoad={() => handleImageLoad(img.jpg)}
+                    onError={() => handleImageLoad(img.jpg)}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
@@ -212,6 +213,7 @@ export default function Gallery() {
                   <>
                     <button
                       onClick={goPrev}
+                      aria-label="Previous image"
                       className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
                       <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -220,6 +222,7 @@ export default function Gallery() {
                     </button>
                     <button
                       onClick={goNext}
+                      aria-label="Next image"
                       className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
                       <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -234,6 +237,7 @@ export default function Gallery() {
                   alt={allImages[expanded].alt}
                   className="w-full h-auto max-h-[85vh] object-contain rounded-sm select-none"
                   draggable={false}
+                  onError={(e) => { e.target.style.display = 'none' }}
                 />
 
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-cream/40 text-[11px] tracking-wider">

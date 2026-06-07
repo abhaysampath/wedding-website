@@ -20,7 +20,7 @@ export default function EventDetails() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
+          <h2 className="font-heading text-3xl md:text-5xl text-charcoal font-light mb-3">
             Event Details
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
@@ -29,7 +29,7 @@ export default function EventDetails() {
             <WeddingSwitcher />
           </div>
 
-          <div className="inline-block border border-gold/30 rounded-sm px-8 py-6 bg-cream transition-wedding">
+          <div className="inline-block md:block md:inline-block border border-gold/30 rounded-sm px-6 md:px-8 py-6 bg-cream transition-wedding w-full md:w-auto">
             <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-1">
               {w.date}
             </p>
@@ -46,7 +46,7 @@ export default function EventDetails() {
           <div className="relative">
             <div className="absolute left-[18px] md:left-1/2 top-0 bottom-0 w-[1px] bg-gold/30 -translate-x-1/2" />
 
-            <div className="space-y-12 md:space-y-16">
+            <div className="space-y-10 md:space-y-16">
               {w.timeline.map((event, i) => (
                 <motion.div
                   key={event.label}
@@ -57,7 +57,7 @@ export default function EventDetails() {
                     i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                   }`}
                 >
-                  <div className={`flex-1 ${i % 2 === 0 ? 'md:text-right md:pr-12' : 'md:text-left md:pl-12'}`}>
+                  <div className={`flex-1 pl-14 ${i % 2 === 0 ? 'md:text-right md:pr-12 md:pl-0' : 'md:text-left md:pl-12'}`}>
                     <p className="font-heading text-gold-dark text-lg md:text-xl font-medium">
                       {event.time}
                     </p>
