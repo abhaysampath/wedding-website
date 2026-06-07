@@ -1,3 +1,5 @@
+const IMAGE_CDN = 'https://raw.githubusercontent.com/abhaysampath/wedding-website/main/public'
+
 const config = {
   debug: false,
   site: {
@@ -33,8 +35,9 @@ const config = {
     siteKey: import.meta.env.VITE_RECAPTCHA_SITE_KEY || '',
   },
   images: {
+    baseUrl: IMAGE_CDN,
     hero: {
-      dir: '/jpg/home/',
+      dir: `${IMAGE_CDN}/jpg/home/`,
       slides: [
         { file: 'hero.jpeg', alt: 'Hero' },
         { file: 'home1.jpeg', alt: 'Home 1' },
@@ -57,7 +60,7 @@ const config = {
       },
     },
     ourStory: {
-      dir: '/jpg/vert/',
+      dir: `${IMAGE_CDN}/jpg/vert/`,
       slides: [
         { file: 'diwali.jpeg', alt: 'Diwali' },
         { file: 'hero1.JPG', alt: 'Hero 1' },

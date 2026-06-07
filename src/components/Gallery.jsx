@@ -12,9 +12,9 @@ const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
 
 const DIR_MAP = {
-  home: '/jpg/home/',
-  gallery: '/jpg/gallery/',
-  vert: '/jpg/vert/',
+  home: `${config.images.baseUrl}/jpg/home/`,
+  gallery: `${config.images.baseUrl}/jpg/gallery/`,
+  vert: `${config.images.baseUrl}/jpg/vert/`,
 }
 
 function formatCaption(alt) {

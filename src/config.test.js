@@ -32,7 +32,7 @@ describe('config', () => {
 
   it('has images.hero section', () => {
     const hero = config.images.hero
-    expect(hero.dir).toMatch(/^\//)
+    expect(hero.dir).toMatch(/^https?:\/\//)
     expect(hero.slides.length).toBeGreaterThan(0)
     expect(hero.interval).toBeGreaterThan(0)
     hero.slides.forEach(s => {
@@ -43,7 +43,7 @@ describe('config', () => {
 
   it('has images.ourStory section', () => {
     const story = config.images.ourStory
-    expect(story.dir).toMatch(/^\//)
+    expect(story.dir).toMatch(/^https?:\/\//)
     expect(story.slides.length).toBeGreaterThan(0)
     story.slides.forEach(s => {
       expect(s.file).toBeTruthy()
