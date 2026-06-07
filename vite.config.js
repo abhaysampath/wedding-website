@@ -11,6 +11,9 @@ export default defineConfig({
     port: PORT,
     allowedHosts: true,
   },
+  optimizeDeps: {
+    exclude: ['@vercel/speed-insights'],
+  },
   test: {
     environment: 'jsdom',
     globals: true,
