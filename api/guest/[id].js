@@ -1,4 +1,4 @@
-import SHEET_CONFIG from './sheets-config.js'
+import SHEET_CONFIG from '../sheets-config.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'PATCH') {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const id = req.url.split('/').pop()
+    const id = req.query?.id || req.url.split('/').pop()
     const rowIndex = parseInt(id.replace(/[^\d]/g, ''), 10)
     if (isNaN(rowIndex) || rowIndex < 1) {
       return res.status(400).json({ error: 'Invalid row index' })
