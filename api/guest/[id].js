@@ -20,9 +20,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid row index' })
     }
 
-    let body = req.body || ''
-    if (!body) for await (const chunk of req) body += chunk
-    const data = JSON.parse(body)
+    const data = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}')
 
     const { google } = await import('googleapis')
     const auth = new google.auth.JWT({
