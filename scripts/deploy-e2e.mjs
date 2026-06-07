@@ -67,6 +67,13 @@ async function main() {
       console.error(`   🔴 Page error: ${err.message}`)
     })
 
+    const failedRequests = []
+    page.on('requestfailed', req => {
+      if (req.failure()?.errorText === 'net::ERR_ABORTED' &&
+          req.url().includes('/_vercel/')) return  // Vercel scripts expected off-platform
+      failedRequests.push({ url: req.url(), error: req.failure()?.errorText })
+    })
+
     // Navigate
     console.log('🌐 Navigating...')
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 })
@@ -112,11 +119,14 @@ async function main() {
     const appErrors = consoleErrors.filter(e =>
       !e.includes('runtime.lastError') &&
       !e.includes('Receiving end does not exist') &&
-      !e.includes('extension') &&
-      !e.includes('/_vercel/')  // Vercel Speed Insights/Analytics only work on Vercel platform
+      !e.includes('extension')
     )
     assert('No app console errors', appErrors.length === 0,
       appErrors.length > 0 ? appErrors[0] : undefined)
+
+    // Test 6: No unexpected network failures (Vercel 404s are expected off-platform)
+    assert('No unexpected network failures', failedRequests.length === 0,
+      failedRequests.length > 0 ? `${failedRequests[0].url} — ${failedRequests[0].error}` : undefined)
 
     // Summary
     console.log(`\n📊 Results: ${testsPassed} passed, ${testsFailed} failed\n`)
