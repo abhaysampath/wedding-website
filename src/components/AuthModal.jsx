@@ -94,8 +94,8 @@ function ContactForm({ user, authMode, updateContact, sideName }) {
     setSaveStatus('saving')
     try {
       await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
-      const msg = `Postal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
-      window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: msg }))
+      const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
+      window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }))
       setShowAuthModal(false)
       setTimeout(() => {
         const el = document.getElementById('contact')
@@ -435,7 +435,7 @@ export default function AuthModal() {
 
   const handleNeedHelp = useCallback(() => {
     const msg = `I'm having trouble signing in to the wedding website. I tried signing in but couldn't complete the process. Please help me get access.`
-    window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: msg }))
+    window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'login' } }))
     setShowAuthModal(false)
     setTimeout(() => {
       const el = document.getElementById('contact')

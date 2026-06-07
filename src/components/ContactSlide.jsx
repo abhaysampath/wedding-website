@@ -65,7 +65,13 @@ export default function ContactSlide() {
 
   useEffect(() => {
     function handlePendingMsg(e) {
-      setMessage(e.detail)
+      const detail = e.detail
+      if (typeof detail === 'string') {
+        setMessage(detail)
+      } else {
+        if (detail.reason) setReason(detail.reason)
+        if (detail.message) setMessage(detail.message)
+      }
     }
     window.addEventListener('pending-contact-msg', handlePendingMsg)
     return () => window.removeEventListener('pending-contact-msg', handlePendingMsg)
