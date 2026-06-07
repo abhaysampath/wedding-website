@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import { MotionConfig } from 'framer-motion'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
@@ -61,6 +61,62 @@ function BackToTop() {
   )
 }
 
+const SECTIONS = [
+  { id: 'hero', label: 'Hero' },
+  { id: 'story', label: 'Our Story' },
+  { id: 'gallery', label: 'Gallery' },
+  { id: 'details', label: 'Events' },
+  { id: 'travel', label: 'Travel' },
+  { id: 'registry', label: 'Registry' },
+  { id: 'faq', label: 'FAQ' },
+  { id: 'contact', label: 'Contact' },
+]
+
+function SectionNav() {
+  const [active, setActive] = useState('')
+  const { user } = useAuth()
+
+  useEffect(() => {
+    const ids = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+      if (visible.length > 0) setActive(visible[0].target.id)
+    }, { rootMargin: '-80px 0px -60% 0px', threshold: [0, 0.25, 0.5] })
+
+    ids.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [user])
+
+  const filtered = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id))
+
+  if (filtered.length === 0) return null
+
+  return (
+    <nav aria-label="Section navigation" className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
+      {filtered.map(s => (
+        <button
+          key={s.id}
+          onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label={s.label}
+          aria-current={active === s.id ? 'true' : undefined}
+          className="group relative flex items-center justify-center"
+        >
+          <span className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
+          }`} />
+          <span className="absolute right-full mr-3 px-2 py-0.5 bg-charcoal/80 text-cream text-[10px] tracking-wider whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            {s.label}
+          </span>
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 function AuthSkeleton() {
   return (
     <div className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm flex items-start justify-center md:pt-[10vh]">
@@ -113,6 +169,7 @@ function PageContent() {
       >
         Skip to content
       </a>
+      <SectionNav />
       <ScrollProgress />
       <Navbar />
       <Hero />

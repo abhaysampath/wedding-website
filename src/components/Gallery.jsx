@@ -215,6 +215,7 @@ export default function Gallery() {
               return (
               <motion.div
                 key={img.jpg}
+                layoutId={`gallery-${img.jpg}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={sectionInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.04 * i }}
@@ -303,20 +304,25 @@ export default function Gallery() {
                   </>
                 )}
 
-                <img
-                  src={allImages[expanded].jpg}
-                  alt={allImages[expanded].alt}
-                  className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
-                    zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
-                  }`}
-                  draggable={false}
-                  onClick={() => {
-                    const now = Date.now()
-                    if (now - lastTap.current < 300) { setZoomed(z => !z); lastTap.current = 0 }
-                    else lastTap.current = now
-                  }}
-                  onError={(e) => { e.target.style.display = 'none' }}
-                />
+                <motion.div
+                  layoutId={`gallery-${allImages[expanded].jpg}`}
+                  className="w-full"
+                >
+                  <img
+                    src={allImages[expanded].jpg}
+                    alt={allImages[expanded].alt}
+                    className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
+                      zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
+                    }`}
+                    draggable={false}
+                    onClick={() => {
+                      const now = Date.now()
+                      if (now - lastTap.current < 300) { setZoomed(z => !z); lastTap.current = 0 }
+                      else lastTap.current = now
+                    }}
+                    onError={(e) => { e.target.style.display = 'none' }}
+                  />
+                </motion.div>
 
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-cream/40 text-[11px] tracking-wider">
                   {expanded + 1} / {allImages.length}
