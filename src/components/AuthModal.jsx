@@ -416,11 +416,21 @@ export default function AuthModal() {
   }, [verificationId, smsCode, guestPhone, guestEmail, selectedMatch, signInAsGuest, updateContact, verifyingCode, setFirebaseError])
 
   const handleCancel = useCallback(() => {
-    if (user) recordLogin()
-    setShowAuthModal(false)
-    setAuthMode('signin')
-    resetState()
-    clearRecaptchaVerifier()
+    if (user) {
+      recordLogin()
+      setShowAuthModal(false)
+      setAuthMode('signin')
+      resetState()
+      clearRecaptchaVerifier()
+    } else {
+      resetState()
+      clearRecaptchaVerifier()
+      setShowAuthModal(false)
+      setTimeout(() => {
+        const el = document.getElementById('sign-in-section')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
   }, [user, recordLogin, setShowAuthModal, setAuthMode, resetState])
 
   const handleNeedHelp = useCallback(() => {

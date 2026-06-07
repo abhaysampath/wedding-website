@@ -18,7 +18,7 @@ import DebugSheet from './components/DebugSheet'
 function SignInBar() {
   const { setShowAuthModal, handleFirebaseSignIn, firebaseLoading } = useAuth()
   return (
-    <section className="py-16 md:py-24 px-6 bg-cream">
+      <section id="sign-in-section" className="py-16 md:py-24 px-6 bg-cream">
       <div className="max-w-sm mx-auto text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
