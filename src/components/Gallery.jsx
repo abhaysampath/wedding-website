@@ -5,6 +5,8 @@ import config from '../config'
 
 const INITIAL_LOAD = 10
 const LOAD_MORE = 4
+const FIRST_BATCH = 3
+const PRELOAD_SIZE = 7
 const TIER_SCALE = { 1: 1, 2: 0.82, 3: 0.66 }
 const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
@@ -41,6 +43,46 @@ export default function Gallery() {
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const [showOverlay, setShowOverlay] = useState(false)
   const overlayShown = useRef(false)
+  const [eagerReady, setEagerReady] = useState(false)
+  const preloaded = useRef(new Set())
+
+  function preload(images) {
+    images.forEach(img => {
+      if (preloaded.current.has(img.jpg)) return
+      preloaded.current.add(img.jpg)
+      const pre = new Image()
+      pre.src = img.jpg
+    })
+  }
+
+  useEffect(() => {
+    const id = window.requestIdleCallback
+      ? window.requestIdleCallback(() => setEagerReady(true), { timeout: 700 })
+      : setTimeout(() => setEagerReady(true), 500)
+    return () => {
+      if (window.requestIdleCallback) window.cancelIdleCallback(id)
+      else clearTimeout(id)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!eagerReady) return
+    preload(allImages.slice(0, FIRST_BATCH))
+  }, [eagerReady, allImages])
+
+  useEffect(() => {
+    if (!sectionInView) return
+    preload(allImages.slice(FIRST_BATCH, FIRST_BATCH + PRELOAD_SIZE))
+  }, [sectionInView, allImages])
+
+  function shuffle(arr) {
+    const a = [...arr]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
 
   const allImages = useMemo(() => {
     const { gallery } = config.images
@@ -55,7 +97,7 @@ export default function Gallery() {
         })
       })
     }
-    return result
+    return shuffle(result)
   }, [])
 
   const visibleImages = allImages.slice(0, visibleCount)
@@ -167,7 +209,7 @@ export default function Gallery() {
                     alt={img.alt}
                     draggable={false}
                     className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
-                    loading="lazy"
+                    loading={i < FIRST_BATCH && eagerReady ? 'eager' : 'lazy'}
                     onLoad={() => handleImageLoad(img.jpg)}
                     onError={() => handleImageLoad(img.jpg)}
                   />
