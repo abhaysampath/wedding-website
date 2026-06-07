@@ -69,10 +69,19 @@ export default function Gallery() {
     }
   }, [])
 
-  function shuffle(arr) {
+  function seededShuffle(arr) {
     const a = [...arr]
+    const seed = arr.reduce((acc, item) => {
+      let h = 0
+      for (let i = 0; i < item.jpg.length; i++) {
+        h = ((h << 5) - h + item.jpg.charCodeAt(i)) | 0
+      }
+      return (acc + h) | 0
+    }, 0)
+    let s = seed || 1
     for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
+      s = (s * 16807) % 2147483647
+      const j = s % (i + 1);
       [a[i], a[j]] = [a[j], a[i]]
     }
     return a
@@ -91,7 +100,7 @@ export default function Gallery() {
         })
       })
     }
-    return shuffle(result)
+    return seededShuffle(result)
   }, [])
 
   useEffect(() => {
