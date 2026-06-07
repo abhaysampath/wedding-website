@@ -52,6 +52,7 @@ export default function Gallery() {
 
   function preload(images) {
     images.forEach(img => {
+      if (!img) return
       if (preloaded.current.has(img.jpg)) return
       preloaded.current.add(img.jpg)
       const pre = new Image()
@@ -91,8 +92,10 @@ export default function Gallery() {
     const { gallery } = config.images
     const result = []
     for (const [section, images] of Object.entries(gallery)) {
+      if (!images || !Array.isArray(images)) continue
       const dir = DIR_MAP[section] || '/jpg/'
       images.forEach(img => {
+        if (!img || !img.file) return
         result.push({
           jpg: dir + img.file,
           alt: img.alt,

@@ -23,6 +23,18 @@ const guests = [
     email: '',
     phone: '',
   },
+  {
+    id: 'g999',
+    firstName: 'Test',
+    lastName: 'User',
+    side: 'groom',
+    relationship: 'Friend',
+    role: 'Guest',
+    weddings: ['both'],
+    plusOne: false,
+    email: 'test@example.com',
+    phone: '+1 5555550100',
+  },
 ]
 
 export default guests

@@ -62,7 +62,9 @@ export default function AuthModal() {
     const urlCodeRef = useRef(null)
     const urlSlugRef = useRef(null)
     const modalRef = useRef(null)
-    const [highlightedIndex, setHighlightedIndex] = useState(-1)
+   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+   const [signedIn, setSignedIn] = useState(null)
+   const welcomeShownRef = useRef(null)
 
   const sideName = config.site.coupleNames
 
@@ -94,6 +96,7 @@ export default function AuthModal() {
       setVerifyingCode(false)
        setGuestPhone('')
        setGuestEmail('')
+       setSignedIn(null)
        sessionStorage.removeItem('awaiting_sms')
        sessionStorage.removeItem('awaiting_email')
        sessionStorage.removeItem('sms_sent_at')
@@ -133,6 +136,7 @@ export default function AuthModal() {
       if (selectedMatch) {
         await updateContact({ phone: guestPhone, email: guestEmail })
         signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
+        setSignedIn(selectedMatch)
       } else {
         setShowAuthModal(false)
       }
@@ -188,6 +192,7 @@ export default function AuthModal() {
       if (selectedMatch) {
         await updateContact({ phone: guestPhone, email: guestEmail })
         signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
+        setSignedIn(selectedMatch)
       } else {
         await updateContact({ phone: guestPhone, email: guestEmail })
       }
@@ -310,7 +315,7 @@ export default function AuthModal() {
 
   useEffect(() => {
     const code = urlCodeRef.current
-    if (!code || !content.guests?.length) return
+    if (!code || !content.guests?.length || !content.loaded) return
     urlCodeRef.current = null
     const slug = urlSlugRef.current
     urlSlugRef.current = null
@@ -329,7 +334,14 @@ export default function AuthModal() {
       setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
       setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
     }, 0)
-  }, [content.guests])
+  }, [content.guests, content.loaded])
+
+  useEffect(() => {
+    if (user && user !== welcomeShownRef.current) {
+      welcomeShownRef.current = user
+      setSignedIn(user)
+    }
+  }, [user])
 
   useEffect(() => {
     if (!awaitingSmsCode) return
@@ -411,7 +423,7 @@ export default function AuthModal() {
           style={{ overscrollBehavior: 'contain' }}
         >
           <div
-            className="min-h-screen md:min-h-0 w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 overflow-y-auto"
+            className="min-h-screen md:min-h-0 w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 overflow-y-auto pb-16 md:pb-0"
             onClick={(e) => e.stopPropagation()}
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
@@ -782,6 +794,30 @@ export default function AuthModal() {
                       No, that's not me
                     </button>
                   </div>
+                </div>
+              )}
+
+              {/* Welcome message after sign-in */}
+              {signedIn && (
+                <div className="text-center py-8 space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto">
+                    <svg className="w-7 h-7 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  </div>
+                  <p className="font-heading text-2xl text-charcoal">
+                    Welcome, {signedIn.firstName}!
+                  </p>
+                  <p className="text-charcoal-light/60 text-sm">
+                    {guestLabel(signedIn, sideName)}
+                  </p>
+                  <button
+                    onClick={() => { setSignedIn(null); setShowAuthModal(false) }}
+                    className="inline-flex items-center gap-2 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm transition-colors font-medium mt-2"
+                  >
+                    Continue to Site
+                  </button>
                 </div>
               )}
 

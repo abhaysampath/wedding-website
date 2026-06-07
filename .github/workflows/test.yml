@@ -1,10 +1,25 @@
-name: Test
+name: CI/CD
 
 on:
   push:
     branches: [dev, main]
   pull_request:
     branches: [main]
+
+env:
+  # Required for vite build (client-side)
+  VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+  VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+  VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+  VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+  VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+  VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
+  VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+  # Required for server-side API (used at runtime, not build time)
+  GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+  GOOGLE_SERVICE_EMAIL: ${{ secrets.GOOGLE_SERVICE_EMAIL }}
+  GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+  RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
 
 jobs:
   test:
@@ -16,4 +31,53 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+
+      # Step 1: Unit tests
+      - name: Run unit tests
+        run: npm test
+
+      # Step 2: Build (also validates env vars via verify-env.mjs)
+      - name: Build production bundle
+        run: npm run build
+
+  deploy:
+    # Only deploy on push to main (not PRs)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # Step 3: Build for deploy
+      - name: Build production bundle
+        run: npm run build
+
+      # Step 4: Install Puppeteer for E2E tests
+      - name: Install Puppeteer
+        run: npm install --no-save puppeteer
+
+      # Step 5: Start preview server for E2E tests
+      - name: Start preview server
+        run: |
+          npx vite preview --port 3002 &
+          sleep 3
+          echo "Preview server started on port 3002"
+
+      # Step 6: Run E2E tests against preview server
+      - name: Run E2E tests
+        run: node scripts/deploy-e2e.mjs http://localhost:3002
+
+      # Step 7: Deploy to Vercel production
+      - name: Deploy to Vercel
+        run: npx vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Step 8: Smoke test against production
+      - name: E2E smoke test on production
+        run: |
+          sleep 10  # Wait for Vercel to propagate
+          node scripts/deploy-e2e.mjs https://abhayandrebecca.com

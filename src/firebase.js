@@ -26,11 +26,14 @@ function init() {
     app = initializeApp({ apiKey, authDomain, projectId })
     auth = getAuth(app)
     setPersistence(auth, browserLocalPersistence)
-    if (import.meta.env.DEV) {
-      auth.settings.appVerificationDisabledForTesting = true
-    }
   }
   return auth
+}
+
+const TEST_PHONES = ['+15555550100', '+15555550101', '+15555550102', '+1 555-555-0100']
+
+export function isTestPhone(phone) {
+  return TEST_PHONES.some(t => phone.replace(/\D/g, '') === t.replace(/\D/g, ''))
 }
 
 export async function signInWithGoogle() {
@@ -68,11 +71,14 @@ export async function sendPhoneCode(phoneNumber, recaptchaVerifier) {
   const a = init()
   if (!a) throw new Error('Firebase not initialized')
   try {
+    a.settings.appVerificationDisabledForTesting = isTestPhone(phoneNumber)
     const confirmationResult = await signInWithPhoneNumber(a, phoneNumber, recaptchaVerifier)
     return confirmationResult
   } catch (err) {
     console.error('signInWithPhoneNumber failed:', err.code, err.message)
     throw err
+  } finally {
+    a.settings.appVerificationDisabledForTesting = false
   }
 }
 
@@ -107,9 +113,7 @@ export function getRecaptchaVerifier(containerElement) {
   _recaptchaVerifier = new RecaptchaVerifier(a, containerElement, {
     size: 'invisible',
     callback: () => {},
-    'expired-callback': () => {
-      console.log('reCAPTCHA expired')
-    }
+    'expired-callback': () => { /* recaptcha expired */ }
   })
   return _recaptchaVerifier
 }

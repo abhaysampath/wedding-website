@@ -34,8 +34,6 @@ export async function sendVerificationCode(email, name = '') {
       console.error('EmailJS error:', error)
       throw error
     }
-  } else {
-
   }
 }
 

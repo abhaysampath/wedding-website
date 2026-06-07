@@ -5,6 +5,7 @@ import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import OurStory from './components/OurStory'
+import AuthModal from './components/AuthModal'
 import config from './config'
 
 const Gallery = lazy(() => import('./components/Gallery'))
@@ -14,7 +15,6 @@ const Registry = lazy(() => import('./components/Registry'))
 const FAQ = lazy(() => import('./components/FAQ'))
 const ContactSection = lazy(() => import('./components/ContactSection'))
 const Footer = lazy(() => import('./components/Footer'))
-const AuthModal = lazy(() => import('./components/AuthModal'))
 const DebugSheet = lazy(() => import('./components/DebugSheet'))
 
 function ScrollProgress() {
@@ -275,9 +275,7 @@ function PageContent() {
       <Suspense fallback={null}>
         <ContactSection />
       </Suspense>
-      <Suspense fallback={<AuthSkeleton />}>
-        <AuthModal />
-      </Suspense>
+      <AuthModal />
       {config.debug && (
         <Suspense fallback={<div className="fixed bottom-4 right-4 z-50 w-48 h-24 bg-charcoal/90 rounded border border-green-400/30 animate-pulse" />}>
           <DebugSheet />

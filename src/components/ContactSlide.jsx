@@ -112,7 +112,6 @@ export default function ContactSlide() {
         setStatus('error')
       }
     } else {
-      console.log('Contact form submission:', { reason: reasonLabel, name, email, message })
       setStatus('sent')
       setMessage('')
     }
