@@ -1,6 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react'
 import { MotionConfig } from 'framer-motion'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import Navbar from './components/Navbar'
@@ -298,6 +299,7 @@ export default function App() {
       <AuthProvider>
         <Page />
         <SpeedInsights />
+        <Analytics />
       </AuthProvider>
     </MotionConfig>
   )
