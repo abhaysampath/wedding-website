@@ -351,8 +351,9 @@ export default function AuthModal() {
       if (selectedMatch) {
         await updateContact({ phone: guestPhone, email: guestEmail })
         signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
+      } else {
+        setShowAuthModal(false)
       }
-      setShowAuthModal(false)
     } catch (err) {
       setFirebaseError(err.message || 'Failed to complete sign in')
     } finally {
@@ -583,10 +584,10 @@ export default function AuthModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="bg-cream rounded-sm w-full max-w-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-             <div className="p-8 md:p-10 relative">
+             className="bg-cream rounded-sm w-full max-w-lg shadow-2xl"
+             onClick={(e) => e.stopPropagation()}
+           >
+              <div className="p-8 md:p-10 relative max-h-[85vh] overflow-y-auto">
                <div ref={recaptchaContainerRef} />
               <button
                 onClick={handleCancel}
