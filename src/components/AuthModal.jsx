@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Drawer } from 'vaul'
 import { useAuth } from '../context/useAuth'
 import ContactForm from './ContactForm'
 import {
@@ -350,12 +349,19 @@ export default function AuthModal() {
   }, [showAuthModal])
 
   return (
-    <Drawer.Root open={showAuthModal} onOpenChange={(open) => { if (!open) handleCancel() }}>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-charcoal/60 backdrop-blur-sm z-50" onClick={handleCancel} />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-cream rounded-t-xl md:rounded-sm md:max-w-lg md:mx-auto md:top-[10vh] md:bottom-auto md:shadow-2xl max-h-[85vh] md:max-h-none overflow-y-auto outline-none" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="p-4 pb-6 md:p-10 relative">
-            <Drawer.Handle className="mx-auto w-10 h-1.5 bg-charcoal-light/20 rounded-full mb-4 md:hidden" />
+    <>
+      {showAuthModal && (
+        <div
+          className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm overflow-y-auto md:flex md:items-start md:justify-center md:pt-[10vh] overscroll-contain"
+          onClick={handleCancel}
+          style={{ overscrollBehavior: 'contain' }}
+        >
+          <div
+            className="min-h-screen md:min-h-0 w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="p-4 pb-6 md:p-10 relative">
               <div ref={recaptchaContainerRef} />
               <button
                 onClick={handleCancel}
@@ -721,8 +727,9 @@ export default function AuthModal() {
                 />
               )}
             </div>
-          </Drawer.Content>
-        </Drawer.Portal>
-      </Drawer.Root>
-    )
-  }
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
