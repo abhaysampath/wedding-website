@@ -217,6 +217,7 @@ export default function Gallery() {
         >
           <div className="flex gap-4 md:gap-6">
             {visibleImages.map((img, i) => {
+              if (!img) return null
               const scale = TIER_SCALE[img.tier] || 0.66
               const wMob = `calc(${BASE_W.mobile}px * ${scale})`
               const hMob = `calc(${BASE_H.mobile}px * ${scale})`
