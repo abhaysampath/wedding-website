@@ -87,7 +87,7 @@ async function main() {
 
     // Test 2: Gallery heading exists (now lazy-loaded after scroll)
     await page.evaluate(() => window.scrollTo(0, 0))
-    await page.waitForTimeout(500)
+    await new Promise(r => setTimeout(r, 500))
     const heading = await page.$eval('h2', els =>
       Array.from(els).find(el => el.textContent === 'Gallery')
     ).catch(() => null)
@@ -107,7 +107,7 @@ async function main() {
         const searchTrigger = document.querySelector('[cursor-text], [class*="cursor-text"]')?.closest('div')
         if (searchTrigger) searchTrigger.click()
       })
-      await page.waitForTimeout(500)
+      await new Promise(r => setTimeout(r, 500))
       const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
       assert('Auth modal opens on click', !!modal)
     } else {
