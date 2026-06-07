@@ -5,6 +5,11 @@ import { useAuth } from '../context/useAuth'
 import weddings from '../data/weddings.json'
 import WeddingSwitcher from './WeddingSwitcher'
 
+function mapsUrl(address) {
+  if (!address) return '#'
+  return `https://www.google.com/maps?q=${encodeURIComponent(address)}`
+}
+
 export default function TravelAccommodations() {
   const { activeWedding } = useAuth()
   const w = weddings[activeWedding]
@@ -46,7 +51,16 @@ export default function TravelAccommodations() {
                 <div className="w-8 h-[1px] bg-gold mb-4" />
                 <h3 className="font-heading text-xl text-charcoal mb-2">{hotel.name}</h3>
                 {hotel.distance && <p className="text-charcoal-light/60 text-sm mb-1">{hotel.distance}</p>}
-                {hotel.address && <p className="text-charcoal-light/50 text-xs mb-2">{hotel.address}</p>}
+                {hotel.address && (
+                  <a
+                    href={mapsUrl(hotel.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-charcoal-light/50 text-xs block mb-2 hover:text-gold-dark transition-colors underline underline-offset-2"
+                  >
+                    {hotel.address}
+                  </a>
+                )}
                 {hotel.phone && <p className="text-gold-dark text-xs">{hotel.phone}</p>}
               </motion.div>
             ))}

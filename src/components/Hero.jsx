@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import config from '../config'
 
@@ -9,6 +9,12 @@ export default function Hero() {
   const timerRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [manual, setManual] = useState(false)
+
+  const { scrollY } = useScroll()
+  const imageY = useTransform(scrollY, [0, 600], [0, 80])
+  const overlayOpacity = useTransform(scrollY, [0, 400], [1, 0.7])
+  const textY = useTransform(scrollY, [0, 400], [0, 30])
+  const textOpacity = useTransform(scrollY, [0, 300], [1, 0.6])
 
   const heroConfig = config.images.hero
   const baseSlides = heroConfig.slides.map(s => ({
@@ -60,7 +66,7 @@ export default function Hero() {
       ref={containerRef}
       className="relative min-h-screen flex flex-col items-center overflow-hidden select-none"
     >
-      <div className="absolute inset-0 bg-charcoal">
+      <motion.div className="absolute inset-0 bg-charcoal" style={{ y: imageY }}>
         <AnimatePresence mode="wait">
           <motion.img
             key={currentIndex}
@@ -74,8 +80,11 @@ export default function Hero() {
             draggable={false}
           />
         </AnimatePresence>
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/30 to-charcoal/60 pointer-events-none" />
+      </motion.div>
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/30 to-charcoal/60 pointer-events-none"
+        style={{ opacity: overlayOpacity }}
+      />
 
       {allSlides.length > 1 && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
@@ -110,7 +119,10 @@ export default function Hero() {
         </div>
       )}
 
-      <div className="relative z-10 flex flex-col items-center w-full px-6 pt-20 md:pt-28 pointer-events-none">
+      <motion.div
+        style={{ y: textY, opacity: textOpacity }}
+        className="relative z-10 flex flex-col items-center w-full px-6 pt-20 md:pt-28 pointer-events-none"
+      >
           <div className="flex flex-col items-center pointer-events-auto">
             <motion.p
               initial={{ opacity: 0, y: 30 }}
@@ -133,7 +145,7 @@ export default function Hero() {
               Rebecca
             </motion.button>
           </div>
-        </div>
+        </motion.div>
 
       {!user && (
         <motion.div

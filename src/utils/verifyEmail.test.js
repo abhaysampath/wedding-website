@@ -50,7 +50,7 @@ describe('generateCode', () => {
 describe('verifyCode', () => {
   it('returns true after sendVerificationCode sets the code', async () => {
     await sendVerificationCode('test@example.com', 'Test User')
-    const code = globalThis.window.__emailCode
+    const code = globalThis.sessionStorage.getItem('pending_email_code')
     expect(verifyCode(code)).toBe(true)
   })
 
@@ -68,7 +68,7 @@ describe('verifyCode', () => {
 
   it('clears the pending code after successful verification', async () => {
     await sendVerificationCode('test4@example.com', 'Test User 4')
-    const code = globalThis.window.__emailCode
+    const code = globalThis.sessionStorage.getItem('pending_email_code')
     verifyCode(code)
     expect(verifyCode(code)).toBe(false)
   })

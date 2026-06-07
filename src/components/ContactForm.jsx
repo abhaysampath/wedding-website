@@ -143,26 +143,38 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Mailing Address
           </label>
-          <textarea
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            rows={2}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-            placeholder="123 Main St, City, State ZIP"
-          />
+          <div className="relative">
+            <textarea
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={2}
+              maxLength={500}
+              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+              placeholder="123 Main St, City, State ZIP"
+            />
+            <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+              {address.length}/500
+            </span>
+          </div>
         </div>
 
         <div>
           <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Dietary Preferences
           </label>
-          <textarea
-            value={dietaryPreferences}
-            onChange={(e) => setDietaryPreferences(e.target.value)}
-            rows={2}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-            placeholder="Any dietary restrictions or preferences"
-          />
+          <div className="relative">
+            <textarea
+              value={dietaryPreferences}
+              onChange={(e) => setDietaryPreferences(e.target.value)}
+              rows={2}
+              maxLength={500}
+              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+              placeholder="Any dietary restrictions or preferences"
+            />
+            <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+              {dietaryPreferences.length}/500
+            </span>
+          </div>
         </div>
 
         {saveStatus === 'saved' && (

@@ -45,6 +45,10 @@ export default function Gallery() {
   const overlayShown = useRef(false)
   const [eagerReady, setEagerReady] = useState(false)
   const preloaded = useRef(new Set())
+  const lightboxRef = useRef(null)
+  const touchStartX = useRef(null)
+  const [zoomed, setZoomed] = useState(false)
+  const lastTap = useRef(0)
 
   function preload(images) {
     images.forEach(img => {
@@ -152,8 +156,32 @@ export default function Gallery() {
       if (e.key === 'ArrowRight') goNext()
       if (e.key === 'ArrowLeft') goPrev()
     }
+    const focusables = () => Array.from(lightboxRef.current?.querySelectorAll('button, [tabindex]:not([tabindex="-1"])') || [])
+    const tabHandler = (e) => {
+      if (e.key !== 'Tab') return
+      const els = focusables()
+      if (els.length === 0) return
+      const first = els[0], last = els[els.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
+    const handleTouchEnd = (e) => {
+      if (touchStartX.current === null) return
+      const dx = e.changedTouches[0].clientX - touchStartX.current
+      touchStartX.current = null
+      if (Math.abs(dx) > 50) { dx > 0 ? goPrev() : goNext() }
+    }
     window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    window.addEventListener('keydown', tabHandler)
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+    window.addEventListener('touchend', handleTouchEnd, { passive: true })
+    return () => {
+      window.removeEventListener('keydown', handler)
+      window.removeEventListener('keydown', tabHandler)
+      window.removeEventListener('touchstart', handleTouchStart)
+      window.removeEventListener('touchend', handleTouchEnd)
+    }
   }, [expanded, goNext, goPrev])
 
   return (
@@ -237,6 +265,7 @@ export default function Gallery() {
               onClick={() => setExpanded(null)}
             >
               <motion.div
+                ref={lightboxRef}
                 initial={{ scale: 0.92, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.92, opacity: 0 }}
@@ -277,8 +306,15 @@ export default function Gallery() {
                 <img
                   src={allImages[expanded].jpg}
                   alt={allImages[expanded].alt}
-                  className="w-full h-auto max-h-[85vh] object-contain rounded-sm select-none"
+                  className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
+                    zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
+                  }`}
                   draggable={false}
+                  onClick={() => {
+                    const now = Date.now()
+                    if (now - lastTap.current < 300) { setZoomed(z => !z); lastTap.current = 0 }
+                    else lastTap.current = now
+                  }}
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
 
