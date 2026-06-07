@@ -18,7 +18,6 @@ const config = {
   },
   sheets: {
     mode: 'api',
-    guestsCsv: null,
   },
   firebase: {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',

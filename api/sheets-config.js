@@ -15,6 +15,7 @@ const SHEET_CONFIG = {
       address: 'Mailing Address',
       dietaryPreferences: 'Dietary Preferences',
       lastLogin: 'LastLogin',
+      lastUpdated: 'LastUpdated',
     },
   },
   faq: {

@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext'
 import config from '../config'
 import { signInWithGoogle, signInWithFacebook } from '../firebase'
 import sampleGuests from '../data/guests'
+import { eastTime } from '../utils/time'
 
 const { sheets } = config
 
@@ -133,7 +134,7 @@ export function AuthProvider({ children }) {
 
   const processSignIn = useCallback((guest, fbUser) => {
     setFirebaseError(null)
-    const now = new Date().toISOString()
+    const now = eastTime()
     const payload = {
       id: guest.id,
       firstName: guest.firstName,
@@ -153,7 +154,7 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now })
+    writeToSheet(guest.id, { lastLogin: now, lastUpdated: now })
     updateUrlSlug(getGuestSlug(guest))
 
     setAuthMode('settings')
@@ -179,7 +180,7 @@ export function AuthProvider({ children }) {
 
   const signInAsGuest = useCallback((guest, overrides = {}) => {
     setFirebaseError(null)
-    const now = new Date().toISOString()
+    const now = eastTime()
     const payload = {
       id: guest.id,
       firstName: guest.firstName,
@@ -199,7 +200,7 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now })
+    writeToSheet(guest.id, { lastLogin: now, lastUpdated: now })
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
@@ -250,9 +251,9 @@ export function AuthProvider({ children }) {
 
   const updateContact = useCallback(async (data) => {
     if (!user) return
-    const now = new Date().toISOString()
+    const now = eastTime()
     const cleanedPhone = (data.phone || '').replace(/\D/g, '')
-    const sheetData = { lastLogin: now }
+    const sheetData = { lastLogin: now, lastUpdated: now }
     if (data.phone !== undefined) sheetData.phone = cleanedPhone
     if (data.email !== undefined) sheetData.email = data.email
     if (data.address !== undefined) sheetData.address = data.address
@@ -266,11 +267,11 @@ export function AuthProvider({ children }) {
 
   const recordLogin = useCallback(() => {
     if (!user) return
-    const now = new Date().toISOString()
+    const now = eastTime()
     const updated = { ...user, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
-    writeToSheet(user.id, { lastLogin: now })
+    writeToSheet(user.id, { lastLogin: now, lastUpdated: now })
   }, [user])
 
   const signOut = useCallback(() => {

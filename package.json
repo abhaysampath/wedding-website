@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "sync-guests": "node scripts/sync-guests.js",
     "dev": "vite",
     "dev:api": "node --env-file=.env scripts/dev-server.mjs",
     "sync": "node --env-file=.env scripts/sync-guests.mjs",
