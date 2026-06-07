@@ -37,7 +37,7 @@ function AccordionItem({ item, isOpen, onClick }) {
 }
 
 export default function FAQ() {
-  const { user, content } = useAuth()
+  const { user, content, activeWedding } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
   const [openIndex, setOpenIndex] = useState(null)
@@ -46,7 +46,9 @@ export default function FAQ() {
   const faqs = (content.faq || []).filter((f) => {
     if (!f.q || !f.a) return false
     if (f.wedding === 'both') return true
-    return weddings.includes(f.wedding)
+    if (!weddings.includes(f.wedding)) return false
+    if (weddings.length > 1) return f.wedding === activeWedding
+    return true
   })
 
   return (
