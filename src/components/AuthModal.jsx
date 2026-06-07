@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Drawer } from 'vaul'
 import { useAuth } from '../context/useAuth'
 import ContactForm from './ContactForm'
 import {
@@ -350,30 +350,16 @@ export default function AuthModal() {
   }, [showAuthModal])
 
   return (
-    <AnimatePresence>
-      {showAuthModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end md:items-start md:justify-center md:pt-[10vh] bg-charcoal/60 backdrop-blur-sm overscroll-contain"
-          onClick={handleCancel}
-          style={{ overscrollBehavior: 'contain' }}
-        >
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="bg-cream w-full max-w-lg shadow-2xl rounded-t-xl md:rounded-sm max-h-[90vh] md:max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-            style={{ WebkitOverflowScrolling: 'touch' }}
-          >
-             <div className="p-6 pb-8 md:p-10 relative">
+    <Drawer.Root open={showAuthModal} onOpenChange={(open) => { if (!open) handleCancel() }}>
+      <Drawer.Portal>
+        <Drawer.Overlay className="fixed inset-0 bg-charcoal/60 backdrop-blur-sm z-50" onClick={handleCancel} />
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-cream rounded-t-xl md:rounded-sm md:max-w-lg md:mx-auto md:top-[10vh] md:bottom-auto md:shadow-2xl max-h-[85vh] md:max-h-none overflow-y-auto outline-none" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="p-4 pb-6 md:p-10 relative">
+            <Drawer.Handle className="mx-auto w-10 h-1.5 bg-charcoal-light/20 rounded-full mb-4 md:hidden" />
               <div ref={recaptchaContainerRef} />
               <button
                 onClick={handleCancel}
-                className="absolute top-8 md:top-10 right-8 md:right-6 w-[42px] h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+                className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                   <path d="M6 18L18 6M6 6l12 12" />
@@ -735,9 +721,8 @@ export default function AuthModal() {
                 />
               )}
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
+          </Drawer.Content>
+        </Drawer.Portal>
+      </Drawer.Root>
+    )
+  }
