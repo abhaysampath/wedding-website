@@ -5,11 +5,32 @@
     "venue": "New York Botanical Garden",
     "address": "2900 Southern Blvd, Bronx, NY 10458",
     "timeline": [
-      { "time": "6:30 PM", "label": "Ceremony", "description": "Join us under the arbor as we exchange our vows" },
-      { "time": "7:00 PM", "label": "Cocktail Hour", "description": "Hors d'oeuvres and drinks in the garden courtyard" },
-      { "time": "8:00 PM", "label": "Reception", "description": "Dinner, toasts, and dancing under the stars" }
+      {
+        "time": "6:30 PM",
+        "label": "Ceremony",
+        "description": "Join us under the arbor as we exchange our vows",
+        "details": "The ceremony will take place in the Rose Garden, weather permitting. In case of rain, we'll move to the Conservatory (indoor). Please arrive by 6:15 PM to find your seat. Phones are welcome but we ask that you stay seated and refrain from blocking the aisle.",
+        "location": "Rose Garden, NY Botanical Garden",
+        "duration": "Approx. 30 minutes"
+      },
+      {
+        "time": "7:00 PM",
+        "label": "Cocktail Hour",
+        "description": "Hors d'oeuvres and drinks in the garden courtyard",
+        "details": "Enjoy passed hors d'oeuvres featuring seasonal ingredients from the garden's own farm. A selection of wine, beer, and our signature cocktail will be served. This is a great time to explore the garden courtyard and take photos with the golden hour light.",
+        "location": "Garden Courtyard",
+        "duration": "Approx. 1 hour"
+      },
+      {
+        "time": "8:00 PM",
+        "label": "Reception",
+        "description": "Dinner, toasts, and dancing under the stars",
+        "details": "A plated dinner will be served followed by heartwarming toasts from our closest family and friends. After dinner, the dance floor opens! We've curated a playlist spanning classics, Motown, and modern hits. The bar will remain open throughout. Late-night snacks will appear around 10 PM.",
+        "location": "Grand Ballroom",
+        "duration": "Until midnight"
+      }
     ],
-    "dressCode": "To be announced",
+    "dressCode": "Formal / Black-tie optional — garden party attire welcome, just no white please",
     "hotels": [
       { "name": "The Botanic Hotel", "distance": "0.5 miles from venue", "address": "123 Garden Lane, Bronx, NY", "phone": "(555) 123-4567" },
       { "name": "Bronx Park Inn", "distance": "1.2 miles from venue", "address": "456 Park Ave, Bronx, NY", "phone": "(555) 987-6543" },
@@ -27,10 +48,24 @@
     "venue": "TBD",
     "address": "Details coming soon",
     "timeline": [
-      { "time": "TBD", "label": "Ceremony", "description": "Traditional Indian wedding ceremony" },
-      { "time": "TBD", "label": "Reception", "description": "Dinner and celebration" }
+      {
+        "time": "TBD",
+        "label": "Ceremony",
+        "description": "Traditional Indian wedding ceremony",
+        "details": "Details about the Indian wedding ceremony will be shared as the date approaches. The ceremony will follow traditional Hindu customs including the jaimala (garland exchange), saptapadi (seven steps), and sindoor.",
+        "location": "TBD",
+        "duration": "Approx. 2 hours"
+      },
+      {
+        "time": "TBD",
+        "label": "Reception",
+        "description": "Dinner and celebration",
+        "details": "A grand dinner reception with live music, dancing, and a feast of traditional Indian cuisine. More details to come.",
+        "location": "TBD",
+        "duration": "Approx. 4 hours"
+      }
     ],
-    "dressCode": "Traditional Indian attire encouraged",
+    "dressCode": "Traditional Indian attire encouraged — sarees, lehengas, and kurta-pajamas welcome",
     "hotels": [
       { "name": "Details coming soon", "distance": "", "address": "", "phone": "" }
     ],
