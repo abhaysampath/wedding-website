@@ -1,0 +1,23 @@
+{
+  "name": "Rebecca & Abhay | Wedding",
+  "short_name": "Our Wedding",
+  "description": "Rebecca and Abhay's Wedding Website",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FEFCF3",
+  "theme_color": "#C9A96E",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "800x800",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
