@@ -1,4 +1,4 @@
-const IMAGE_CDN = 'https://raw.githubusercontent.com/abhaysampath/wedding-website/main/public'
+const IMAGE_CDN = 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public'
 
 const config = {
   debug: false,
