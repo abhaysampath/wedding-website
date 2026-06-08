@@ -6,7 +6,34 @@
     "address": "2900 Southern Blvd, Bronx, NY 10458",
     "timeline": [
       {
-        "time": "6:30 PM",
+        "time": "2:00pm",
+        "label": "Vendor Access to Venue",
+        "description": "Vendors may enter the venue for setup and preparation",
+        "details": "All vendors (catering, florals, AV, coordination) may arrive for setup. Please check in at the staff entrance on Southern Blvd. Load-in through the service corridor. Event coordination team will be onsite to direct you.",
+        "location": "NY Botanical Garden — Service Entrance",
+        "duration": "Setup window: 2:00pm – 6:00pm",
+        "roles": ["bride", "groom", "close_family", "vendor"],
+        "vendorHighlight": true
+      },
+      {
+        "time": "3:00pm",
+        "label": "Couple Access to Venue for Photography",
+        "description": "Bride, groom, and immediate family arrive for pre-ceremony photos",
+        "details": "The couple and immediate family have access to the venue for private photography before guest arrival. First look and family formals will be captured in the Rose Garden and Conservatory. Please arrive promptly at 3:00pm — the photographer's schedule is tight.",
+        "location": "Rose Garden & Conservatory",
+        "duration": "3:00pm – 5:30pm",
+        "roles": ["bride", "groom", "close_family"]
+      },
+      {
+        "time": "6:00pm – 6:30pm",
+        "label": "Guest Arrival",
+        "description": "Guests arrive and are seated for the ceremony",
+        "details": "Please arrive and make your way to the Rose Garden for the ceremony. Ushers will guide you to your seat. This is a great time to sign the guest book and find your seat before the ceremony begins at 6:30pm sharp.",
+        "location": "Rose Garden, NY Botanical Garden",
+        "duration": "30 minutes"
+      },
+      {
+        "time": "6:30pm – 7:00pm",
         "label": "Ceremony",
         "description": "Join us under the arbor as we exchange our vows",
         "details": "The ceremony will take place in the Rose Garden, weather permitting. In case of rain, we'll move to the Conservatory (indoor). Please arrive by 6:15 PM to find your seat. Phones are welcome but we ask that you stay seated and refrain from blocking the aisle.",
@@ -14,7 +41,7 @@
         "duration": "Approx. 30 minutes"
       },
       {
-        "time": "7:00 PM",
+        "time": "7:00pm – 8:00pm",
         "label": "Cocktail Hour",
         "description": "Hors d'oeuvres and drinks in the garden courtyard",
         "details": "Enjoy passed hors d'oeuvres featuring seasonal ingredients from the garden's own farm. A selection of wine, beer, and our signature cocktail will be served. This is a great time to explore the garden courtyard and take photos with the golden hour light.",
@@ -22,12 +49,22 @@
         "duration": "Approx. 1 hour"
       },
       {
-        "time": "8:00 PM",
+        "time": "8:00pm – 12:00am",
         "label": "Reception",
         "description": "Dinner, toasts, and dancing under the stars",
         "details": "A plated dinner will be served followed by heartwarming toasts from our closest family and friends. After dinner, the dance floor opens! We've curated a playlist spanning classics, Motown, and modern hits. The bar will remain open throughout. Late-night snacks will appear around 10 PM.",
         "location": "Grand Ballroom",
         "duration": "Until midnight"
+      },
+      {
+        "time": "(Monday) 12:00am – 1:00am",
+        "label": "Vendor Load Out",
+        "description": "Vendors may return for teardown and equipment pickup",
+        "details": "Vendors may enter for teardown and load-out after the reception concludes. All equipment, decor, and rentals must be removed by 1:00am. Please check out with the coordination team before departing.",
+        "location": "NY Botanical Garden — Service Entrance",
+        "duration": "1 hour",
+        "roles": ["bride", "groom", "close_family", "vendor"],
+        "vendorHighlight": true
       }
     ],
     "dressCode": "Formal / Black-tie optional — garden party attire welcome, just no white please",

@@ -37,7 +37,8 @@ function ChevronIcon({ open }) {
 }
 
 export default function EventDetails() {
-  const { activeWedding } = useAuth()
+  const { activeWedding, user } = useAuth()
+  const userRole = user?.role || null
   const w = weddings[activeWedding]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
@@ -46,6 +47,12 @@ export default function EventDetails() {
   const toggleEvent = (idx) => {
     setExpanded(prev => prev === idx ? null : idx)
   }
+
+  const filteredTimeline = w.timeline.filter(event => {
+    if (!event.roles) return true
+    if (!userRole) return false
+    return event.roles.includes(userRole)
+  })
 
   return (
     <section id="details" className="py-20 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
@@ -78,13 +85,14 @@ export default function EventDetails() {
           </div>
         </motion.div>
 
-        {w.timeline.length > 0 && (
+        {filteredTimeline.length > 0 && (
           <div className="relative">
             <div className="absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-gold/30 via-gold/10 to-transparent -translate-x-1/2" />
 
             <div className="space-y-8 md:space-y-12">
-              {w.timeline.map((event, i) => {
+              {filteredTimeline.map((event, i) => {
                 const isExpanded = expanded === i
+                const isVendor = userRole === 'vendor' && event.vendorHighlight
                 return (
                   <motion.div
                     key={event.label}
@@ -93,7 +101,7 @@ export default function EventDetails() {
                     transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
                     className={`relative flex flex-col md:flex-row items-start gap-5 md:gap-0 ${
                       i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                    }`}
+                    } ${isVendor ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-gold/20' : ''}`}
                   >
                     <div
                       className={`flex-1 pl-16 md:pl-0 cursor-pointer ${
@@ -110,6 +118,11 @@ export default function EventDetails() {
                       <div className={`inline-block w-full ${i % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}>
                         <span className="inline-flex items-center gap-2 bg-gold/10 text-gold-dark text-xs font-medium tracking-wider uppercase px-3 py-1.5 rounded-sm mb-3">
                           {event.time}
+                          {isVendor && (
+                            <span className="text-[9px] bg-gold/20 text-gold-dark px-1.5 py-0.5 rounded-sm -mr-1">
+                              Vendor
+                            </span>
+                          )}
                         </span>
                         <h3 className="font-heading text-xl md:text-2xl text-charcoal mt-1 mb-2">
                           {event.label}
