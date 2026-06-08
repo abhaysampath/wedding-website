@@ -31,7 +31,7 @@ function LogoButton({ logoClicked, onClick }) {
             transition={{ duration: 0.2 }}
             className="inline-flex items-center justify-center w-9 h-9 rounded-sm border currentColor border-current/30 text-sm"
           >
-            R&A
+            <img src="/Logo-Color/transparent-logo.png" alt="R&A" className="w-full h-full object-contain p-0.5" />
           </motion.span>
         ) : (
           <motion.span
