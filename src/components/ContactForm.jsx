@@ -1,13 +1,35 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useAuth } from '../context/useAuth'
 import { stripPhone, guestLabel } from '../utils/guest'
 
 export default function ContactForm({ user, authMode, updateContact, sideName }) {
-  const { setShowAuthModal } = useAuth()
-  const [phone, setPhone] = useState(stripPhone(user?.phone))
-  const [email, setEmail] = useState(user?.email || '')
+  const { setShowAuthModal, content } = useAuth()
+
+  const guestFromContent = useMemo(() => {
+    if (!user?.id || !content?.guests?.length) return null
+    return content.guests.find(g => g.id === user.id) || null
+  }, [user?.id, content?.guests])
+
+  const [phone, setPhone] = useState(() => {
+    return stripPhone(user?.phone || guestFromContent?.phone || '')
+  })
+  const [email, setEmail] = useState(() => {
+    return user?.email || guestFromContent?.email || ''
+  })
   const [address, setAddress] = useState(user?.address || '')
   const [dietaryPreferences, setDietaryPreferences] = useState(user?.dietaryPreferences || '')
+
+  useEffect(() => {
+    if (!phone && guestFromContent?.phone) {
+      setPhone(stripPhone(guestFromContent.phone))
+    }
+    if (!email && guestFromContent?.email) {
+      setEmail(guestFromContent.email)
+    }
+  }, [guestFromContent?.phone, guestFromContent?.email])
+
+  const originalPhone = stripPhone(user?.phone || guestFromContent?.phone || '')
+  const originalEmail = user?.email || guestFromContent?.email || ''
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [emailFocused, setEmailFocused] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -85,7 +107,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <div className="relative">
             <input
               type="tel"
-              value={!phoneFocused && phone === stripPhone(user?.phone) ? `(${phone.slice(0,3)}) ${phone.slice(3,6)}-${phone.slice(6,10)}` : phone}
+              value={!phoneFocused && phone === originalPhone ? `(${phone.slice(0,3)}) ${phone.slice(3,6)}-${phone.slice(6,10)}` : phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               onFocus={() => setPhoneFocused(true)}
               onBlur={() => setPhoneFocused(false)}
@@ -110,7 +132,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <div className="relative">
             <input
               type="email"
-              value={!emailFocused && email === (user?.email || '') ? email.replace(/(.)(.*)(.@.*)/, (_, a, m, s) => a + '*'.repeat(m.length) + s) : email}
+              value={!emailFocused && email === originalEmail ? email.replace(/(.)(.*)(.@.*)/, (_, a, m, s) => a + '*'.repeat(m.length) + s) : email}
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setEmailFocused(true)}
               onBlur={() => setEmailFocused(false)}

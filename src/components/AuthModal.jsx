@@ -840,7 +840,7 @@ export default function AuthModal() {
                   </div>
                 }>
                   <ContactForm
-                    key={`contact-${user.id}`}
+                    key={`contact-${user.id}-${content.loaded}`}
                     user={user}
                     authMode={authMode}
                     updateContact={updateContact}
