@@ -71,6 +71,9 @@ export default async function handler(req, res) {
     if (data.lastUpdated !== undefined && colMap.lastUpdated !== undefined) {
       updates.push({ range: `${tabName}!${colLetter(colMap.lastUpdated)}${sheetRow}`, values: [[data.lastUpdated]] })
     }
+    if (data.loginFailed !== undefined && colMap.loginFailed !== undefined) {
+      updates.push({ range: `${tabName}!${colLetter(colMap.loginFailed)}${sheetRow}`, values: [[data.loginFailed]] })
+    }
 
     if (updates.length === 0) {
       return res.status(200).json({ updated: 0 })

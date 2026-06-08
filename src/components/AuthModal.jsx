@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
+import { track } from '@vercel/analytics'
 import { useAuth } from '../context/useAuth'
 
 const ContactForm = lazy(() => import('./ContactForm'))
@@ -37,7 +38,7 @@ export default function AuthModal() {
     authMode, setAuthMode,
     user, config, firebaseLoading, firebaseError, setFirebaseError,
     handleFirebaseSignIn, signInAsGuest, updateContact, recordLogin,
-    content,
+    recordLoginAttempt, content,
   } = useAuth()
 
    const [nameInput, setNameInput] = useState('')
@@ -109,8 +110,14 @@ export default function AuthModal() {
 
 
 
-   const handleEmailConfirm = useCallback(async () => {
+   const handleOAuthSignIn = useCallback(async (provider) => {
+      if (selectedMatch) recordLoginAttempt(selectedMatch.id)
+      return handleFirebaseSignIn(provider)
+    }, [selectedMatch, recordLoginAttempt, handleFirebaseSignIn])
+
+    const handleEmailConfirm = useCallback(async () => {
       if (saving || !guestEmail || !selectedMatch) return
+      if (selectedMatch) recordLoginAttempt(selectedMatch.id)
       setSaving(true)
       setFirebaseError(null)
       try {
@@ -120,10 +127,11 @@ export default function AuthModal() {
         sessionStorage.setItem('email_sent_at', String(Date.now()))
       } catch (err) {
         setFirebaseError(err.message || 'Failed to send verification code')
+        track('signin_failed', { method: 'email', reason: err.message, guest: selectedMatch?.firstName, guestId: selectedMatch?.id })
       } finally {
         setSaving(false)
       }
-    }, [guestEmail, selectedMatch, saving, setFirebaseError])
+    }, [guestEmail, selectedMatch, saving, setFirebaseError, recordLoginAttempt])
 
   const handleEmailCodeComplete = useCallback(async (code) => {
     if (!verifyCode(code)) {
@@ -142,6 +150,7 @@ export default function AuthModal() {
       }
     } catch (err) {
       setFirebaseError(err.message || 'Failed to complete sign in')
+      track('signin_failed', { method: 'email_code', reason: err.message, guest: selectedMatch?.firstName, guestId: selectedMatch?.id })
     } finally {
       setSaving(false)
     }
@@ -149,6 +158,7 @@ export default function AuthModal() {
 
    const handlePhoneConfirm = useCallback(async () => {
       if (saving || sendingSms || !isUsNumber(guestPhone)) return
+      if (selectedMatch) recordLoginAttempt(selectedMatch.id)
       setSendingSms(true)
       setFirebaseError(null)
       try {
@@ -170,6 +180,7 @@ export default function AuthModal() {
         sessionStorage.setItem('sms_sent_at', String(Date.now()))
       } catch (err) {
         console.error('Phone auth error:', err)
+        track('signin_failed', { method: 'phone', reason: err.code || err.message, guest: selectedMatch?.firstName, guestId: selectedMatch?.id })
         if (err.code === 'auth/captcha-check-failed') {
           setFirebaseError('reCAPTCHA verification failed. Please check your internet connection and try again. In development, you can use test phone numbers from Firebase Console.')
         } else {
@@ -198,6 +209,7 @@ export default function AuthModal() {
       }
     } catch (err) {
       setFirebaseError(err.message || 'Failed to verify code')
+      track('signin_failed', { method: 'sms_code', reason: err.message, guest: selectedMatch?.firstName, guestId: selectedMatch?.id })
     } finally {
       setVerifyingCode(false)
     }
@@ -329,6 +341,7 @@ export default function AuthModal() {
           setSelectedMatch(guest)
           setGuestPhone(stripPhone(guest.phone))
           setGuestEmail(guest.email || '')
+          if (guest.id) recordLoginAttempt(guest.id)
         }
       }
       setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
@@ -443,12 +456,12 @@ export default function AuthModal() {
                 </svg>
               </button>
 
-              {/* Sign In — OAuth first, then name entry */}
+               {/* Sign In — OAuth first, then name entry */}
               {authMode === 'signin' && !selectedMatch && (
                 <div className="space-y-4">
                   <div className="flex gap-3">
                     <button
-                      onClick={() => handleFirebaseSignIn('google')}
+                      onClick={() => handleOAuthSignIn('google')}
                       disabled={firebaseLoading}
                       className="flex-1 flex items-center justify-center gap-2 py-3 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
                     >
@@ -461,7 +474,7 @@ export default function AuthModal() {
                     </button>
 
                     <button
-                      onClick={() => handleFirebaseSignIn('facebook')}
+                      onClick={() => handleOAuthSignIn('facebook')}
                       disabled={firebaseLoading}
                       className="flex-1 flex items-center justify-center gap-2 py-3 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
                     >
@@ -555,34 +568,34 @@ export default function AuthModal() {
                      </p>
                     </div>
 
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => handleFirebaseSignIn('google')}
-                        disabled={firebaseLoading}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
-                      >
-                        {firebaseLoading ? (
-                          <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                        )}
-                        Google
-                      </button>
-                      <button
-                        onClick={() => handleFirebaseSignIn('facebook')}
-                        disabled={firebaseLoading}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
-                      >
-                        {firebaseLoading ? (
-                          <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                          </svg>
-                        )}
-                        Facebook
-                      </button>
-                    </div>
+                     <div className="flex gap-3">
+                       <button
+                         onClick={() => handleOAuthSignIn('google')}
+                         disabled={firebaseLoading}
+                         className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
+                       >
+                         {firebaseLoading ? (
+                           <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+                         ) : (
+                           <svg className="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                         )}
+                         Google
+                       </button>
+                       <button
+                         onClick={() => handleOAuthSignIn('facebook')}
+                         disabled={firebaseLoading}
+                         className="flex-1 flex items-center justify-center gap-2 py-2.5 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
+                       >
+                         {firebaseLoading ? (
+                           <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+                         ) : (
+                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                           </svg>
+                         )}
+                         Facebook
+                       </button>
+                     </div>
 
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-px bg-gold/10" />

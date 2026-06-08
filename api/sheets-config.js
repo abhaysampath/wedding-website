@@ -16,6 +16,7 @@ const SHEET_CONFIG = {
       dietaryPreferences: 'Dietary Preferences',
       lastLogin: 'LastLogin',
       lastUpdated: 'LastUpdated',
+      loginFailed: 'LoginFailed',
     },
   },
   faq: {

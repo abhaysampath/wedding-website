@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { track } from '@vercel/analytics'
 import { AuthContext } from './AuthContext'
 import config from '../config'
 import { signInWithGoogle, signInWithFacebook } from '../firebase'
@@ -154,7 +155,7 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now, lastUpdated: now })
+    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
     updateUrlSlug(getGuestSlug(guest))
 
     setAuthMode('settings')
@@ -200,7 +201,7 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now, lastUpdated: now })
+    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
@@ -244,6 +245,7 @@ export function AuthProvider({ children }) {
       }
     } catch (err) {
       setFirebaseError(err.message || 'Sign in failed')
+      track('signin_failed', { method: provider, reason: err.message })
     } finally {
       setFirebaseLoading(false)
     }
@@ -253,17 +255,26 @@ export function AuthProvider({ children }) {
     if (!user) return
     const now = eastTime()
     const cleanedPhone = (data.phone || '').replace(/\D/g, '')
-    const sheetData = { lastLogin: now, lastUpdated: now }
+    const sheetData = {}
     if (data.phone !== undefined) sheetData.phone = cleanedPhone
     if (data.email !== undefined) sheetData.email = data.email
     if (data.address !== undefined) sheetData.address = data.address
     if (data.dietaryPreferences !== undefined) sheetData.dietaryPreferences = data.dietaryPreferences
+    const hasDataChanges = Object.keys(sheetData).length > 0
+    if (hasDataChanges) sheetData.lastUpdated = now
     const updated = { ...user, ...sheetData, phone: cleanedPhone || user.phone, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
+    if (!hasDataChanges) return
     const ok = await writeToSheet(user.id, sheetData)
     if (!ok) throw new Error('Failed to save to sheet')
   }, [user])
+
+  const recordLoginAttempt = useCallback(async (guestId) => {
+    if (!guestId) return
+    const now = eastTime()
+    await writeToSheet(guestId, { loginFailed: now })
+  }, [])
 
   const recordLogin = useCallback(() => {
     if (!user) return
@@ -271,7 +282,7 @@ export function AuthProvider({ children }) {
     const updated = { ...user, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
-    writeToSheet(user.id, { lastLogin: now, lastUpdated: now })
+    writeToSheet(user.id, { lastLogin: now })
   }, [user])
 
   const signOut = useCallback(() => {
@@ -310,6 +321,7 @@ export function AuthProvider({ children }) {
     switchWedding,
     updateContact,
     recordLogin,
+    recordLoginAttempt,
     openSettings,
     canSwitch,
   }
