@@ -29,9 +29,12 @@ function LogoButton({ logoClicked, onClick }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/80 overflow-hidden"
+            className="group inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/20 hover:bg-[#F5FFFA]/80 overflow-hidden transition-colors duration-500"
           >
-            <img src="/Logo-Color/transparent-logo.png" alt="R&A" className="w-full h-full object-cover scale-[2.6]" />
+            <div className="relative w-full h-full">
+              <img src="/Logo-BW/transparent-logo.png" alt="" className="absolute inset-0 w-full h-full object-cover scale-[1.2]" />
+              <img src="/Logo-Color/transparent-logo.png" alt="R&A" className="absolute inset-0 w-full h-full object-cover scale-[1.2] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
           </motion.span>
         ) : (
           <motion.span
