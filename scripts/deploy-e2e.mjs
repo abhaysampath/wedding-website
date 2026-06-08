@@ -70,7 +70,7 @@ async function main() {
     const failedRequests = []
     page.on('requestfailed', req => {
       if (req.failure()?.errorText === 'net::ERR_ABORTED' &&
-          req.url().includes('/_vercel/')) return  // Vercel scripts expected off-platform
+          (req.url().includes('/_vercel/') || req.url().includes('/api/'))) return  // Vercel scripts & API expected off-platform
       failedRequests.push({ url: req.url(), error: req.failure()?.errorText })
     })
 
