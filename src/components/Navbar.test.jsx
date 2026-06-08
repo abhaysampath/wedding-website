@@ -76,6 +76,7 @@ describe('Navbar', () => {
     const logos = screen.getAllByAltText('AR')
     expect(logos.length).toBe(2)
     expect(logos[0].getAttribute('src')).toContain('ar-logo.png')
+    expect(logos[0].className).toContain('h-12')
   })
 
   it('toggles to full text on logo click', () => {

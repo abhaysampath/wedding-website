@@ -29,12 +29,12 @@ function LogoButton({ logoClicked, onClick }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/20 hover:bg-[#F5FFFA]/80 overflow-hidden transition-colors duration-500 [box-shadow:0_2px_4px_rgba(0,0,0,0.15)] hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
+            className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-[#F5FFFA]/80 hover:border hover:border-gold/20 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
           >
             <img
               src="/ar-logo.png"
               alt="AR"
-              className="w-full h-full object-contain scale-[0.85] pointer-events-none"
+              className="h-12 w-auto pointer-events-none"
             />
           </motion.span>
         ) : (
