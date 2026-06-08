@@ -29,20 +29,13 @@ function LogoButton({ logoClicked, onClick }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="group inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/20 hover:bg-[#F5FFFA]/80 overflow-hidden transition-colors duration-500"
+            className="inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/20 hover:bg-[#F5FFFA]/80 overflow-hidden transition-colors duration-500 [box-shadow:0_2px_4px_rgba(0,0,0,0.15)] hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
           >
-            <div className="relative w-full h-full">
-              <img
-                src="/Logo-BW/transparent-logo.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover scale-[1.2] [filter:drop-shadow(0_2px_4px_rgba(0,0,0,0.15))] transition-[opacity] duration-500 group-hover:opacity-0"
-              />
-              <img
-                src="/Logo-Color/transparent-logo.png"
-                alt="R&A"
-                className="absolute inset-0 w-full h-full object-cover scale-[1.2] transition-[opacity] duration-500 opacity-0 group-hover:opacity-100 [filter:drop-shadow(0_4px_12px_rgba(0,0,0,0.4))]"
-              />
-            </div>
+            <img
+              src="/ar-logo.png"
+              alt="AR"
+              className="w-full h-full object-contain scale-[0.85] mix-blend-multiply pointer-events-none"
+            />
           </motion.span>
         ) : (
           <motion.span

@@ -71,11 +71,11 @@ describe('Navbar', () => {
     expect(screen.getByText('Invited Guest')).toBeTruthy()
   })
 
-  it('renders two BW logo images (desktop + mobile)', () => {
+  it('renders two AR logo images (desktop + mobile)', () => {
     render(<Navbar />)
-    const logos = screen.getAllByAltText('')
+    const logos = screen.getAllByAltText('AR')
     expect(logos.length).toBe(2)
-    expect(logos[0].getAttribute('src')).toContain('Logo-BW')
+    expect(logos[0].getAttribute('src')).toContain('ar-logo.png')
   })
 
   it('toggles to full text on logo click', () => {
