@@ -813,11 +813,8 @@ export default function AuthModal() {
               {/* Welcome message after sign-in */}
               {signedIn && (
                 <div className="text-center py-8 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto">
-                    <svg className="w-7 h-7 text-gold-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
+                  <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto overflow-hidden">
+                    <img src="/Logo-Color/transparent-logo.png" alt="Welcome" className="w-full h-full object-cover scale-150" />
                   </div>
                   <p className="font-heading text-2xl text-charcoal">
                     Welcome, {signedIn.firstName}!
