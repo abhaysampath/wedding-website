@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { track } from '@vercel/analytics'
 import { AuthContext } from './AuthContext'
 import config from '../config'
-import { signInWithGoogle, signInWithFacebook } from '../firebase'
+import { signInWithGoogle, signInWithFacebook, signInWithFacebookToken } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
 
@@ -249,6 +249,39 @@ export function AuthProvider({ children }) {
     } finally {
       setFirebaseLoading(false)
     }
+  }, [content.guests, processSignIn])
+
+  useEffect(() => {
+    const handler = async (e) => {
+      setFirebaseLoading(true)
+      setFirebaseError(null)
+      try {
+        const result = await signInWithFacebookToken(e.detail.accessToken)
+        if (result?.user) {
+          const fbUser = {
+            name: result.user.displayName || '',
+            email: result.user.email || '',
+            photo: result.user.photoURL || '',
+            uid: result.user.uid,
+          }
+          const guest = content.guests?.length
+            ? (findGuestByName(content.guests, fbUser.name) || findGuestByEmail(content.guests, fbUser.email))
+            : null
+          if (guest) {
+            processSignIn(guest, fbUser)
+          } else {
+            setPendingFbUser(fbUser)
+          }
+        }
+      } catch (err) {
+        setFirebaseError(err.message || 'Facebook sign in failed')
+        track('signin_failed', { method: 'facebook_sdk', reason: err.message })
+      } finally {
+        setFirebaseLoading(false)
+      }
+    }
+    window.addEventListener('facebook-login', handler)
+    return () => window.removeEventListener('facebook-login', handler)
   }, [content.guests, processSignIn])
 
   const updateContact = useCallback(async (data) => {

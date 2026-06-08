@@ -112,7 +112,18 @@ export default function AuthModal() {
 
 
 
-   const handleOAuthSignIn = useCallback(async (provider) => {
+    const handleOAuthSignIn = useCallback(async (provider) => {
+      if (provider === 'facebook' && window.FB) {
+        if (selectedMatch) recordLoginAttempt(selectedMatch.id)
+        window.FB.login(function(response) {
+          if (response.authResponse) {
+            window.dispatchEvent(new CustomEvent('facebook-login', {
+              detail: { accessToken: response.authResponse.accessToken }
+            }))
+          }
+        }, { scope: 'public_profile,email' })
+        return
+      }
       if (selectedMatch) recordLoginAttempt(selectedMatch.id)
       return handleFirebaseSignIn(provider)
     }, [selectedMatch, recordLoginAttempt, handleFirebaseSignIn])

@@ -31,6 +31,18 @@
           window.__fbLoginStatus = response.status;
         });
       };
+      function checkLoginState() {
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      }
+      function statusChangeCallback(response) {
+        if (response.status === 'connected') {
+          window.dispatchEvent(new CustomEvent('facebook-login', {
+            detail: { accessToken: response.authResponse.accessToken }
+          }));
+        }
+      }
       (function(d, s, id){
          var js, fjs = d.getElementsByTagName(s)[0];
          if (d.getElementById(id)) {return;}
