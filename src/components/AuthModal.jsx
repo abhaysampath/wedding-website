@@ -841,7 +841,7 @@ export default function AuthModal() {
               {signedIn && (
                 <div className="text-center py-8 space-y-4">
                   <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto overflow-hidden">
-                    <img src="/ar-logo.png" alt="Welcome" className="w-full h-full object-contain scale-150 mix-blend-multiply" />
+                    <img src="/ar-logo.png" alt="Welcome" className="w-full h-full object-contain scale-150" />
                   </div>
                   <p className="font-heading text-2xl text-charcoal">
                     Welcome, {signedIn.firstName}!

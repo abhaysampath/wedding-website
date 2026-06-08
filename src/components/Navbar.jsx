@@ -34,7 +34,7 @@ function LogoButton({ logoClicked, onClick }) {
             <img
               src="/ar-logo.png"
               alt="AR"
-              className="w-full h-full object-contain scale-[0.85] mix-blend-multiply pointer-events-none"
+              className="w-full h-full object-contain scale-[0.85] pointer-events-none"
             />
           </motion.span>
         ) : (
