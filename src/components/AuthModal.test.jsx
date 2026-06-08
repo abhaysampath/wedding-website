@@ -37,6 +37,7 @@ vi.mock('../firebase', () => ({
   linkPhoneCredential: vi.fn(),
   getRecaptchaVerifier: vi.fn(() => ({})),
   clearRecaptchaVerifier: vi.fn(),
+  signInWithFacebookToken: vi.fn(),
 }))
 
 vi.mock('../utils/verifyEmail', () => ({
@@ -237,5 +238,59 @@ describe('AuthModal phone verification', () => {
     fireEvent.click(screen.getByText('Jane Doe'))
     const sendLogIn = screen.getAllByText('Send Log-In Code')
     expect(sendLogIn.length).toBe(2)
+  })
+})
+
+describe('AuthModal Facebook SDK', () => {
+  let fbLoginMock
+  let dispatchSpy
+
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue(baseAuth())
+    fbLoginMock = vi.fn()
+    window.FB = { login: fbLoginMock }
+    dispatchSpy = vi.spyOn(window, 'dispatchEvent')
+  })
+
+  afterEach(() => {
+    delete window.FB
+    dispatchSpy.mockRestore()
+  })
+
+  it('calls FB.login when Facebook button is clicked and FB SDK is loaded', () => {
+    render(<AuthModal />)
+    fireEvent.click(screen.getByText('Facebook'))
+    expect(fbLoginMock).toHaveBeenCalledOnce()
+    expect(fbLoginMock.mock.calls[0][1]).toEqual({ scope: 'public_profile,email' })
+  })
+
+  it('dispatches facebook-login event when FB.login succeeds', () => {
+    fbLoginMock.mockImplementation((cb) => cb({
+      authResponse: { accessToken: 'test-token' }
+    }))
+    render(<AuthModal />)
+    fireEvent.click(screen.getByText('Facebook'))
+    expect(dispatchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'facebook-login',
+        detail: { accessToken: 'test-token' },
+      })
+    )
+  })
+
+  it('does not dispatch event when FB.login response has no authResponse', () => {
+    fbLoginMock.mockImplementation((cb) => cb({}))
+    render(<AuthModal />)
+    fireEvent.click(screen.getByText('Facebook'))
+    expect(dispatchSpy).not.toHaveBeenCalled()
+  })
+
+  it('falls back to handleFirebaseSignIn when FB SDK is not loaded', () => {
+    delete window.FB
+    const auth = baseAuth()
+    mockUseAuth.mockReturnValue(auth)
+    render(<AuthModal />)
+    fireEvent.click(screen.getByText('Facebook'))
+    expect(auth.handleFirebaseSignIn).toHaveBeenCalledWith('facebook')
   })
 })
