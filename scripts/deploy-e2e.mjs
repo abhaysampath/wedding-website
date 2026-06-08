@@ -115,7 +115,25 @@ async function main() {
     const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
     assert('Auth modal opens on click', !!modal)
 
-    // Test 5: Console errors filtered for noise
+    // Test 5: Scroll to specific sections and verify content
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await new Promise(r => setTimeout(r, 500))
+
+    const bodyText = await page.evaluate(() => document.body.innerText)
+
+    const e2eChecks = [
+      { label: 'Event Details section', key: 'Event Details' },
+      { label: 'FAQ section', key: 'FAQ' },
+      { label: 'Footer section', key: 'Abhay & Rebecca' },
+    ]
+    for (const check of e2eChecks) {
+      assert(check.label, bodyText.includes(check.key), `${check.key} not found in page`)
+    }
+
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await new Promise(r => setTimeout(r, 300))
+
+    // Test 6: Console errors filtered for noise
     const appErrors = consoleErrors.filter(e =>
       !e.includes('runtime.lastError') &&
       !e.includes('Receiving end does not exist') &&

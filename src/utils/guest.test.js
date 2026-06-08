@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stripPhone, guestLabel } from './guest'
+import { stripPhone, guestLabel, roleLabels } from './guest'
 
 describe('stripPhone', () => {
   it('removes non-digit characters', () => {
@@ -45,5 +45,23 @@ describe('guestLabel', () => {
   it('formats side + role fallback', () => {
     const guest = { role: 'close_family', side: 'bride' }
     expect(guestLabel(guest, sideName)).toBe("Rebecca's close family")
+  })
+})
+
+describe('roleLabels', () => {
+  it('has all expected role keys', () => {
+    expect(roleLabels).toHaveProperty('bride')
+    expect(roleLabels).toHaveProperty('groom')
+    expect(roleLabels).toHaveProperty('close_family')
+    expect(roleLabels).toHaveProperty('invited_guest')
+    expect(roleLabels).toHaveProperty('vendor')
+  })
+
+  it('has correct label values', () => {
+    expect(roleLabels.bride).toBe('Bride')
+    expect(roleLabels.groom).toBe('Groom')
+    expect(roleLabels.close_family).toBe('Close Family')
+    expect(roleLabels.invited_guest).toBe('Invited Guest')
+    expect(roleLabels.vendor).toBe('Vendor')
   })
 })
