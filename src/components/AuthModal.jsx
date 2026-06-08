@@ -63,6 +63,8 @@ export default function AuthModal() {
     const urlCodeRef = useRef(null)
     const urlSlugRef = useRef(null)
     const modalRef = useRef(null)
+    const inputContainerRef = useRef(null)
+    const [dropdownPos, setDropdownPos] = useState(null)
    const [highlightedIndex, setHighlightedIndex] = useState(-1)
    const [signedIn, setSignedIn] = useState(null)
    const welcomeShownRef = useRef(null)
@@ -426,6 +428,26 @@ export default function AuthModal() {
     return () => window.removeEventListener('keydown', handler)
   }, [showAuthModal])
 
+  useEffect(() => {
+    if (!showDropdown || !inputContainerRef.current) {
+      setDropdownPos(null)
+      return
+    }
+    const updatePos = () => {
+      if (inputContainerRef.current) {
+        const rect = inputContainerRef.current.getBoundingClientRect()
+        setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+      }
+    }
+    updatePos()
+    window.addEventListener('scroll', updatePos, { passive: true })
+    window.addEventListener('resize', updatePos, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', updatePos)
+      window.removeEventListener('resize', updatePos)
+    }
+  }, [showDropdown])
+
   return (
     <>
       {showAuthModal && (
@@ -500,43 +522,48 @@ export default function AuthModal() {
 
                    <p className="text-sm text-charcoal-light/70">Find your invite by name</p>
 
-                   <div className="relative">
-                     <input
-                       ref={inputRef}
-                       type="text"
-                       value={nameInput}
-                       onChange={handleNameChange}
-                       onFocus={handleNameFocus}
-                       onKeyDown={handleKeyDown}
-                       role="combobox"
-                       aria-expanded={showDropdown && matches.length > 0}
-                       aria-controls="name-dropdown"
-                       aria-activedescendant={highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined}
-                       className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-                       placeholder="Start typing your name"
-                       autoComplete="off"
-                     />
-                     {showDropdown && matches.length > 0 && (
-                       <div id="name-dropdown" role="listbox" className="absolute top-full left-0 right-0 mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-10">
-                         {matches.map((g, i) => (
-                           <button
-                             key={g.id}
-                             role="option"
-                             aria-selected={i === highlightedIndex}
-                             data-index={i}
-                             onMouseEnter={() => setHighlightedIndex(i)}
-                             onClick={() => handleSelectMatch(g)}
-                             className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gold/5 last:border-b-0 ${
-                               i === highlightedIndex ? 'bg-gold/10 text-charcoal' : 'text-charcoal hover:bg-cream-dark'
-                             }`}
-                           >
-                             <span className="font-medium">{g.firstName} {g.lastName}</span>
-                             <span className="text-charcoal-light/50 ml-2">{guestLabel(g, sideName)}</span>
-                           </button>
-                         ))}
-                       </div>
-                     )}
-                   </div>
+                   <div ref={inputContainerRef}>
+                      <input
+                        ref={inputRef}
+                        type="text"
+                        value={nameInput}
+                        onChange={handleNameChange}
+                        onFocus={handleNameFocus}
+                        onKeyDown={handleKeyDown}
+                        role="combobox"
+                        aria-expanded={showDropdown && matches.length > 0}
+                        aria-controls="name-dropdown"
+                        aria-activedescendant={highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined}
+                        className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                        placeholder="Start typing your name"
+                        autoComplete="off"
+                      />
+                      {showDropdown && matches.length > 0 && dropdownPos && (
+                        <div
+                          id="name-dropdown"
+                          role="listbox"
+                          style={{ position: 'fixed', top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width }}
+                          className="mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
+                        >
+                          {matches.map((g, i) => (
+                            <button
+                              key={g.id}
+                              role="option"
+                              aria-selected={i === highlightedIndex}
+                              data-index={i}
+                              onMouseEnter={() => setHighlightedIndex(i)}
+                              onClick={() => handleSelectMatch(g)}
+                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gold/5 last:border-b-0 ${
+                                i === highlightedIndex ? 'bg-gold/10 text-charcoal' : 'text-charcoal hover:bg-cream-dark'
+                              }`}
+                            >
+                              <span className="font-medium">{g.firstName} {g.lastName}</span>
+                              <span className="text-charcoal-light/50 ml-2">{guestLabel(g, sideName)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                   {firebaseError && (
                     <div role="alert" className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70">

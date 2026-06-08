@@ -29,9 +29,9 @@ function LogoButton({ logoClicked, onClick }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="inline-flex items-center justify-center w-9 h-9 overflow-hidden"
+            className="inline-flex items-center justify-center w-[72px] h-9 rounded-[8px] bg-[#F5FFFA]/80 overflow-hidden"
           >
-            <img src="/Logo-Color/transparent-logo.png" alt="R&A" className="w-full h-full object-cover scale-[3]" />
+            <img src="/Logo-Color/transparent-logo.png" alt="R&A" className="w-full h-full object-cover scale-[2.6]" />
           </motion.span>
         ) : (
           <motion.span
