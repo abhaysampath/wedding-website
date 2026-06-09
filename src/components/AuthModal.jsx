@@ -99,10 +99,13 @@ export default function AuthModal() {
       setSendingSms(false)
       setVerifyingCode(false)
        setGuestPhone('')
-       setGuestEmail('')
-       setSignedIn(null)
-       sessionStorage.removeItem('awaiting_sms')
-       sessionStorage.removeItem('awaiting_email')
+        setGuestEmail('')
+        setSignedIn(null)
+        setHighlightedIndex(-1)
+        setSmsResendable(true)
+        setEmailResendable(true)
+        sessionStorage.removeItem('awaiting_sms')
+        sessionStorage.removeItem('awaiting_email')
        sessionStorage.removeItem('sms_sent_at')
        sessionStorage.removeItem('email_sent_at')
        sessionStorage.removeItem('pending_guest_id')
@@ -124,7 +127,7 @@ export default function AuthModal() {
       setSaving(true)
       setFirebaseError(null)
       try {
-        await sendVerificationCode(guestEmail, selectedMatch.firstName.trim())
+        await sendVerificationCode(guestEmail, `${selectedMatch.firstName} ${selectedMatch.lastName}`.trim())
         setAwaitingEmailLink(true)
         sessionStorage.setItem('awaiting_email', '1')
         sessionStorage.setItem('email_sent_at', String(Date.now()))
@@ -353,9 +356,16 @@ export default function AuthModal() {
   }, [content.guests, content.loaded])
 
   useEffect(() => {
+    if (showAuthModal) resetState()
+  }, [showAuthModal, resetState])
+
+  useEffect(() => {
     if (user && user !== welcomeShownRef.current) {
       welcomeShownRef.current = user
       setSignedIn(user)
+    } else if (!user) {
+      setSignedIn(null)
+      welcomeShownRef.current = null
     }
   }, [user])
 
@@ -829,21 +839,12 @@ export default function AuthModal() {
               {/* Welcome message after sign-in */}
               {signedIn && (
                 <div className="text-center py-8 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center mx-auto overflow-hidden">
+                  <div className="w-16 h-16 bg-gold/10 flex items-center justify-center mx-auto">
                     <img src="/ar-logo.png" alt="Welcome" className="w-full h-full object-contain scale-150" />
                   </div>
                   <p className="font-heading text-2xl text-charcoal">
                     Welcome, {signedIn.firstName}!
                   </p>
-                  <p className="text-charcoal-light/60 text-sm">
-                    {guestLabel(signedIn, sideName)}
-                  </p>
-                  <button
-                    onClick={() => { setSignedIn(null); setShowAuthModal(false) }}
-                    className="inline-flex items-center gap-2 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm transition-colors font-medium mt-2"
-                  >
-                    Continue to Site
-                  </button>
                 </div>
               )}
 

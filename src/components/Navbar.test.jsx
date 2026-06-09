@@ -41,7 +41,7 @@ describe('Navbar', () => {
 
   it('shows guest links when no user is signed in', () => {
     render(<Navbar />)
-    expect(screen.getByText('Our Story')).toBeTruthy()
+    expect(screen.queryByText('Our Story')).toBeNull()
     expect(screen.getByText('Gallery')).toBeTruthy()
   })
 
@@ -67,8 +67,8 @@ describe('Navbar', () => {
       signOut: vi.fn(),
     })
     render(<Navbar />)
-    expect(screen.getByText('Jane Doe')).toBeTruthy()
-    expect(screen.getByText('Invited Guest')).toBeTruthy()
+    expect(screen.getAllByText('Jane Doe').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Invited Guest').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders two AR logo images (desktop + mobile)', () => {

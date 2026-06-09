@@ -79,7 +79,7 @@ function SectionNav() {
   const { user } = useAuth()
 
   useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
       if (visible.length > 0) setActive(visible[0].target.id)
@@ -93,7 +93,7 @@ function SectionNav() {
     return () => observer.disconnect()
   }, [user])
 
-  const filtered = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id))
+  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id))
 
   if (filtered.length === 0) return null
 
@@ -124,7 +124,7 @@ function BottomNav() {
   const { user } = useAuth()
 
   useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
       if (visible.length > 0) setActive(visible[0].target.id)
@@ -138,7 +138,7 @@ function BottomNav() {
     return () => observer.disconnect()
   }, [user])
 
-  const filtered = SECTIONS.filter(s => user || !['details', 'travel', 'registry', 'faq'].includes(s.id))
+  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id))
 
   return (
     <nav aria-label="Bottom navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
@@ -261,12 +261,12 @@ function PageContent() {
       <ScrollProgress />
       <Navbar />
       <Hero />
-      <OurStory />
       <Suspense fallback={<GallerySkeleton />}>
         <Gallery />
       </Suspense>
       {user && (
         <Suspense fallback={<UserSkeleton />}>
+          <OurStory />
           <EventDetails />
           <TravelAccommodations />
           <Registry />

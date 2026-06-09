@@ -43,10 +43,9 @@ const baseUser = {
 const sideName = { bride: 'Rebecca', groom: 'Abhay' }
 
 describe('ContactForm', () => {
-  it('renders user name and relationship', () => {
+  it('renders user name', () => {
     render(<ContactForm user={baseUser} authMode="settings" updateContact={vi.fn()} sideName={sideName} />)
     expect(screen.getByText('Jane Doe')).toBeTruthy()
-    expect(screen.getByDisplayValue('Cousin')).toBeTruthy()
   })
 
   it('pre-fills address and dietary preferences from user data', () => {
@@ -55,10 +54,10 @@ describe('ContactForm', () => {
     expect(screen.getByDisplayValue('Vegetarian')).toBeTruthy()
   })
 
-  it('shows phone formatted and email masked when not focused', () => {
+  it('shows phone formatted when not focused', () => {
     render(<ContactForm user={baseUser} authMode="settings" updateContact={vi.fn()} sideName={sideName} />)
     expect(screen.getByDisplayValue('(555) 123-4567')).toBeTruthy()
-    expect(screen.getByDisplayValue('j**e@example.com')).toBeTruthy()
+    expect(screen.getByDisplayValue('jane@example.com')).toBeTruthy()
   })
 
   it('shows empty fields when user data is missing', () => {
@@ -92,7 +91,7 @@ describe('ContactForm', () => {
     }
     render(<ContactForm user={userNoContact} authMode="settings" updateContact={vi.fn()} sideName={sideName} />)
     expect(screen.getByDisplayValue('(555) 123-4567')).toBeTruthy()
-    expect(screen.getByDisplayValue('j**e@example.com')).toBeTruthy()
+    expect(screen.getByDisplayValue('jane@example.com')).toBeTruthy()
   })
 
   it('shows placeholders when both user and content.guests have empty phone/email', () => {
@@ -129,6 +128,6 @@ describe('ContactForm', () => {
     })
     rerender(<ContactForm user={userNoContact} authMode="settings" updateContact={vi.fn()} sideName={sideName} />)
     expect(await screen.findByDisplayValue('(555) 123-4567')).toBeTruthy()
-    expect(await screen.findByDisplayValue('j**e@example.com')).toBeTruthy()
+    expect(await screen.findByDisplayValue('jane@example.com')).toBeTruthy()
   })
 })

@@ -56,9 +56,11 @@ async function verifyRecaptchaToken(token) {
 export default function ContactSlide() {
   const { user } = useAuth()
   const reasons = config.images.hero.contact.reasons
+  const defaultName = user ? `${user.firstName} ${user.lastName}`.trim() : ''
+  const defaultEmail = user?.email || ''
   const [reason, setReason] = useState(reasons[0]?.value || '')
-  const [name, setName] = useState(user ? `${user.firstName} ${user.lastName}`.trim() : '')
-  const [email, setEmail] = useState(user?.email || '')
+  const [name, setName] = useState(defaultName)
+  const [email, setEmail] = useState(defaultEmail)
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [status, setStatus] = useState(null)
@@ -94,17 +96,43 @@ export default function ContactSlide() {
     }
 
     const reasonLabel = reasons.find(r => r.value === reason)?.label || reason
-    const subject = `[${reasonLabel}] Contact from ${name || 'Anonymous'}`
+    const subject = `Contact from ${name || 'Anonymous'}`
 
-    const { serviceId, templateId, publicKey } = config.emailjs
-    if (serviceId && templateId && publicKey) {
+    const nameModified = user && name !== defaultName
+    const emailModified = user && email !== defaultEmail
+
+    const sessionInfo = {
+      userAgent: navigator.userAgent,
+      platform: navigator.platform,
+      language: navigator.language,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+    }
+
+    const userData = user ? {
+      id: user.id,
+      role: user.role,
+      side: user.side,
+      relationship: user.relationship,
+      nameModified,
+      emailModified,
+      session: sessionInfo,
+    } : {
+      session: sessionInfo,
+    }
+
+    const { serviceId, templateId, contactTemplateId, publicKey } = config.emailjs
+    const activeTemplateId = contactTemplateId || templateId
+    if (serviceId && activeTemplateId && publicKey) {
       try {
-        await emailjs.send(serviceId, templateId, {
+        await emailjs.send(serviceId, activeTemplateId, {
           email: email || 'anonymous@wedding-site',
           name: name || 'Not provided',
+          contact_type: reasonLabel,
           subject,
           message: message.trim(),
-          reason: reasonLabel,
+          user_data: JSON.stringify(userData, null, 2),
         }, publicKey)
         setStatus('sent')
         setMessage('')
@@ -116,7 +144,7 @@ export default function ContactSlide() {
       setMessage('')
     }
     setSending(false)
-  }, [reason, name, email, message, reasons])
+  }, [reason, name, email, message, reasons, user, defaultName, defaultEmail])
 
   if (status === 'sent') {
     return (

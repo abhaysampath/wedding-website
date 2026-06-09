@@ -197,13 +197,11 @@ describe('AuthModal welcome screen', () => {
     mockUseAuth.mockReturnValue(baseAuth())
   })
 
-  it('shows welcome message and Continue button when signedIn is set', () => {
+  it('shows welcome message when signedIn is set', () => {
     const signedInUser = { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest', side: 'bride', relationship: 'Cousin' }
     mockUseAuth.mockReturnValue({ ...baseAuth(), user: signedInUser })
     render(<AuthModal />)
     expect(screen.getByText(/Welcome.*Jane/)).toBeTruthy()
-    expect(screen.getByText('Cousin')).toBeTruthy()
-    expect(screen.getByText('Continue to Site')).toBeTruthy()
   })
 })
 

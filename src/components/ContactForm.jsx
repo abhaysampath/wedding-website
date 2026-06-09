@@ -30,8 +30,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
 
   const originalPhone = stripPhone(user?.phone || guestFromContent?.phone || '')
   const originalEmail = user?.email || guestFromContent?.email || ''
+  const originalAddress = user?.address || guestFromContent?.address || ''
+  const originalDietaryPreferences = user?.dietaryPreferences || guestFromContent?.dietaryPreferences || ''
   const [phoneFocused, setPhoneFocused] = useState(false)
-  const [emailFocused, setEmailFocused] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
@@ -39,6 +40,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   const validEmail = EMAIL_RE.test(email.trim())
   const validPhone = stripPhone(phone).length >= 10
+  const hasChanges = phone !== originalPhone || email !== originalEmail || address !== originalAddress || dietaryPreferences !== originalDietaryPreferences
 
   const handlePhoneChange = useCallback((raw) => {
     setPhone(raw.replace(/\D/g, ''))
@@ -132,10 +134,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <div className="relative">
             <input
               type="email"
-              value={!emailFocused && email === originalEmail ? email.replace(/(.)(.*)(.@.*)/, (_, a, m, s) => a + '*'.repeat(m.length) + s) : email}
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setEmailFocused(true)}
-              onBlur={() => setEmailFocused(false)}
               className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
               placeholder="you@email.com"
             />
@@ -147,18 +147,6 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
               {showConfirmation && saving ? 'Confirming...' : saving ? 'Saving...' : 'Confirm'}
             </button>
           </div>
-        </div>
-
-        <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Relationship
-          </label>
-          <input
-            type="text"
-            value={user?.relationship || ''}
-            readOnly
-            className="w-full bg-cream-dark border border-gold/10 rounded-sm px-4 py-3 text-sm text-charcoal-light/60 cursor-default"
-          />
         </div>
 
         <div>
@@ -220,14 +208,14 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             </button>
             <button
               onClick={handleSave}
-              disabled={saveStatus === 'saving'}
+              disabled={!hasChanges || saveStatus === 'saving'}
               className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
             >
               {saveStatus === 'saving' ? 'Saving...' : 'Save'}
             </button>
             <button
               onClick={handleMessageClick}
-              disabled={saveStatus === 'saving'}
+              disabled={!hasChanges || saveStatus === 'saving'}
               className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-30"
             >
               {saveStatus === 'saving' ? 'Saving...' : 'Message'}

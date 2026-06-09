@@ -4,7 +4,6 @@ import { useAuth } from '../context/useAuth'
 import { roleLabels } from '../utils/guest'
 
 const guestLinks = [
-  { href: '#story', label: 'Our Story' },
   { href: '#gallery', label: 'Gallery' },
 ]
 
@@ -24,7 +23,7 @@ function LogoButton({ onClick, scrolled }) {
       <motion.span
         whileTap={{ scale: 0.85 }}
         transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-        className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-gold/15 hover:border hover:border-gold/20 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
+        className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-gold/15 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
       >
         <img
           src="/ar-logo.png"
@@ -104,7 +103,13 @@ export default function Navbar() {
 
       {/* Mobile layout — icon top-right, no menu */}
       <div className="md:hidden flex items-center justify-end px-6 h-16">
-        <div className={`flex items-center ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
+        <div className={`flex items-center gap-3 ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
+          {user && (
+            <div className="text-right">
+              <p className="text-xs font-medium leading-tight">{user.firstName} {user.lastName}</p>
+              <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
+            </div>
+          )}
           <div ref={mobileBtnRef}>
             <LogoButton onClick={() => handleLogoClick(mobileBtnRef)} scrolled={scrolled} />
           </div>
