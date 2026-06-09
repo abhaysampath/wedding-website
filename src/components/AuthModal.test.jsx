@@ -37,7 +37,6 @@ vi.mock('../firebase', () => ({
   linkPhoneCredential: vi.fn(),
   getRecaptchaVerifier: vi.fn(() => ({})),
   clearRecaptchaVerifier: vi.fn(),
-
 }))
 
 vi.mock('../utils/verifyEmail', () => ({
@@ -221,12 +220,12 @@ describe('AuthModal settings mode', () => {
   })
 })
 
-describe('AuthModal phone verification', () => {
+describe('AuthModal phone & email verification', () => {
   beforeEach(() => {
     mockUseAuth.mockReturnValue(baseAuth())
   })
 
-  it('shows phone input after selecting a guest with a phone number', () => {
+  it('shows phone and email inputs after selecting a guest', () => {
     render(<AuthModal />)
     const input = screen.getByPlaceholderText('Start typing your name')
     fireEvent.change(input, { target: { value: 'Jan' } })

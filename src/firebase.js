@@ -6,6 +6,7 @@ import {
   signInAnonymously,
   PhoneAuthProvider,
   linkWithCredential,
+  signInWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   browserLocalPersistence,
