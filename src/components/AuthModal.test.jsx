@@ -37,7 +37,7 @@ vi.mock('../firebase', () => ({
   linkPhoneCredential: vi.fn(),
   getRecaptchaVerifier: vi.fn(() => ({})),
   clearRecaptchaVerifier: vi.fn(),
-  signInWithFacebookToken: vi.fn(),
+
 }))
 
 vi.mock('../utils/verifyEmail', () => ({
@@ -91,10 +91,9 @@ describe('AuthModal sign-in mode', () => {
     mockUseAuth.mockReturnValue(baseAuth())
   })
 
-  it('renders OAuth buttons for Google and Facebook', () => {
+  it('renders Google OAuth button', () => {
     render(<AuthModal />)
     expect(screen.getByText('Google')).toBeTruthy()
-    expect(screen.getByText('Facebook')).toBeTruthy()
   })
 
   it('renders name search input', () => {
@@ -156,20 +155,18 @@ describe('AuthModal sign-in mode', () => {
     expect(screen.getByText('John Smith')).toBeTruthy()
   })
 
-  it('disables OAuth buttons when firebaseLoading is true', () => {
+  it('disables Google button when firebaseLoading is true', () => {
     mockUseAuth.mockReturnValue({ ...baseAuth(), firebaseLoading: true })
     render(<AuthModal />)
     const googleBtn = screen.getByText('Google').closest('button')
-    const facebookBtn = screen.getByText('Facebook').closest('button')
     expect(googleBtn.disabled).toBe(true)
-    expect(facebookBtn.disabled).toBe(true)
   })
 
   it('shows OAuth button spinner when firebaseLoading is true', () => {
     mockUseAuth.mockReturnValue({ ...baseAuth(), firebaseLoading: true })
     render(<AuthModal />)
     const spinners = document.querySelectorAll('.animate-spin')
-    expect(spinners.length).toBeGreaterThanOrEqual(2)
+    expect(spinners.length).toBeGreaterThanOrEqual(1)
   })
 
   it('displays firebaseError as an alert', () => {
@@ -241,56 +238,4 @@ describe('AuthModal phone verification', () => {
   })
 })
 
-describe('AuthModal Facebook SDK', () => {
-  let fbLoginMock
-  let dispatchSpy
 
-  beforeEach(() => {
-    mockUseAuth.mockReturnValue(baseAuth())
-    fbLoginMock = vi.fn()
-    window.FB = { login: fbLoginMock }
-    dispatchSpy = vi.spyOn(window, 'dispatchEvent')
-  })
-
-  afterEach(() => {
-    delete window.FB
-    dispatchSpy.mockRestore()
-  })
-
-  it('calls FB.login when Facebook button is clicked and FB SDK is loaded', () => {
-    render(<AuthModal />)
-    fireEvent.click(screen.getByText('Facebook'))
-    expect(fbLoginMock).toHaveBeenCalledOnce()
-    expect(fbLoginMock.mock.calls[0][1]).toEqual({ scope: 'public_profile,email' })
-  })
-
-  it('dispatches facebook-login event when FB.login succeeds', () => {
-    fbLoginMock.mockImplementation((cb) => cb({
-      authResponse: { accessToken: 'test-token' }
-    }))
-    render(<AuthModal />)
-    fireEvent.click(screen.getByText('Facebook'))
-    expect(dispatchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'facebook-login',
-        detail: { accessToken: 'test-token' },
-      })
-    )
-  })
-
-  it('does not dispatch event when FB.login response has no authResponse', () => {
-    fbLoginMock.mockImplementation((cb) => cb({}))
-    render(<AuthModal />)
-    fireEvent.click(screen.getByText('Facebook'))
-    expect(dispatchSpy).not.toHaveBeenCalled()
-  })
-
-  it('falls back to handleFirebaseSignIn when FB SDK is not loaded', () => {
-    delete window.FB
-    const auth = baseAuth()
-    mockUseAuth.mockReturnValue(auth)
-    render(<AuthModal />)
-    fireEvent.click(screen.getByText('Facebook'))
-    expect(auth.handleFirebaseSignIn).toHaveBeenCalledWith('facebook')
-  })
-})

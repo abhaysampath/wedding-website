@@ -4,8 +4,6 @@ import React from 'react'
 
 vi.mock('../firebase', () => ({
   signInWithGoogle: vi.fn(),
-  signInWithFacebook: vi.fn(),
-  signInWithFacebookToken: vi.fn(),
   createAnonymousSession: vi.fn(),
   sendPhoneCode: vi.fn(),
   linkPhoneCredential: vi.fn(),
@@ -27,7 +25,6 @@ vi.mock('../utils/time', () => ({
 
 import { useAuth } from './useAuth'
 import { AuthProvider } from './AuthProvider'
-import { signInWithFacebookToken } from '../firebase'
 
 function TestHarness() {
   const { firebaseLoading, firebaseError, user } = useAuth()
@@ -48,98 +45,15 @@ function renderProvider() {
   )
 }
 
-describe('AuthProvider facebook-login event', () => {
+describe('AuthProvider sign-in path', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     localStorage.clear()
     sessionStorage.clear()
   })
 
-  it('calls signInWithFacebookToken with the access token from the event', async () => {
-    signInWithFacebookToken.mockRejectedValueOnce(new Error('no guest'))
-    renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', {
-        detail: { accessToken: 'test-token-123' },
-      }))
-    })
-
-    expect(signInWithFacebookToken).toHaveBeenCalledWith('test-token-123')
-  })
-
-  it('sets firebaseLoading true during sign-in and false after', async () => {
-    let resolvePromise
-    signInWithFacebookToken.mockReturnValueOnce(new Promise((resolve) => { resolvePromise = resolve }))
+  it('renders without crashing and shows no user initially', () => {
     const { getByTestId } = renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', {
-        detail: { accessToken: 'tok' },
-      }))
-    })
-
-    expect(getByTestId('loading').textContent).toBe('true')
-
-    await act(async () => {
-      resolvePromise({ user: { displayName: 'Jane Doe', email: 'jane@example.com', uid: 'fb-uid' } })
-    })
-
-    expect(getByTestId('loading').textContent).toBe('false')
-  })
-
-  it('sets firebaseError when signInWithFacebookToken rejects', async () => {
-    signInWithFacebookToken.mockRejectedValueOnce(new Error('Facebook auth failed'))
-    const { getByTestId } = renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', {
-        detail: { accessToken: 'bad-token' },
-      }))
-    })
-
-    expect(getByTestId('error').textContent).toContain('Facebook auth failed')
-  })
-
-  it('signs in guest when displayName matches a guest name', async () => {
-    signInWithFacebookToken.mockResolvedValueOnce({
-      user: { displayName: 'Jane Doe', email: 'jane@example.com', uid: 'fb-uid' },
-    })
-    const { getByTestId } = renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', {
-        detail: { accessToken: 'tok' },
-      }))
-    })
-
-    expect(getByTestId('user').textContent).toBe('Jane Doe')
-  })
-
-  it('sets firebaseError when Facebook user does not match any guest', async () => {
-    signInWithFacebookToken.mockResolvedValueOnce({
-      user: { displayName: 'Unknown Person', email: 'unknown@example.com', uid: 'fb-uid' },
-    })
-    const { getByTestId } = renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', {
-        detail: { accessToken: 'tok' },
-      }))
-    })
-
-    expect(getByTestId('error').textContent).toContain('Could not find')
-  })
-
-  it('does not sign in user when accessToken is undefined', async () => {
-    signInWithFacebookToken.mockResolvedValueOnce(undefined)
-    const { getByTestId } = renderProvider()
-
-    await act(async () => {
-      window.dispatchEvent(new CustomEvent('facebook-login', { detail: {} }))
-    })
-
-    expect(signInWithFacebookToken).toHaveBeenCalledWith(undefined)
     expect(getByTestId('user').textContent).toBe('')
   })
 })

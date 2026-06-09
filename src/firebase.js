@@ -2,9 +2,7 @@ import { initializeApp } from 'firebase/app'
 import {
   getAuth,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   signInWithPopup,
-  signInWithCredential,
   signInAnonymously,
   PhoneAuthProvider,
   linkWithCredential,
@@ -36,31 +34,12 @@ export function isTestPhone(phone) {
   return TEST_PHONES.some(t => phone.replace(/\D/g, '') === t.replace(/\D/g, ''))
 }
 
-const FB_PROVIDER = new FacebookAuthProvider()
-
 export async function signInWithGoogle() {
   const a = init()
   if (!a) throw new Error('Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env')
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
   const result = await signInWithPopup(a, provider)
-  return result
-}
-
-export async function signInWithFacebook() {
-  const a = init()
-  if (!a) throw new Error('Firebase not configured')
-  const provider = new FacebookAuthProvider()
-  provider.setCustomParameters({ prompt: 'select_account' })
-  const result = await signInWithPopup(a, provider)
-  return result
-}
-
-export async function signInWithFacebookToken(accessToken) {
-  const a = init()
-  if (!a) throw new Error('Firebase not configured')
-  const credential = FacebookAuthProvider.credential(accessToken)
-  const result = await signInWithCredential(a, credential)
   return result
 }
 

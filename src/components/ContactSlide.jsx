@@ -125,10 +125,8 @@ export default function ContactSlide() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col items-center justify-center text-center px-6 py-16"
       >
-        <div className="w-12 h-12 rounded-full bg-sage/20 flex items-center justify-center mb-4">
-          <svg className="w-6 h-6 text-sage" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-            <path d="M5 13l4 4L19 7" />
-          </svg>
+        <div className="w-16 h-16 mb-4">
+          <img src="/ar-logo.png" alt="AR" className="w-full h-full object-contain opacity-70" />
         </div>
         <p className="text-cream/90 font-heading text-xl mb-2">Thank You!</p>
         <p className="text-cream/60 text-sm max-w-xs">Your message has been sent. We'll get back to you soon.</p>

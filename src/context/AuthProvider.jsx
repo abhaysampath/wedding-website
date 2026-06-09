@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { track } from '@vercel/analytics'
 import { AuthContext } from './AuthContext'
 import config from '../config'
-import { signInWithGoogle, signInWithFacebook, signInWithFacebookToken } from '../firebase'
+import { signInWithGoogle } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
 
@@ -131,8 +131,6 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const [pendingFbUser, setPendingFbUser] = useState(null)
-
   const processSignIn = useCallback((guest, fbUser) => {
     setFirebaseError(null)
     const now = eastTime()
@@ -165,19 +163,6 @@ export function AuthProvider({ children }) {
       if (el) el.scrollIntoView({ behavior: 'smooth' })
     }, 300)
   }, [])
-
-  useEffect(() => {
-    if (!pendingFbUser || !content.guests?.length) return
-    const guest = findGuestByName(content.guests, pendingFbUser.name) || findGuestByEmail(content.guests, pendingFbUser.email)
-    if (!guest) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFirebaseError(`Could not find "${pendingFbUser.name}" on the guest list. Try a different account or contact the couple.`)
-      setPendingFbUser(null)
-      return
-    }
-    setPendingFbUser(null)
-    processSignIn(guest, pendingFbUser)
-  }, [pendingFbUser, content.guests, processSignIn])
 
   const signInAsGuest = useCallback((guest, overrides = {}) => {
     setFirebaseError(null)
@@ -220,14 +205,9 @@ export function AuthProvider({ children }) {
     setFirebaseLoading(true)
     setFirebaseError(null)
     try {
-      let result
-      if (provider === 'google') {
-        result = await signInWithGoogle()
-      } else {
-        result = await signInWithFacebook()
-      }
+      const result = await signInWithGoogle()
       if (result?.user) {
-        const fbUser = {
+        const authUser = {
           name: result.user.displayName || '',
           email: result.user.email || '',
           photo: result.user.photoURL || '',
@@ -235,12 +215,13 @@ export function AuthProvider({ children }) {
         }
 
         const guest = content.guests?.length
-          ? (findGuestByName(content.guests, fbUser.name) || findGuestByEmail(content.guests, fbUser.email))
+          ? (findGuestByName(content.guests, authUser.name) || findGuestByEmail(content.guests, authUser.email))
           : null
         if (guest) {
-          processSignIn(guest, fbUser)
+          processSignIn(guest, authUser)
         } else {
-          setPendingFbUser(fbUser)
+          setFirebaseError(`Could not find "${authUser.name}" on the guest list. Try a different account or contact the couple.`)
+          track('guest_not_found', { name: authUser.name, email: authUser.email })
         }
       }
     } catch (err) {
@@ -249,39 +230,6 @@ export function AuthProvider({ children }) {
     } finally {
       setFirebaseLoading(false)
     }
-  }, [content.guests, processSignIn])
-
-  useEffect(() => {
-    const handler = async (e) => {
-      setFirebaseLoading(true)
-      setFirebaseError(null)
-      try {
-        const result = await signInWithFacebookToken(e.detail.accessToken)
-        if (result?.user) {
-          const fbUser = {
-            name: result.user.displayName || '',
-            email: result.user.email || '',
-            photo: result.user.photoURL || '',
-            uid: result.user.uid,
-          }
-          const guest = content.guests?.length
-            ? (findGuestByName(content.guests, fbUser.name) || findGuestByEmail(content.guests, fbUser.email))
-            : null
-          if (guest) {
-            processSignIn(guest, fbUser)
-          } else {
-            setPendingFbUser(fbUser)
-          }
-        }
-      } catch (err) {
-        setFirebaseError(err.message || 'Facebook sign in failed')
-        track('signin_failed', { method: 'facebook_sdk', reason: err.message })
-      } finally {
-        setFirebaseLoading(false)
-      }
-    }
-    window.addEventListener('facebook-login', handler)
-    return () => window.removeEventListener('facebook-login', handler)
   }, [content.guests, processSignIn])
 
   const updateContact = useCallback(async (data) => {
