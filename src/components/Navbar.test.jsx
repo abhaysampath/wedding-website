@@ -79,16 +79,22 @@ describe('Navbar', () => {
     expect(logos[0].className).toContain('h-12')
   })
 
-  it('toggles to full text on logo click', () => {
+  it('opens auth modal on logo click', () => {
+    const setShowAuthModal = vi.fn()
+    const setAuthMode = vi.fn()
+    mockUseAuth.mockReturnValue({
+      user: null,
+      setShowAuthModal,
+      setAuthMode,
+      signOut: vi.fn(),
+    })
     render(<Navbar />)
-    expect(screen.queryByText('Abhay & Rebecca')).toBeNull()
     const buttons = screen.getAllByRole('button')
     const logoButton = buttons.find(b => b.className.includes('font-heading'))
     expect(logoButton).toBeTruthy()
     if (logoButton) {
       fireEvent.click(logoButton)
-      const texts = screen.getAllByText('Abhay & Rebecca')
-      expect(texts.length).toBe(2)
+      expect(setShowAuthModal).toHaveBeenCalledWith(true)
     }
   })
 })

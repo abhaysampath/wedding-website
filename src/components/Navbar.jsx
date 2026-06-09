@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { roleLabels } from '../utils/guest'
 
@@ -18,38 +18,20 @@ const authLinks = [
   { href: '#faq', label: 'FAQ' },
 ]
 
-function LogoButton({ logoClicked, onClick }) {
+function LogoButton({ onClick, scrolled }) {
   return (
-    <button onClick={onClick} className="relative font-heading font-semibold tracking-wide transition-all duration-300">
-      <AnimatePresence mode="wait">
-        {!logoClicked ? (
-          <motion.span
-            key="short"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-[#F5FFFA]/80 hover:border hover:border-gold/20 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
-          >
-            <img
-              src="/ar-logo.png"
-              alt="AR"
-              className="h-12 w-auto pointer-events-none"
-            />
-          </motion.span>
-        ) : (
-          <motion.span
-            key="full"
-            initial={{ width: 36, opacity: 0 }}
-            animate={{ width: 'auto', opacity: 1 }}
-            exit={{ width: 36, opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="inline-flex items-center h-9 rounded-sm border currentColor border-current/30 text-sm overflow-hidden whitespace-nowrap"
-          >
-            <span className="px-2">Abhay & Rebecca</span>
-          </motion.span>
-        )}
-      </AnimatePresence>
+    <button onClick={onClick} className="relative font-heading font-semibold tracking-wide">
+      <motion.span
+        whileTap={{ scale: 0.85 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 14 }}
+        className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-gold/15 hover:border hover:border-gold/20 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
+      >
+        <img
+          src="/ar-logo.png"
+          alt="AR"
+          className={`h-12 w-auto pointer-events-none transition-all duration-300 ${scrolled ? '' : 'brightness-0 invert'}`}
+        />
+      </motion.span>
     </button>
   )
 }
@@ -57,21 +39,18 @@ function LogoButton({ logoClicked, onClick }) {
 export default function Navbar() {
   const { user, setShowAuthModal, setAuthMode, signOut } = useAuth()
   const [scrolled, setScrolled] = useState(false)
-  const [logoClicked, setLogoClicked] = useState(false)
+  const desktopBtnRef = useRef(null)
+  const mobileBtnRef = useRef(null)
 
   const links = user ? authLinks : guestLinks
 
-  const handleLogoClick = () => {
-    setLogoClicked(l => !l);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setTimeout(() => {
-      if (user) {
-        setShowAuthModal(true);
-        setAuthMode('settings');
-      } else {
-        setShowAuthModal(true);
-      }
-    }, 400);
+  const handleLogoClick = (sourceRef) => {
+    const rect = sourceRef?.current?.getBoundingClientRect()
+    if (rect) {
+      window.__logoRect = { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
+    }
+    if (user) setAuthMode('settings')
+    setShowAuthModal(true)
   }
 
   useEffect(() => {
@@ -109,7 +88,7 @@ export default function Navbar() {
                 <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
               </div>
               <button
-                onClick={() => { signOut(); setLogoClicked(false) }}
+                onClick={() => { signOut() }}
                 className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
                 title="Sign out"
               >
@@ -117,14 +96,18 @@ export default function Navbar() {
               </button>
             </div>
           )}
-          <LogoButton logoClicked={logoClicked} onClick={handleLogoClick} />
+          <div ref={desktopBtnRef}>
+            <LogoButton onClick={() => handleLogoClick(desktopBtnRef)} scrolled={scrolled} />
+          </div>
         </div>
       </div>
 
       {/* Mobile layout — icon top-right, no menu */}
       <div className="md:hidden flex items-center justify-end px-6 h-16">
         <div className={`flex items-center ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
-          <LogoButton logoClicked={logoClicked} onClick={handleLogoClick} />
+          <div ref={mobileBtnRef}>
+            <LogoButton onClick={() => handleLogoClick(mobileBtnRef)} scrolled={scrolled} />
+          </div>
         </div>
       </div>
     </nav>

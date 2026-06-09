@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
+
 import { track } from '@vercel/analytics'
 import { useAuth } from '../context/useAuth'
 
@@ -448,19 +449,38 @@ export default function AuthModal() {
     }
   }, [showDropdown])
 
+  const logoOffsetRef = useRef({ x: 0, y: 0 })
+  if (showAuthModal && typeof window !== 'undefined' && window.__logoRect) {
+    const r = window.__logoRect
+    const cx = window.innerWidth / 2
+    const cy = window.innerHeight / 2
+    logoOffsetRef.current = { x: r.x + r.width / 2 - cx, y: r.y + r.height / 2 - cy }
+    window.__logoRect = null
+  }
+
+  const logoAnimStyle = useMemo(() => {
+    if (!showAuthModal) return {}
+    const ox = logoOffsetRef.current.x * 0.5
+    const oy = logoOffsetRef.current.y * 0.5
+    return {
+      '--logo-ox': `${ox}px`,
+      '--logo-oy': `${oy}px`,
+    }
+  }, [showAuthModal])
+
   return (
     <>
       {showAuthModal && (
         <div
+          className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm overflow-y-auto md:flex md:items-start md:justify-center md:pt-[10vh] overscroll-contain animate-modal-fade-in"
           ref={modalRef}
-          className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm overflow-y-auto md:flex md:items-start md:justify-center md:pt-[10vh] overscroll-contain"
           onClick={handleCancel}
           style={{ overscrollBehavior: 'contain' }}
         >
           <div
-            className="min-h-screen md:min-h-0 w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 overflow-y-auto pb-16 md:pb-0"
+            className="min-h-screen md:min-h-0 w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 overflow-y-auto pb-16 md:pb-0 animate-modal-pop-in"
             onClick={(e) => e.stopPropagation()}
-            style={{ WebkitOverflowScrolling: 'touch' }}
+            style={{ ...logoAnimStyle, WebkitOverflowScrolling: 'touch' }}
           >
             <div className="p-4 pb-6 md:p-10 relative">
               <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
