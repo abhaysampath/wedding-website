@@ -115,7 +115,29 @@ async function main() {
     const modal = await page.$('[aria-label*="sign" i], [role="dialog"], [class*="modal"]')
     assert('Auth modal opens on click', !!modal)
 
-    // Test 5: Scroll to specific sections and verify content
+    // Test 5: Sign in as guest to unlock auth-gated sections (Event Details, FAQ, etc.)
+    const guestUser = {
+      id: 'g001',
+      firstName: 'Rebecca',
+      lastName: '',
+      side: 'bride',
+      role: 'bride',
+      relationship: 'The Bride',
+      weddings: ['us', 'india'],
+      plusOne: false,
+      phone: '',
+      email: '',
+      address: '',
+      dietaryPreferences: '',
+      lastLogin: new Date().toISOString(),
+      uid: null,
+    }
+    await page.evaluate((guest) => {
+      localStorage.setItem('wedding_user', JSON.stringify(guest))
+    }, guestUser)
+    await page.reload({ waitUntil: 'networkidle0', timeout: 30000 })
+
+    // Test 6: Scroll to specific sections and verify content
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
     await new Promise(r => setTimeout(r, 500))
 
@@ -124,7 +146,7 @@ async function main() {
     const e2eChecks = [
       { label: 'Event Details section', key: 'Event Details' },
       { label: 'FAQ section', key: 'FAQ' },
-      { label: 'Footer section', key: 'Abhay & Rebecca' },
+      { label: 'Footer section', key: 'Rebecca & Abhay' },
     ]
     for (const check of e2eChecks) {
       assert(check.label, bodyText.includes(check.key), `${check.key} not found in page`)
@@ -133,7 +155,7 @@ async function main() {
     await page.evaluate(() => window.scrollTo(0, 0))
     await new Promise(r => setTimeout(r, 300))
 
-    // Test 6: Console errors filtered for noise
+    // Test 7: Console errors filtered for noise
     const appErrors = consoleErrors.filter(e =>
       !e.includes('runtime.lastError') &&
       !e.includes('Receiving end does not exist') &&
@@ -143,7 +165,7 @@ async function main() {
     assert('No app console errors', appErrors.length === 0,
       appErrors.length > 0 ? appErrors[0] : undefined)
 
-    // Test 6: No unexpected network failures (Vercel 404s are expected off-platform)
+    // Test 8: No unexpected network failures (Vercel 404s are expected off-platform)
     assert('No unexpected network failures', failedRequests.length === 0,
       failedRequests.length > 0 ? `${failedRequests[0].url} — ${failedRequests[0].error}` : undefined)
 
