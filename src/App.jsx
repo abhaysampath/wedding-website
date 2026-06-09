@@ -246,13 +246,57 @@ function GallerySkeleton() {
   )
 }
 
+function useSectionHash() {
+  const { user } = useAuth()
+
+  useEffect(() => {
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    let lastId = ''
+
+    const updateHash = (id) => {
+      if (id === lastId) return
+      lastId = id
+      const hash = id === 'hero' ? '' : `#${id}`
+      const url = hash ? `${window.location.pathname.replace(/\/$/, '')}${hash}` : window.location.pathname.replace(/\/$/, '') || '/'
+      history.replaceState(null, '', url)
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+      if (visible.length > 0) updateHash(visible[0].target.id)
+    }, { rootMargin: '-80px 0px -50% 0px', threshold: [0, 0.25, 0.5] })
+
+    ids.forEach(id => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    const onPopState = () => {
+      const hash = window.location.hash.slice(1)
+      if (hash && ids.includes(hash)) {
+        document.getElementById(hash)?.scrollIntoView({ behavior: 'instant' })
+      } else if (!hash) {
+        window.scrollTo({ top: 0, behavior: 'instant' })
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('popstate', onPopState)
+    }
+  }, [user])
+}
+
 function PageContent() {
   const { activeWedding, user } = useAuth()
+
+  useSectionHash()
 
   return (
     <div data-wedding={activeWedding} className="wedding-page min-h-screen pb-14 md:pb-0">
       <a
-        href="#story"
+        href="#gallery"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
       >
         Skip to content
