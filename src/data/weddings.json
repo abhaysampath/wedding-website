@@ -81,35 +81,57 @@
   },
   "india": {
     "label": "India Wedding",
-    "date": "TBD 2027",
-    "venue": "TBD",
-    "address": "Details coming soon",
+    "date": "Thursday, February 25, 2027",
+    "venue": "Dwaraka Palace",
+    "venueUrl": "https://www.kalyanamandapam.com/dwaraka-palace-chennai",
+    "address": "63 1st Seaward Road, Chennai, Tamil Nadu 600041, India",
     "timeline": [
       {
-        "time": "TBD",
-        "label": "Ceremony",
-        "description": "Traditional Indian wedding ceremony",
-        "details": "Details about the Indian wedding ceremony will be shared as the date approaches. The ceremony will follow traditional Hindu customs including the jaimala (garland exchange), saptapadi (seven steps), and sindoor.",
-        "location": "TBD",
-        "duration": "Approx. 2 hours"
+        "time": "February 23, 2027",
+        "label": "Mehendi",
+        "description": "Mehendi ceremony for Rebecca, Paulette, Jayashree, and Abhay",
+        "details": "A joyful pre-wedding ceremony where intricate henna designs are applied. Join us for music, mingling, and celebration as we kick off the wedding festivities.",
+        "location": "Dwaraka Palace, Chennai"
       },
       {
-        "time": "TBD",
-        "label": "Reception",
-        "description": "Dinner and celebration",
-        "details": "A grand dinner reception with live music, dancing, and a feast of traditional Indian cuisine. More details to come.",
-        "location": "TBD",
-        "duration": "Approx. 4 hours"
+        "time": "February 24, 2027",
+        "label": "Virutham, Nischayathaartham & Mehendi",
+        "description": "A day of pre-wedding rituals: Virutham, formal engagement, and mehendi mingling",
+        "details": "The Viratham ceremony will be conducted on the morning of February 24th. Viratham (or Vrutham) is a significant pre-wedding ritual in Tamil Hindu weddings, particularly among Brahmins, symbolizing the transition from bachelorhood/spinsterhood to married life (Grihastha). It involves fasting and prayers by the bride, groom, and their parents to seek ancestral blessings for a harmonious, long-lasting marriage.\n\nThe Nischayathaartham is the formal engagement ceremony where the families come together to finalize the wedding commitments, followed by mehendi and mingling.",
+        "location": "Dwaraka Palace, Chennai"
+      },
+      {
+        "time": "February 25, 2027 — Morning",
+        "label": "Muhurtham",
+        "description": "The main wedding ceremony: Kaasi Yathirai, Garland exchange, Oonjal, Kanya daanam, Pani grahanam & Sapthapathi",
+        "details": "Once the couple announces their engagement, the Priest, along with the couple's parents, come together to discuss the Muhurtham. Based on the couple's horoscopes, the Priest determines the most auspicious day to conduct the marriage and time to start ceremony. The calculation is derived from Hindu Vedic Astrology and is of utmost importance in order to avoid the presence of evil eye at the wedding.\n\nThe Muhurtham ceremony includes:\n\n• Kaasi Yathirai — The groom pretends to leave for Kashi (a holy city) to become an ascetic, and the bride's father persuades him to return and embrace married life\n• Garland exchange — The bride and groom exchange garlands, symbolizing mutual acceptance\n• Oonjal — The couple sits on a decorated swing as women sing traditional songs\n• Kanya daanam — The bride's father gives her away to the groom\n• Pani grahanam — The groom holds the bride's hand, sealing the union\n• Sapthapathi — The seven sacred steps around the holy fire, each representing a vow",
+        "location": "Dwaraka Palace, Chennai",
+        "duration": "Morning ceremony"
+      },
+      {
+        "time": "February 25, 2027 — Evening",
+        "label": "Wedding Reception",
+        "description": "Grand dinner reception with celebration, music, and traditional cuisine",
+        "details": "Join us for a festive evening of dinner, music, and celebration following the wedding ceremony. A feast of traditional Indian cuisine will be served.",
+        "location": "Dwaraka Palace, Chennai",
+        "duration": "Evening reception"
       }
     ],
-    "dressCode": "Traditional Indian attire encouraged — sarees, lehengas, and kurta-pajamas welcome",
+    "dressCode": "Traditional Indian attire encouraged. Women typically wear Sarees for the ceremony and Lehengas for the reception. Men usually wear a Kurta or Sherwani with dress pants. Since the ceremony is religious, please dress modestly (covered shoulders and longer hemlines). Please avoid the colors black and red. If you are part of the Wedding Party, please coordinate with Rebecca and Abhay.\n\nRental options: Vitham Rentals (Chennai), Aayka Fashion (NYC — free pickup), All Borrow (online rental).",
+    "brideFamilyGuestNames": ["Rebecca", "Steve", "Paulette", "David", "Alex"],
+    "brideFamilyHotels": [
+      { "name": "The Leela Palace Chennai", "website": "https://www.theleela.com/the-leela-palace-chennai", "address": "Adyar Seaface, MRC Nagar, Chennai, Tamil Nadu 600028, India", "phone": "+91 44 4422 3000" }
+    ],
     "hotels": [
-      { "name": "Details coming soon", "distance": "", "address": "", "phone": "" }
+      { "name": "Taj Wellington Mews, Chennai", "website": "https://www.tajhotels.com/en-in/taj/taj-wellington-mews-chennai/", "address": "157, Mowbray's Rd, Nungambakkam, Chennai, Tamil Nadu 600018, India", "phone": "+91 44 4422 4000" },
+      { "name": "The Leela Palace Chennai", "website": "https://www.theleela.com/the-leela-palace-chennai", "address": "Adyar Seaface, MRC Nagar, Chennai, Tamil Nadu 600028, India", "phone": "+91 44 4422 3000" },
+      { "name": "Green Meadows Resorts Chennai", "address": "546, T H Road, Thapalpettai, Meensuruti, Chennai, Tamil Nadu 600126, India", "phone": "+91 44 2799 0999" },
+      { "name": "Novotel Chennai Chamiers Road", "badge": "Discount option", "website": "https://www.novotelchennai.in/", "address": "9, Chamiers Road, Pasupathy Nagar, Teynampet, Chennai, Tamil Nadu 600018, India", "phone": "+91 44 4399 0000" }
     ],
     "transport": {
-      "car": "Details coming soon.",
-      "train": "Details coming soon.",
-      "subway": "Details coming soon."
+      "car": "Chennai is well-connected by road. Dwaraka Palace is located at 63 1st Seaward Road, Chennai, Tamil Nadu 600041. Taxis and ride-sharing services (Uber, Ola) are widely available.",
+      "train": "Chennai Central Railway Station (MAS) is approximately 8 km from the venue. Many auto-rickshaws and taxis are available outside the station.",
+      "subway": "The nearest Chennai Metro station is Thirumayilai. From there, an auto-rickshaw or taxi is a short ride to the venue."
     }
   }
 }

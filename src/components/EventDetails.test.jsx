@@ -174,8 +174,22 @@ describe('EventDetails India wedding', () => {
       user: { role: 'bride' },
     })
     render(<EventDetails />)
-    expect(screen.getByText('TBD 2027')).toBeTruthy()
-    expect(screen.getByText('Ceremony')).toBeTruthy()
-    expect(screen.getByText('Reception')).toBeTruthy()
+    expect(screen.getByText('Thursday, February 25, 2027')).toBeTruthy()
+    expect(screen.getByText('Dwaraka Palace')).toBeTruthy()
+    expect(screen.getAllByText('Mehendi').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Muhurtham')).toBeTruthy()
+    expect(screen.getByText('Wedding Reception')).toBeTruthy()
+  })
+
+  it('renders Wikipedia links for known foreign terms', () => {
+    mockUseAuth.mockReturnValue({
+      activeWedding: 'india',
+      user: { role: 'bride' },
+    })
+    render(<EventDetails />)
+    const mehendiLinks = screen.getAllByText('Mehendi')
+    const anchor = mehendiLinks.find(el => el.tagName === 'A')
+    expect(anchor).toBeTruthy()
+    expect(anchor.getAttribute('href')).toBe('https://en.wikipedia.org/wiki/Mehndi')
   })
 })

@@ -1,10 +1,35 @@
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { useAuth } from '../context/useAuth'
 import weddings from '../data/weddings.json'
 import WeddingSwitcher from './WeddingSwitcher'
+import { linkTerms } from '../utils/glossary'
+
+function LinkedText({ text }) {
+  if (!text) return null
+  const parts = linkTerms(text)
+  return (
+    <>
+      {parts.map((p, i) =>
+        typeof p === 'string' ? (
+          <Fragment key={i}>{p}</Fragment>
+        ) : (
+          <a
+            key={i}
+            href={p.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gold-dark hover:text-gold underline underline-offset-2 decoration-gold/30 hover:decoration-gold/60 transition-colors"
+          >
+            {p.word}
+          </a>
+        )
+      )}
+    </>
+  )
+}
 
 function ClockIcon() {
   return (
@@ -77,10 +102,21 @@ export default function EventDetails() {
               {w.date}
             </p>
             <p className="text-charcoal-light text-sm md:text-base tracking-wide">
-              {w.venue}
+              {w.venueUrl ? (
+                <a href={w.venueUrl} target="_blank" rel="noopener noreferrer" className="text-gold-dark hover:text-gold underline underline-offset-2 decoration-gold/30 hover:decoration-gold/60 transition-colors">
+                  {w.venue}
+                </a>
+              ) : w.venue}
             </p>
             <p className="text-charcoal-light/60 text-xs md:text-sm mt-1.5">
-              {w.address}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(w.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-charcoal-light/80 transition-colors"
+              >
+                {w.address}
+              </a>
             </p>
           </div>
         </motion.div>
@@ -128,7 +164,7 @@ export default function EventDetails() {
                           {event.label}
                         </h3>
                         <p className="text-charcoal-light/70 text-sm md:text-base leading-relaxed">
-                          {event.description}
+                          <LinkedText text={event.description} />
                         </p>
                       </div>
 
@@ -149,7 +185,7 @@ export default function EventDetails() {
                             >
                               {event.details && (
                                 <p className="text-charcoal-light/80 text-sm md:text-base leading-relaxed">
-                                  {event.details}
+                                  <LinkedText text={event.details} />
                                 </p>
                               )}
                               <motion.div
@@ -211,18 +247,7 @@ export default function EventDetails() {
           </div>
         )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center mt-20"
-        >
-          <p className="text-charcoal-light/60 text-sm italic flex items-center justify-center gap-3">
-            <span className="w-8 h-[1px] bg-gold/20" />
-            Attire: {w.dressCode}
-            <span className="w-8 h-[1px] bg-gold/20" />
-          </p>
-        </motion.div>
+
       </div>
     </section>
   )
