@@ -32,11 +32,11 @@ describe('fullName', () => {
   })
 
   it('prepends prefix when present', () => {
-    expect(fullName({ firstName: 'John', lastName: 'Smith', prefix: 'Dr.' })).toBe('Dr. John Smith')
+    expect(fullName({ firstName: 'John', lastName: 'Smith', title: 'Dr.' })).toBe('Dr. John Smith')
   })
 
-  it('trims prefix whitespace', () => {
-    expect(fullName({ firstName: 'Jane', lastName: 'Doe', prefix: '  Dr.  ' })).toBe('Dr. Jane Doe')
+  it('trims title whitespace', () => {
+    expect(fullName({ firstName: 'Jane', lastName: 'Doe', title: '  Dr.  ' })).toBe('Dr. Jane Doe')
   })
 })
 

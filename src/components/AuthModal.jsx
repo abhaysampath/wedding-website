@@ -606,7 +606,7 @@ export default function AuthModal() {
                         {fullName(selectedMatch)}
                       </p>
                      <p className="text-sm text-charcoal-light/50 mt-1">
-                       {guestLabel(selectedMatch, sideName)}
+                        {guestLabel(selectedMatch, sideName)}?
                      </p>
                     </div>
 
@@ -631,7 +631,7 @@ export default function AuthModal() {
                        <div className="flex-1 h-px bg-gold/10" />
                      </div>
 
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-4">
                       {/* Phone — always visible when guest has phone */}
                       {guestPhone && isUsNumber(guestPhone) && !awaitingSmsCode && (
                         <div>

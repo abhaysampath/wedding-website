@@ -12,7 +12,7 @@ export function stripPhone(raw) {
 
 export function fullName(guest) {
   if (!guest) return ''
-  const prefix = guest.prefix ? guest.prefix.trim() + ' ' : ''
+  const prefix = guest.title ? guest.title.trim() + ' ' : ''
   return `${prefix}${guest.firstName} ${guest.lastName}`.trim()
 }
 

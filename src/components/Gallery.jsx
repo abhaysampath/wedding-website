@@ -53,7 +53,7 @@ export default function Gallery() {
   function preload(images) {
     (images || []).forEach(img => {
       if (!img?.jpg) return
-      if (preloaded.current.has(img.jpg)) return
+      if (!preloaded.current || preloaded.current.has(img.jpg)) return
       preloaded.current.add(img.jpg)
       const pre = new Image()
       pre.src = img.jpg
@@ -71,6 +71,7 @@ export default function Gallery() {
   }, [])
 
   function seededShuffle(arr) {
+    if (!arr || !Array.isArray(arr)) return []
     const a = [...arr]
     const seed = arr.reduce((acc, item) => {
       if (!item?.jpg) return acc

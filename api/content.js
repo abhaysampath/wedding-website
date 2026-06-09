@@ -73,6 +73,7 @@ export default async function handler(req, res) {
         firstName,
         lastName,
         side: inferSide(firstName, lastName, relationship, roleRaw),
+        title: row.title || '',
         relationship,
         role: ROLE_MAP[roleRaw] || 'invited_guest',
         weddings: parseWeddings(row.invitedTo),
