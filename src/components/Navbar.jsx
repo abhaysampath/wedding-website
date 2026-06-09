@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-import { roleLabels } from '../utils/guest'
+import { roleLabels, fullName } from '../utils/guest'
 
 const guestLinks = [
   { href: '#gallery', label: 'Gallery' },
@@ -83,7 +83,7 @@ export default function Navbar() {
           {user && (
             <div className="flex items-center gap-2 text-right">
               <div>
-                <p className="text-xs font-medium leading-tight">{user.firstName} {user.lastName}</p>
+                <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
                 <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
               </div>
               <button
@@ -106,8 +106,7 @@ export default function Navbar() {
         <div className={`flex items-center gap-3 ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
           {user && (
             <div className="text-right">
-              <p className="text-xs font-medium leading-tight">{user.firstName} {user.lastName}</p>
-              <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
+              <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
             </div>
           )}
           <div ref={mobileBtnRef}>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import emailjs from '@emailjs/browser'
 import config from '../config'
 import { useAuth } from '../context/useAuth'
+import { fullName } from '../utils/guest'
 
 const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
 
@@ -56,7 +57,7 @@ async function verifyRecaptchaToken(token) {
 export default function ContactSlide() {
   const { user } = useAuth()
   const reasons = config.images.hero.contact.reasons
-  const defaultName = user ? `${user.firstName} ${user.lastName}`.trim() : ''
+  const defaultName = user ? fullName(user) : ''
   const defaultEmail = user?.email || ''
   const [reason, setReason] = useState(reasons[0]?.value || '')
   const [name, setName] = useState(defaultName)

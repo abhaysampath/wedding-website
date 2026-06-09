@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stripPhone, guestLabel, roleLabels } from './guest'
+import { stripPhone, guestLabel, roleLabels, fullName } from './guest'
 
 describe('stripPhone', () => {
   it('removes non-digit characters', () => {
@@ -18,6 +18,25 @@ describe('stripPhone', () => {
 
   it('passes through already clean digits', () => {
     expect(stripPhone('5551234567')).toBe('5551234567')
+  })
+})
+
+describe('fullName', () => {
+  it('returns empty string for null/undefined', () => {
+    expect(fullName(null)).toBe('')
+    expect(fullName(undefined)).toBe('')
+  })
+
+  it('returns firstName + lastName without prefix', () => {
+    expect(fullName({ firstName: 'Jane', lastName: 'Doe' })).toBe('Jane Doe')
+  })
+
+  it('prepends prefix when present', () => {
+    expect(fullName({ firstName: 'John', lastName: 'Smith', prefix: 'Dr.' })).toBe('Dr. John Smith')
+  })
+
+  it('trims prefix whitespace', () => {
+    expect(fullName({ firstName: 'Jane', lastName: 'Doe', prefix: '  Dr.  ' })).toBe('Dr. Jane Doe')
   })
 })
 

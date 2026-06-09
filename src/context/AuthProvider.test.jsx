@@ -25,6 +25,7 @@ vi.mock('../utils/time', () => ({
 
 import { useAuth } from './useAuth'
 import { AuthProvider } from './AuthProvider'
+import { fullName } from '../utils/guest'
 
 function TestHarness() {
   const { firebaseLoading, firebaseError, user } = useAuth()
@@ -32,7 +33,7 @@ function TestHarness() {
     <div>
       <div data-testid="loading">{String(firebaseLoading)}</div>
       <div data-testid="error">{firebaseError || ''}</div>
-      <div data-testid="user">{user ? `${user.firstName} ${user.lastName}` : ''}</div>
+      <div data-testid="user">{user ? fullName(user) : ''}</div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useAuth } from '../context/useAuth'
-import { stripPhone, guestLabel } from '../utils/guest'
+import { stripPhone, guestLabel, fullName } from '../utils/guest'
 
 export default function ContactForm({ user, authMode, updateContact, sideName }) {
   const { setShowAuthModal, content } = useAuth()
@@ -92,7 +92,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   return (
     <div className="space-y-5">
       <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
-        <p className="font-heading text-lg text-charcoal">{user.firstName} {user.lastName}</p>
+        <p className="font-heading text-lg text-charcoal">{fullName(user)}</p>
         <p className="text-xs text-charcoal-light/50 mt-1">{guestLabel(user, sideName)}</p>
       </div>
 

@@ -13,7 +13,7 @@ import {
 } from '../firebase'
 import { sendVerificationCode, verifyCode } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
-import { stripPhone, guestLabel } from '../utils/guest'
+import { stripPhone, guestLabel, fullName } from '../utils/guest'
 
 function isUsNumber(raw) {
   const digits = stripPhone(raw)
@@ -497,7 +497,7 @@ export default function AuthModal() {
               <div className="p-4 pb-6 md:p-10 relative">
                <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
                  {authMode === 'signin' ? 'Sign in' : authMode === 'contact' ? 'Contact information' : authMode === 'settings' ? 'Settings' : ''}
-                 {selectedMatch ? ` — signed in as ${selectedMatch.firstName} ${selectedMatch.lastName}` : ''}
+                  {selectedMatch ? ` — signed in as ${fullName(selectedMatch)}` : ''}
                  {firebaseError ? ` — error: ${firebaseError}` : ''}
                </div>
                <div ref={recaptchaContainerRef} />
@@ -572,7 +572,7 @@ export default function AuthModal() {
                                 i === highlightedIndex ? 'bg-gold/10 text-charcoal' : 'text-charcoal hover:bg-cream-dark'
                               }`}
                             >
-                              <span className="font-medium">{g.firstName} {g.lastName}</span>
+                               <span className="font-medium">{fullName(g)}</span>
                               <span className="text-charcoal-light/50 ml-2">{guestLabel(g, sideName)}</span>
                             </button>
                           ))}
@@ -602,9 +602,9 @@ export default function AuthModal() {
                  <div className="space-y-6">
                    <div className="text-center">
                      <p className="text-sm text-charcoal-light/50 mb-2">Are you</p>
-                     <p className="font-heading text-2xl text-charcoal">
-                       {selectedMatch.firstName} {selectedMatch.lastName}
-                     </p>
+                      <p className="font-heading text-2xl text-charcoal">
+                        {fullName(selectedMatch)}
+                      </p>
                      <p className="text-sm text-charcoal-light/50 mt-1">
                        {guestLabel(selectedMatch, sideName)}
                      </p>
