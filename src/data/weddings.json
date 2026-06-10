@@ -2,7 +2,7 @@
   "us": {
     "label": "US Wedding",
     "date": "Sunday, May 30, 2027",
-    "venue": "New York Botanical Garden",
+    "venue": "The Stone Mill at New York Botanical Garden",
     "address": "2900 Southern Blvd, Bronx, NY 10458",
     "timeline": [
       {
@@ -19,8 +19,8 @@
         "time": "3:00pm",
         "label": "Couple Access to Venue for Photography",
         "description": "Bride, groom, and immediate family arrive for pre-ceremony photos",
-        "details": "The couple and immediate family have access to the venue for private photography before guest arrival. First look and family formals will be captured in the Rose Garden and Conservatory. Please arrive promptly at 3:00pm — the photographer's schedule is tight.",
-        "location": "Rose Garden & Conservatory",
+        "details": "The couple and immediate family have access to the venue for private photography before guest arrival. First look and family formals will be captured at the Stone Mill and Conservatory. Please arrive promptly at 3:00pm — the photographer's schedule is tight.",
+        "location": "Stone Mill & Conservatory",
         "duration": "3:00pm – 5:30pm",
         "roles": ["bride", "groom", "close_family"]
       },
@@ -28,16 +28,16 @@
         "time": "6:00pm – 6:30pm",
         "label": "Guest Arrival",
         "description": "Guests arrive and are seated for the ceremony",
-        "details": "Please arrive and make your way to the Rose Garden for the ceremony. Ushers will guide you to your seat. This is a great time to sign the guest book and find your seat before the ceremony begins at 6:30pm sharp.",
-        "location": "Rose Garden, NY Botanical Garden",
+        "details": "Please arrive and make your way to the Stone Mill for the ceremony. Ushers will guide you to your seat. This is a great time to sign the guest book and find your seat before the ceremony begins at 6:30pm sharp.",
+        "location": "Stone Mill, NY Botanical Garden",
         "duration": "30 minutes"
       },
       {
         "time": "6:30pm – 7:00pm",
         "label": "Ceremony",
         "description": "Join us under the arbor as we exchange our vows",
-        "details": "The ceremony will take place in the Rose Garden, weather permitting. In case of rain, we'll move to the Conservatory (indoor). Please arrive by 6:15 PM to find your seat. Phones are welcome but we ask that you stay seated and refrain from blocking the aisle.",
-        "location": "Rose Garden, NY Botanical Garden",
+        "details": "The ceremony will take place at the Stone Mill, weather permitting. In case of rain, we'll move to the Conservatory (indoor). Please arrive by 6:15 PM to find your seat. Phones are welcome but we ask that you stay seated and refrain from blocking the aisle.",
+        "location": "Stone Mill, NY Botanical Garden",
         "duration": "Approx. 30 minutes"
       },
       {
@@ -76,7 +76,8 @@
     "transport": {
       "car": "The New York Botanical Garden is located at 2900 Southern Blvd, Bronx, NY. There are several parking garages nearby.",
       "train": "Metro-North Railroad from Grand Central to Botanical Garden Station. The journey takes approximately 20 minutes.",
-      "subway": "Take the 2 or 5 train to Pelham Parkway station, then a short taxi or bus ride to the garden."
+      "subway": "Take the 2 or 5 train to Pelham Parkway station, then a short taxi or bus ride to the garden.",
+      "air": "The closest airports are LaGuardia (LGA) and JFK International (JFK). Newark Liberty (EWR) is also accessible via train or car. A taxi or ride-share from LGA is about 15-20 minutes, from JFK about 30-40 minutes."
     }
   },
   "india": {
@@ -131,7 +132,8 @@
     "transport": {
       "car": "Chennai is well-connected by road. Dwaraka Palace is located at 63 1st Seaward Road, Chennai, Tamil Nadu 600041. Taxis and ride-sharing services (Uber, Ola) are widely available.",
       "train": "Chennai Central Railway Station (MAS) is approximately 8 km from the venue. Many auto-rickshaws and taxis are available outside the station.",
-      "subway": "The nearest Chennai Metro station is Thirumayilai. From there, an auto-rickshaw or taxi is a short ride to the venue."
+      "subway": "The nearest Chennai Metro station is Thirumayilai. From there, an auto-rickshaw or taxi is a short ride to the venue.",
+      "air": "Chennai International Airport (MAA) is about 15 km from the venue. Taxis and ride-sharing services (Uber, Ola) are readily available at the airport. The drive to Dwaraka Palace takes approximately 30-45 minutes depending on traffic."
     }
   }
 }

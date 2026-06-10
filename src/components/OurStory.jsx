@@ -102,7 +102,7 @@ export default function OurStory() {
               </p>
               <p>
                 Last December, we escaped the New York winter for the warm waters and open skies of Belize.
-                On a perfect evening, Abhay got down on one knee and asked the question that changed everything.
+                On a perfect evening, I got down on one knee and asked the question that changed everything.
                 With a full heart, Rebecca said yes.
               </p>
               <p>

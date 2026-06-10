@@ -43,7 +43,7 @@ describe('EventDetails role-based filtering', () => {
     })
     render(<EventDetails />)
     expect(screen.getByText('Event Details')).toBeTruthy()
-    expect(screen.getByText('New York Botanical Garden')).toBeTruthy()
+    expect(screen.getByText('The Stone Mill at New York Botanical Garden')).toBeTruthy()
   })
 
   it('shows all 7 events for bride', () => {

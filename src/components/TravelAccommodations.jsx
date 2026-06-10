@@ -106,7 +106,7 @@ export default function TravelAccommodations() {
               {Object.entries(w.transport).map(([mode, text]) => (
                 <p key={mode}>
                   <strong className="text-charcoal capitalize">
-                    {mode === 'car' ? 'By Car' : mode === 'train' ? 'By Train' : 'By Subway'}:
+                    {mode === 'car' ? 'By Car' : mode === 'train' ? 'By Train' : mode === 'air' ? 'By Air' : 'By Subway'}:
                   </strong>{' '}
                   {text}
                 </p>

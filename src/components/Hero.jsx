@@ -130,14 +130,14 @@ export default function Hero() {
 
       <motion.div
         style={{ y: textY, opacity: textOpacity }}
-        className="relative z-10 flex flex-col items-center w-full px-6 pt-20 md:pt-28 pointer-events-none"
+        className="relative z-10 flex flex-col items-center w-full px-6 pt-32 md:pt-48 pointer-events-none"
       >
           <div className="flex flex-col items-center pointer-events-auto">
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="font-heading text-gold-light text-sm md:text-lg lg:text-xl tracking-[0.3em] uppercase mb-3 md:mb-4"
+              className="font-heading text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4"
             >
               We're getting married
             </motion.p>
@@ -150,7 +150,7 @@ export default function Hero() {
               className="font-heading text-4xl md:text-7xl lg:text-8xl font-light text-cream leading-tight text-center"
             >
               Abhay
-              <span className="mx-2 md:mx-6 text-gold"> & </span>
+              <span className="mx-2 md:mx-6 text-cream"> & </span>
               Rebecca
             </motion.button>
           </div>

@@ -299,7 +299,7 @@ export default function Gallery() {
                 {allImages.length > 1 && (
                   <>
                     <button
-                      onClick={goPrev}
+                      onClick={(e) => { e.stopPropagation(); goPrev() }}
                       aria-label="Previous image"
                       className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
@@ -308,7 +308,7 @@ export default function Gallery() {
                       </svg>
                     </button>
                     <button
-                      onClick={goNext}
+                      onClick={(e) => { e.stopPropagation(); goNext() }}
                       aria-label="Next image"
                       className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
