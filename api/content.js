@@ -82,6 +82,8 @@ export default async function handler(req, res) {
         phone: row.phone || '',
         address: row.address || '',
         dietaryPreferences: row.dietaryPreferences || '',
+        rsvpUs: row.rsvpUs || '',
+        rsvpIndia: row.rsvpIndia || '',
       }
     })
 

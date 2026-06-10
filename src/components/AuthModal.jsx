@@ -225,6 +225,27 @@ export default function AuthModal() {
   }, [verificationId, smsCode, guestPhone, guestEmail, selectedMatch, signInAsGuest, updateContact, verifyingCode, setFirebaseError])
 
   const handleCancel = useCallback(() => {
+    if (user && (authMode === 'settings' || authMode === 'contact')) {
+      setShowAuthModal(false)
+    } else if (user) {
+      recordLogin()
+      setShowAuthModal(false)
+      setAuthMode('signin')
+      resetState()
+      clearRecaptchaVerifier()
+    } else {
+      resetState()
+      clearRecaptchaVerifier()
+      setShowAuthModal(false)
+      setTimeout(() => {
+        const el = document.getElementById('hero')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 100)
+    }
+  }, [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode])
+
+  const handleDiscardAndClose = useCallback(() => {
+    try { sessionStorage.removeItem('contact_draft_' + user?.id) } catch {}
     if (user) {
       recordLogin()
       setShowAuthModal(false)
@@ -502,10 +523,10 @@ export default function AuthModal() {
                  {firebaseError ? ` — error: ${firebaseError}` : ''}
                </div>
                <div ref={recaptchaContainerRef} />
-               <button
-                onClick={handleCancel}
-                className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
-              >
+                <button
+                 onClick={handleDiscardAndClose}
+                 className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                   <path d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -653,13 +674,13 @@ export default function AuthModal() {
                                disabled={sendingSms}
                               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
                             >
-                              {sendingSms ? 'Sending...' : 'Send Log-In Code'}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                               {sendingSms ? 'Sending...' : 'Confirm'}
+                             </button>
+                           </div>
+                         </div>
+                       )}
 
-                      {/* Email — always visible when guest has email */}
+                       {/* Email — always visible when guest has email */}
                       {guestEmail && !awaitingEmailLink && (
                         <div>
                           <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
@@ -677,11 +698,11 @@ export default function AuthModal() {
                                disabled={saving}
                               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
                             >
-                              {saving ? 'Sending...' : 'Send Log-In Code'}
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                               {saving ? 'Sending...' : 'Confirm'}
+                             </button>
+                           </div>
+                         </div>
+                       )}
                      </div>
 
                       {/* SMS code input + resend (below grid) */}

@@ -147,6 +147,8 @@ export function AuthProvider({ children }) {
       email: guest.email || '',
       address: guest.address || '',
       dietaryPreferences: guest.dietaryPreferences || '',
+      rsvpUs: guest.rsvpUs || '',
+      rsvpIndia: guest.rsvpIndia || '',
       lastLogin: now,
       uid: fbUser.uid,
     }
@@ -180,6 +182,8 @@ export function AuthProvider({ children }) {
       email: overrides.email ?? guest.email ?? '',
       address: overrides.address ?? guest.address ?? '',
       dietaryPreferences: overrides.dietaryPreferences ?? guest.dietaryPreferences ?? '',
+      rsvpUs: overrides.rsvpUs ?? guest.rsvpUs ?? '',
+      rsvpIndia: overrides.rsvpIndia ?? guest.rsvpIndia ?? '',
       lastLogin: now,
       uid: null,
     }
@@ -241,6 +245,8 @@ export function AuthProvider({ children }) {
     if (data.email !== undefined) sheetData.email = data.email
     if (data.address !== undefined) sheetData.address = data.address
     if (data.dietaryPreferences !== undefined) sheetData.dietaryPreferences = data.dietaryPreferences
+    if (data.rsvpUs !== undefined) sheetData.rsvpUs = data.rsvpUs
+    if (data.rsvpIndia !== undefined) sheetData.rsvpIndia = data.rsvpIndia
     const hasDataChanges = Object.keys(sheetData).length > 0
     if (hasDataChanges) sheetData.lastUpdated = now
     const updated = { ...user, ...sheetData, phone: cleanedPhone || user.phone, lastLogin: now }

@@ -230,8 +230,8 @@ describe('AuthModal phone & email verification', () => {
     const input = screen.getByPlaceholderText('Start typing your name')
     fireEvent.change(input, { target: { value: 'Jan' } })
     fireEvent.click(screen.getByText('Jane Doe'))
-    const sendLogIn = screen.getAllByText('Send Log-In Code')
-    expect(sendLogIn.length).toBe(2)
+    const confirmButtons = screen.getAllByText('Confirm')
+    expect(confirmButtons.length).toBe(2)
   })
 })
 

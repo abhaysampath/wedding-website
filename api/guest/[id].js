@@ -74,6 +74,12 @@ export default async function handler(req, res) {
     if (data.loginFailed !== undefined && colMap.loginFailed !== undefined) {
       updates.push({ range: `${tabName}!${colLetter(colMap.loginFailed)}${sheetRow}`, values: [[data.loginFailed]] })
     }
+    if (data.rsvpUs !== undefined && colMap.rsvpUs !== undefined) {
+      updates.push({ range: `${tabName}!${colLetter(colMap.rsvpUs)}${sheetRow}`, values: [[data.rsvpUs]] })
+    }
+    if (data.rsvpIndia !== undefined && colMap.rsvpIndia !== undefined) {
+      updates.push({ range: `${tabName}!${colLetter(colMap.rsvpIndia)}${sheetRow}`, values: [[data.rsvpIndia]] })
+    }
 
     if (updates.length === 0) {
       return res.status(200).json({ updated: 0 })

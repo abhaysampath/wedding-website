@@ -17,6 +17,8 @@ const SHEET_CONFIG = {
       lastLogin: 'LastLogin',
       lastUpdated: 'LastUpdated',
       loginFailed: 'LoginFailed',
+      rsvpUs: 'RSVP US',
+      rsvpIndia: 'RSVP India',
     },
   },
   faq: {

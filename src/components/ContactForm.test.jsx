@@ -69,11 +69,10 @@ describe('ContactForm', () => {
     expect(screen.getByPlaceholderText('you@email.com')).toBeTruthy()
   })
 
-  it('shows Save buttons, Confirm, Close, and Message in settings mode', () => {
+  it('shows Save buttons, Close, and Message in settings mode', () => {
     render(<ContactForm user={baseUser} authMode="settings" updateContact={vi.fn()} sideName={sideName} />)
     const saveButtons = screen.getAllByText('Save')
-    expect(saveButtons.length).toBe(2)
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeTruthy()
+    expect(saveButtons.length).toBe(3)
     expect(screen.getByRole('button', { name: 'Close' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Message' })).toBeTruthy()
   })

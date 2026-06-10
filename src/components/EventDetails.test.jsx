@@ -76,7 +76,7 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.getByText('Vendor Load Out')).toBeTruthy()
   })
 
-  it('shows 6 events for close_family (not Vendor Access)', () => {
+  it('shows 5 events for close_family (not Vendor Access or Vendor Load Out)', () => {
     mockUseAuth.mockReturnValue({
       activeWedding: 'us',
       user: { role: 'close_family' },
@@ -87,9 +87,9 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.getByText('Ceremony')).toBeTruthy()
     expect(screen.getByText('Cocktail Hour')).toBeTruthy()
     expect(screen.getByText('Reception')).toBeTruthy()
-    expect(screen.getByText('Vendor Load Out')).toBeTruthy()
 
     expect(screen.queryByText('Vendor Access to Venue')).toBeNull()
+    expect(screen.queryByText('Vendor Load Out')).toBeNull()
   })
 
   it('shows all events accessible to vendor', () => {
