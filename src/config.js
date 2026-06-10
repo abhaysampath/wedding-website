@@ -43,11 +43,9 @@ const config = {
         { file: 'hero.jpeg', alt: 'Hero' },
         { file: 'home1.jpeg', alt: 'Home 1' },
         { file: 'home2.JPG', alt: 'Home 2' },
-        { file: 'home3.JPG', alt: 'Home 3' },
       ],
       interval: 10000,
       personalized: {
-        groom: { file: 'ra-and-ak.JPG', alt: 'Ra & Ak' },
         bride: { file: 'kiss.jpg', alt: 'Kiss' },
       },
       contact: {
@@ -79,9 +77,7 @@ const config = {
         { file: 'hero.jpeg', alt: 'Hero', tier: 1 },
         { file: 'home1.jpeg', alt: 'Home 1', tier: 1 },
         { file: 'home2.JPG', alt: 'Home 2', tier: 2 },
-        { file: 'home3.JPG', alt: 'Home 3', tier: 2 },
         { file: 'kiss.jpg', alt: 'Kiss', tier: 1 },
-        { file: 'ra-and-ak.JPG', alt: 'Ra & Ak', tier: 1 },
       ],
       gallery: [
         { file: 'eng-smiles.jpeg', alt: 'Eng Smiles', tier: 2 },

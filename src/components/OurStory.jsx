@@ -43,7 +43,7 @@ export default function OurStory() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
         >
-          <SectionTitle>Rebecca & Abhay</SectionTitle>
+          <SectionTitle>Our Story</SectionTitle>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">

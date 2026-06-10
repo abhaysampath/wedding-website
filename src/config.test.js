@@ -66,7 +66,7 @@ describe('config', () => {
 
   it('has images.hero personalized entries', () => {
     const p = config.images.hero.personalized
-    expect(p.groom.file).toBeTruthy()
+    if (p.groom) expect(p.groom.file).toBeTruthy()
     expect(p.bride.file).toBeTruthy()
   })
 

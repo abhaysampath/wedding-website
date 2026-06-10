@@ -369,12 +369,14 @@ export default function Gallery() {
               <p className="text-charcoal-light/70 text-sm mb-4">
                 Sign in to find your invite and view the full gallery
               </p>
-              <button
+              <motion.button
                 onClick={() => { setShowOverlay(false); setShowAuthModal(true) }}
-                className="inline-flex items-center gap-3 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm transition-colors font-medium"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 500, damping: 12 } }}
+                className="inline-flex items-center gap-3 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm font-medium"
               >
                 Find Your Invite
-              </button>
+              </motion.button>
             </div>
           </motion.div>
         )}

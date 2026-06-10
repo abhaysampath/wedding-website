@@ -12,7 +12,7 @@
         "details": "All vendors (catering, florals, AV, coordination) may arrive for setup. Please check in at the staff entrance on Southern Blvd. Load-in through the service corridor. Event coordination team will be onsite to direct you.",
         "location": "NY Botanical Garden — Service Entrance",
         "duration": "Setup window: 2:00pm – 6:00pm",
-        "roles": ["bride", "groom", "close_family", "vendor"],
+        "roles": ["bride", "groom", "vendor"],
         "vendorHighlight": true
       },
       {
@@ -22,7 +22,7 @@
         "details": "The couple and immediate family have access to the venue for private photography before guest arrival. First look and family formals will be captured at the Stone Mill and Conservatory. Please arrive promptly at 3:00pm — the photographer's schedule is tight.",
         "location": "Stone Mill & Conservatory",
         "duration": "3:00pm – 5:30pm",
-        "roles": ["bride", "groom", "close_family"]
+        "roles": ["bride", "groom", "close_family", "vendor"]
       },
       {
         "time": "6:00pm – 6:30pm",
@@ -63,7 +63,7 @@
         "details": "Vendors may enter for teardown and load-out after the reception concludes. All equipment, decor, and rentals must be removed by 1:00am. Please check out with the coordination team before departing.",
         "location": "NY Botanical Garden — Service Entrance",
         "duration": "1 hour",
-        "roles": ["bride", "groom", "close_family", "vendor"],
+        "roles": ["bride", "groom", "vendor"],
         "vendorHighlight": true
       }
     ],

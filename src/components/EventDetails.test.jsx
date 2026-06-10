@@ -76,10 +76,26 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.getByText('Vendor Load Out')).toBeTruthy()
   })
 
-  it('shows all 7 events for close_family', () => {
+  it('shows 6 events for close_family (not Vendor Access)', () => {
     mockUseAuth.mockReturnValue({
       activeWedding: 'us',
       user: { role: 'close_family' },
+    })
+    render(<EventDetails />)
+    expect(screen.getByText('Couple Access to Venue for Photography')).toBeTruthy()
+    expect(screen.getByText('Guest Arrival')).toBeTruthy()
+    expect(screen.getByText('Ceremony')).toBeTruthy()
+    expect(screen.getByText('Cocktail Hour')).toBeTruthy()
+    expect(screen.getByText('Reception')).toBeTruthy()
+    expect(screen.getByText('Vendor Load Out')).toBeTruthy()
+
+    expect(screen.queryByText('Vendor Access to Venue')).toBeNull()
+  })
+
+  it('shows all events accessible to vendor', () => {
+    mockUseAuth.mockReturnValue({
+      activeWedding: 'us',
+      user: { role: 'vendor' },
     })
     render(<EventDetails />)
     expect(screen.getByText('Vendor Access to Venue')).toBeTruthy()
@@ -89,22 +105,6 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.getByText('Cocktail Hour')).toBeTruthy()
     expect(screen.getByText('Reception')).toBeTruthy()
     expect(screen.getByText('Vendor Load Out')).toBeTruthy()
-  })
-
-  it('shows all events accessible to vendor (not Couple Access or Photography)', () => {
-    mockUseAuth.mockReturnValue({
-      activeWedding: 'us',
-      user: { role: 'vendor' },
-    })
-    render(<EventDetails />)
-    expect(screen.getByText('Vendor Access to Venue')).toBeTruthy()
-    expect(screen.getByText('Guest Arrival')).toBeTruthy()
-    expect(screen.getByText('Ceremony')).toBeTruthy()
-    expect(screen.getByText('Cocktail Hour')).toBeTruthy()
-    expect(screen.getByText('Reception')).toBeTruthy()
-    expect(screen.getByText('Vendor Load Out')).toBeTruthy()
-
-    expect(screen.queryByText('Couple Access to Venue for Photography')).toBeNull()
   })
 
   it('shows Vendor badge on vendor-highlighted events for vendor user', () => {
