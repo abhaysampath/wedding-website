@@ -16,7 +16,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 
 const SHEETS = {
-  guests: { tab: 'GUESTS', range: 'A:Q', columns: { firstName: 'First Name', lastName: 'Last Name', side: 'Side', relationship: 'Relationship', role: 'Role', weddings: 'Weddings', plusOne: 'Plus One' } },
+  guests: { tab: 'GUESTS', range: 'A:Q', columns: { firstName: 'First Name', lastName: 'Last Name', side: 'Side', relationship: 'Relationship', role: 'Role', weddings: 'Weddings', plusOne: 'Plus One', rsvpUs: 'US-RSVP', rsvpIndia: 'India-RSVP' } },
   faq:    { tab: 'FAQ', range: 'A:C', columns: { question: 'Question', answer: 'Answer', wedding: 'Wedding' } },
 }
 
@@ -74,6 +74,8 @@ async function run() {
           role: g.role || 'invited_guest',
           weddings: (g.weddings || 'us').split(',').map(w => w.trim()),
           plusOne: (g.plusOne || '').toLowerCase() === 'true',
+          rsvpUs: g.rsvpUs || '',
+          rsvpIndia: g.rsvpIndia || '',
         }
       })
     } else {
