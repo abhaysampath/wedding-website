@@ -1,7 +1,7 @@
 import SHEET_CONFIG from './sheets-config.js'
 
 const TAB_RANGES = {
-  guests: 'A:P',
+  guests: 'A:Q',
   faq: 'A:C',
 }
 
