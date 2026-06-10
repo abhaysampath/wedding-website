@@ -16,8 +16,28 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = join(__dirname, '..')
 
 const SHEETS = {
-  guests: { tab: 'GUESTS', range: 'A:Q', columns: { firstName: 'First Name', lastName: 'Last Name', side: 'Side', relationship: 'Relationship', role: 'Role', weddings: 'Weddings', plusOne: 'Plus One', rsvpUs: 'US-RSVP', rsvpIndia: 'India-RSVP' } },
+  guests: { tab: 'GUESTS', range: 'A:Q', columns: { firstName: 'First Name', lastName: 'Last Name', relationship: 'Relationship', role: 'Role', invitedTo: 'Invited To', plusOne: 'Plus One', rsvpUs: 'US-RSVP', rsvpIndia: 'India-RSVP' } },
   faq:    { tab: 'FAQ', range: 'A:C', columns: { question: 'Question', answer: 'Answer', wedding: 'Wedding' } },
+}
+
+function inferSide(firstName, lastName, relationship, role) {
+  const full = `${firstName} ${lastName}`.toLowerCase()
+  if (full === 'abhay sampath' || full.startsWith('abhay')) return 'groom'
+  if (full === 'rebecca erde' || full.startsWith('rebecca')) return 'bride'
+  const rel = (relationship || '').toLowerCase()
+  if (rel.includes('abhay')) return 'groom'
+  if (rel.includes('rebecca')) return 'bride'
+  const r = (role || '').trim().toLowerCase()
+  if (r.includes('bride') || r === 'br-family') return 'bride'
+  return 'bride'
+}
+
+function parseInvitedTo(val) {
+  const v = (val || '').toLowerCase()
+  if (v.includes('both')) return ['us', 'india']
+  if (v.includes('us')) return ['us']
+  if (v.includes('india')) return ['india']
+  return ['us']
 }
 
 function jsArray(name, rows) {
@@ -69,10 +89,10 @@ async function run() {
           id: `g${String(i + 1).padStart(3, '0')}`,
           firstName: g.firstName || '',
           lastName: g.lastName || '',
-          side: g.side || 'bride',
+          side: inferSide(g.firstName, g.lastName, g.relationship, g.role),
           relationship: g.relationship || '',
           role: g.role || 'invited_guest',
-          weddings: (g.weddings || 'us').split(',').map(w => w.trim()),
+          weddings: parseInvitedTo(g.invitedTo),
           plusOne: (g.plusOne || '').toLowerCase() === 'true',
           rsvpUs: g.rsvpUs || '',
           rsvpIndia: g.rsvpIndia || '',
