@@ -3,13 +3,15 @@ name: Daily Guest Report
 on:
   # ─────────────────────────────────────────────
   # FREQUENCY: Change the cron expression below.
-  #   '0 13 * * *'   = every day at 1 PM UTC
-  #   '0 13 */2 * *' = every 2 days at 1 PM UTC
-  #   '0 13 * * 1'   = every Monday at 1 PM UTC
+  #   '0 12 * * *'  = every day at 12 PM UTC (8 AM ET / 5 AM PT)
+  #   '0 12 */2 * *' = every 2 days at 12 PM UTC
+  #   '0 12 * * 1'   = every Monday at 12 PM UTC
   #   See https://crontab.guru for help.
+  #   Adjust UTC offset for your timezone:
+  #     12 PM UTC = 8 AM ET / 5 AM PT
   # ─────────────────────────────────────────────
   schedule:
-    - cron: '0 13 * * *'
+    - cron: '0 12 * * *'
 
   # Also allow manual trigger from the Actions tab
   workflow_dispatch:
@@ -27,6 +29,7 @@ env:
   # 1 for daily, etc.
   # ─────────────────────────────────────────────
   DAYS_BETWEEN: '1'
+  SITE_URL: https://abhayandrebecca.com
 
 jobs:
   report:
@@ -42,3 +45,10 @@ jobs:
 
       - name: Generate and send report
         run: node scripts/daily-report.mjs
+
+      - name: Upload sheet backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: guests-backup
+          path: public/guests-backup.json
+          retention-days: 30
