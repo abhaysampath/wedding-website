@@ -1,0 +1,44 @@
+name: Daily Guest Report
+
+on:
+  # ─────────────────────────────────────────────
+  # FREQUENCY: Change the cron expression below.
+  #   '0 13 * * *'   = every day at 1 PM UTC
+  #   '0 13 */2 * *' = every 2 days at 1 PM UTC
+  #   '0 13 * * 1'   = every Monday at 1 PM UTC
+  #   See https://crontab.guru for help.
+  # ─────────────────────────────────────────────
+  schedule:
+    - cron: '0 13 * * *'
+
+  # Also allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+env:
+  GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+  GOOGLE_SERVICE_EMAIL: ${{ secrets.GOOGLE_SERVICE_EMAIL }}
+  GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+  SMTP_USER: ${{ secrets.SMTP_USER }}
+  SMTP_PASS: ${{ secrets.SMTP_PASS }}
+  REPORT_RECIPIENT: sera.belize@gmail.com
+  # ─────────────────────────────────────────────
+  # DAYS_BETWEEN: Only flag logins/updates within
+  # this many days. Set to 7 for weekly summaries,
+  # 1 for daily, etc.
+  # ─────────────────────────────────────────────
+  DAYS_BETWEEN: '1'
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate and send report
+        run: node scripts/daily-report.mjs
