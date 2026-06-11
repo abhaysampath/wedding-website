@@ -13,7 +13,6 @@ import config from './config'
 const Gallery = lazy(() => import('./components/Gallery'))
 const EventDetails = lazy(() => import('./components/EventDetails'))
 const TravelAccommodations = lazy(() => import('./components/TravelAccommodations'))
-const Registry = lazy(() => import('./components/Registry'))
 const FAQ = lazy(() => import('./components/FAQ'))
 const ContactSection = lazy(() => import('./components/ContactSection'))
 const Footer = lazy(() => import('./components/Footer'))
@@ -69,7 +68,6 @@ const SECTIONS = [
   { id: 'gallery', label: 'Gallery' },
   { id: 'details', label: 'Events' },
   { id: 'travel', label: 'Travel' },
-  { id: 'registry', label: 'Registry' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contact', label: 'Contact' },
 ]
@@ -79,7 +77,7 @@ function SectionNav() {
   const { user } = useAuth()
 
   useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
       if (visible.length > 0) setActive(visible[0].target.id)
@@ -93,7 +91,7 @@ function SectionNav() {
     return () => observer.disconnect()
   }, [user])
 
-  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id))
+  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id))
 
   if (filtered.length === 0) return null
 
@@ -124,7 +122,7 @@ function BottomNav() {
   const { user } = useAuth()
 
   useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
     const observer = new IntersectionObserver((entries) => {
       const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
       if (visible.length > 0) setActive(visible[0].target.id)
@@ -138,7 +136,7 @@ function BottomNav() {
     return () => observer.disconnect()
   }, [user])
 
-  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id))
+  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id))
 
   return (
     <nav aria-label="Bottom navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
@@ -250,7 +248,7 @@ function useSectionHash() {
   const { user } = useAuth()
 
   useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'registry', 'faq'].includes(s.id)).map(s => s.id)
+    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
     let lastId = ''
 
     const updateHash = (id) => {
@@ -313,7 +311,6 @@ function PageContent() {
           <OurStory />
           <EventDetails />
           <TravelAccommodations />
-          <Registry />
           <FAQ />
           <Footer />
         </Suspense>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-import { roleLabels, fullName } from '../utils/guest'
+import { guestLabel, fullName } from '../utils/guest'
 
 const guestLinks = [
   { href: '#gallery', label: 'Gallery' },
@@ -12,8 +12,6 @@ const authLinks = [
   { href: '#details', label: 'Event Details' },
   { href: '#gallery', label: 'Gallery' },
   { href: '#travel', label: 'Travel' },
-
-  { href: '#registry', label: 'Registry' },
   { href: '#faq', label: 'FAQ' },
 ]
 
@@ -84,7 +82,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2 text-right">
               <div>
                 <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
-                <p className="text-[10px] opacity-60 tracking-wider uppercase">{roleLabels[user.role] || 'Guest'}</p>
+                <p className="text-[10px] opacity-60 tracking-wider uppercase">{guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}</p>
               </div>
               <button
                 onClick={() => { signOut() }}

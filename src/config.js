@@ -41,7 +41,7 @@ const config = {
       dir: `${IMAGE_CDN}/pics/home/`,
       slides: [
         { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay' },
-        { file: 'belize-engagement-m.jpeg', alt: 'Belize Engagement' },
+        { file: 'belize-engagement.jpeg', alt: 'Belize Engagement' },
         { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset' },
         { file: 'gala4.JPG', alt: 'Gala 4' },
         { file: 'nyc.JPG', alt: 'NYC' },
@@ -82,7 +82,7 @@ const config = {
     gallery: {
       home: [
         { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
-        { file: 'belize-engagement-m.jpeg', alt: 'Belize Engagement', tier: 1 },
+        { file: 'belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
         { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
         { file: 'gala4.JPG', alt: 'Gala 4', tier: 2 },
         { file: 'kiss.jpg', alt: 'Kiss', tier: 1 },

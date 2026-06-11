@@ -55,7 +55,7 @@ describe('Navbar', () => {
     render(<Navbar />)
     expect(screen.getByText('Event Details')).toBeTruthy()
     expect(screen.getByText('Travel')).toBeTruthy()
-    expect(screen.getByText('Registry')).toBeTruthy()
+    expect(screen.getByText('FAQ')).toBeTruthy()
     expect(screen.getByText('FAQ')).toBeTruthy()
   })
 
@@ -68,7 +68,7 @@ describe('Navbar', () => {
     })
     render(<Navbar />)
     expect(screen.getAllByText('Jane Doe').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getAllByText('Invited Guest').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('invited guest').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders two AR logo images (desktop + mobile)', () => {

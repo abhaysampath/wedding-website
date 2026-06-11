@@ -17,13 +17,29 @@ const DIR_MAP = {
   vert: `${config.images.baseUrl}/pics/vert/`,
 }
 
-function formatCaption(alt) {
-  return alt
-    .replace(/^[A-Z0-9-]+[_-]/, '')
-    .replace(/[_-]/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .trim() || 'Untitled'
+function buildAllImages() {
+  const { gallery } = config.images
+  const result = []
+  for (const [section, images] of Object.entries(gallery)) {
+    if (!images || !Array.isArray(images)) continue
+    const dir = DIR_MAP[section] || '/pics/'
+    images.forEach(img => {
+      if (!img || !img.file) return
+      result.push({
+        jpg: dir + img.file,
+        alt: img.alt,
+        tier: img.tier || 2,
+      })
+    })
+  }
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]]
+  }
+  return result
 }
+
+const ALL_IMAGES = buildAllImages()
 
 function Skeleton() {
   return (
@@ -70,45 +86,17 @@ export default function Gallery() {
     }
   }, [])
 
-  function randomShuffle(arr) {
-    if (!arr || !Array.isArray(arr)) return []
-    const a = [...arr]
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]]
-    }
-    return a
-  }
-
-  const allImages = useMemo(() => {
-    const { gallery } = config.images
-    const result = []
-    for (const [section, images] of Object.entries(gallery)) {
-      if (!images || !Array.isArray(images)) continue
-      const dir = DIR_MAP[section] || '/pics/'
-      images.forEach(img => {
-        if (!img || !img.file) return
-        result.push({
-          jpg: dir + img.file,
-          alt: img.alt,
-          tier: img.tier || 2,
-        })
-      })
-    }
-    return randomShuffle(result)
-  }, [])
-
   useEffect(() => {
     if (!eagerReady) return
-    preload(allImages.slice(0, FIRST_BATCH))
-  }, [eagerReady, allImages])
+    preload(ALL_IMAGES.slice(0, FIRST_BATCH))
+  }, [eagerReady])
 
   useEffect(() => {
     if (!sectionInView) return
-    preload(allImages.slice(FIRST_BATCH))
-  }, [sectionInView, allImages])
+    preload(ALL_IMAGES.slice(FIRST_BATCH))
+  }, [sectionInView])
 
-  const visibleImages = allImages.slice(0, visibleCount)
+  const visibleImages = ALL_IMAGES.slice(0, visibleCount)
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -116,14 +104,14 @@ export default function Gallery() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, allImages.length))
+          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, ALL_IMAGES.length))
         }
       },
       { rootMargin: '200px' }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [allImages.length])
+  }, [])
 
   useEffect(() => {
     if (user) return
@@ -146,12 +134,12 @@ export default function Gallery() {
   }, [])
 
   const goNext = useCallback(() => {
-    setExpanded((prev) => (prev < allImages.length - 1 ? prev + 1 : 0))
-  }, [allImages.length])
+    setExpanded((prev) => (prev < ALL_IMAGES.length - 1 ? prev + 1 : 0))
+  }, [])
 
   const goPrev = useCallback(() => {
-    setExpanded((prev) => (prev > 0 ? prev - 1 : allImages.length - 1))
-  }, [allImages.length])
+    setExpanded((prev) => (prev > 0 ? prev - 1 : ALL_IMAGES.length - 1))
+  }, [])
 
   useEffect(() => {
     if (expanded === null) return
@@ -252,11 +240,6 @@ export default function Gallery() {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                    <p className="text-cream/90 text-xs font-light truncate">
-                      {formatCaption(img.alt)}
-                    </p>
-                  </div>
                 </div>
               </motion.div>
             )})}
@@ -266,7 +249,7 @@ export default function Gallery() {
         </div>
 
         <AnimatePresence>
-          {expanded !== null && allImages[expanded] && (
+          {expanded !== null && ALL_IMAGES[expanded] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -290,7 +273,7 @@ export default function Gallery() {
                   Close <span className="text-cream/30 ml-1">(Esc)</span>
                 </button>
 
-                {allImages.length > 1 && (
+                {ALL_IMAGES.length > 1 && (
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); goPrev() }}
@@ -314,12 +297,12 @@ export default function Gallery() {
                 )}
 
                 <motion.div
-                  layoutId={`gallery-${allImages[expanded].jpg}`}
+                  layoutId={`gallery-${ALL_IMAGES[expanded].jpg}`}
                   className="w-full"
                 >
                   <img
-                    src={allImages[expanded].jpg}
-                    alt={allImages[expanded].alt}
+                    src={ALL_IMAGES[expanded].jpg}
+                    alt={ALL_IMAGES[expanded].alt}
                     className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
                       zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
                     }`}
@@ -334,7 +317,7 @@ export default function Gallery() {
                 </motion.div>
 
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-cream/40 text-[11px] tracking-wider">
-                  {expanded + 1} / {allImages.length}
+                  {expanded + 1} / {ALL_IMAGES.length}
                 </div>
               </motion.div>
             </motion.div>
