@@ -10,8 +10,8 @@ vi.mock('../config', () => ({
     firebase: { apiKey: '', authDomain: '', projectId: '' },
     emailjs: { serviceId: '', templateId: '', publicKey: '' },
     images: {
-      hero: { dir: '/jpg/home/', slides: [], interval: 10000, personalized: {} },
-      ourStory: { dir: '/jpg/vert/', slides: [] },
+      hero: { dir: '/pics/home/', slides: [], interval: 10000, personalized: {} },
+      ourStory: { dir: '/pics/vert/', slides: [] },
       gallery: { home: [], gallery: [], vert: [] },
     },
   },

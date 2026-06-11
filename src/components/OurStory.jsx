@@ -30,7 +30,13 @@ export default function OurStory() {
   useEffect(() => {
     if (!isInView) return
     storyTimerRef.current = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % slides.length)
+      setCurrentIndex(prev => {
+        let next
+        do {
+          next = Math.floor(Math.random() * slides.length)
+        } while (slides.length > 1 && next === prev)
+        return next
+      })
     }, 5000)
     return () => clearInterval(storyTimerRef.current)
   }, [isInView, slides.length])

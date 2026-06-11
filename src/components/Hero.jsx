@@ -54,7 +54,11 @@ export default function Hero() {
   }, [heroConfig.interval])
 
   const goNext = useCallback(() => {
-    goTo((currentIndex + 1) % allSlides.length)
+    let next
+    do {
+      next = Math.floor(Math.random() * allSlides.length)
+    } while (allSlides.length > 1 && next === currentIndex)
+    goTo(next)
   }, [currentIndex, allSlides.length, goTo])
 
   const goPrev = useCallback(() => {
@@ -145,7 +149,7 @@ export default function Hero() {
           >
             <motion.p
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
-              className="font-heading text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4"
+              className="font-['Cormorant_Garamond',_serif] text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4"
             >
               We're getting married
             </motion.p>

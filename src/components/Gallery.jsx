@@ -12,9 +12,9 @@ const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
 
 const DIR_MAP = {
-  home: `${config.images.baseUrl}/jpg/home/`,
-  gallery: `${config.images.baseUrl}/jpg/gallery/`,
-  vert: `${config.images.baseUrl}/jpg/vert/`,
+  home: `${config.images.baseUrl}/pics/home/`,
+  gallery: `${config.images.baseUrl}/pics/gallery/`,
+  vert: `${config.images.baseUrl}/pics/vert/`,
 }
 
 function formatCaption(alt) {
@@ -70,21 +70,11 @@ export default function Gallery() {
     }
   }, [])
 
-  function seededShuffle(arr) {
+  function randomShuffle(arr) {
     if (!arr || !Array.isArray(arr)) return []
     const a = [...arr]
-    const seed = arr.reduce((acc, item) => {
-      if (!item?.jpg) return acc
-      let h = 0
-      for (let i = 0; i < item.jpg.length; i++) {
-        h = ((h << 5) - h + item.jpg.charCodeAt(i)) | 0
-      }
-      return (acc + h) | 0
-    }, 0)
-    let s = seed || 1
     for (let i = a.length - 1; i > 0; i--) {
-      s = (s * 16807) % 2147483647
-      const j = s % (i + 1);
+      const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]]
     }
     return a
@@ -95,7 +85,7 @@ export default function Gallery() {
     const result = []
     for (const [section, images] of Object.entries(gallery)) {
       if (!images || !Array.isArray(images)) continue
-      const dir = DIR_MAP[section] || '/jpg/'
+      const dir = DIR_MAP[section] || '/pics/'
       images.forEach(img => {
         if (!img || !img.file) return
         result.push({
@@ -105,7 +95,7 @@ export default function Gallery() {
         })
       })
     }
-    return seededShuffle(result)
+    return randomShuffle(result)
   }, [])
 
   useEffect(() => {
