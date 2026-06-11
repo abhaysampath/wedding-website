@@ -58,7 +58,7 @@ export default function TravelAccommodations() {
                 className="bg-cream border border-gold/20 rounded-sm p-6 hover:shadow-lg hover:shadow-sage/5 transition-shadow duration-300 transition-wedding"
               >
                 <div className="w-8 h-[1px] bg-gold mb-4" />
-                <h3 className="font-heading text-xl text-charcoal mb-2">
+                <h3 className="font-['Cormorant_Garamond',_serif] text-xl text-charcoal mb-2 font-semibold">
                   {hotel.name}
                   {hotel.badge && (
                     <span className="ml-2 text-[10px] tracking-wider uppercase bg-gold/10 text-gold-dark px-2 py-0.5 rounded-sm align-middle">

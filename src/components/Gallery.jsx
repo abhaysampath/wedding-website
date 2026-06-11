@@ -105,7 +105,7 @@ export default function Gallery() {
 
   useEffect(() => {
     if (!sectionInView) return
-    preload(allImages.slice(FIRST_BATCH, FIRST_BATCH + PRELOAD_SIZE))
+    preload(allImages.slice(FIRST_BATCH))
   }, [sectionInView, allImages])
 
   const visibleImages = allImages.slice(0, visibleCount)
@@ -245,7 +245,11 @@ export default function Gallery() {
                     className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
                     loading={i < FIRST_BATCH && eagerReady ? 'eager' : 'lazy'}
                     onLoad={() => handleImageLoad(img.jpg)}
-                    onError={() => handleImageLoad(img.jpg)}
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      handleImageLoad(img.jpg)
+                      console.warn('Gallery image failed to load:', img.jpg)
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">

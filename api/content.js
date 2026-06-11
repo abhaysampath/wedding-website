@@ -95,6 +95,7 @@ export default async function handler(req, res) {
     }
     function parseFaqWedding(val) {
       const v = (val || '').trim().toLowerCase()
+      if (v === 'hide') return 'hide'
       if (v.includes('both')) return 'both'
       if (v.includes('india')) return 'india'
       if (v.includes('us')) return 'us'

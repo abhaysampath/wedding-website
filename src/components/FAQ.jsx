@@ -45,6 +45,7 @@ export default function FAQ() {
   const weddings = user?.weddings || []
   const faqs = (content.faq || []).filter((f) => {
     if (!f.q || !f.a) return false
+    if (f.wedding === 'hide') return false
     if (f.wedding === 'both') return true
     if (!weddings.includes(f.wedding)) return false
     if (weddings.length > 1) return f.wedding === activeWedding

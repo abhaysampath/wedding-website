@@ -56,9 +56,9 @@ describe('guestLabel', () => {
     expect(guestLabel({ role: 'groom' }, sideName)).toBe('The Groom')
   })
 
-  it('returns relationship if present', () => {
+  it('returns side + relationship if present', () => {
     const guest = { role: 'invited_guest', relationship: 'Cousin', side: 'bride' }
-    expect(guestLabel(guest, sideName)).toBe('Cousin')
+    expect(guestLabel(guest, sideName)).toBe("Rebecca's Cousin")
   })
 
   it('formats side + role fallback', () => {

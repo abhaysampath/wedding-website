@@ -95,6 +95,10 @@ export default function Hero() {
               className="absolute inset-0 w-full h-full object-cover"
               style={{ objectPosition: 'center 65%' }}
               draggable={false}
+              onError={(e) => {
+                e.target.style.display = 'none'
+                console.warn('Hero image failed to load:', currentSlide?.src)
+              }}
             />
           </motion.div>
         </AnimatePresence>
@@ -149,7 +153,7 @@ export default function Hero() {
           >
             <motion.p
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
-              className="font-['Cormorant_Garamond',_serif] text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4"
+              className="font-['Cormorant_Garamond',_serif] font-bold text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4 -mt-2 md:-mt-4"
             >
               We're getting married
             </motion.p>

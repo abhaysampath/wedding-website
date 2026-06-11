@@ -32,6 +32,84 @@ const WEDDING_LABELS = {
   india: { short: 'India Wedding — Chennai', date: weddings.india.date, venue: weddings.india.venue, address: weddings.india.address },
 }
 
+function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
+  const info = WEDDING_LABELS[weddingKey]
+  const isActive = checked === 'Yes'
+
+  const handleToggle = useCallback(() => {
+    let next
+    if (!checked) {
+      next = 'Yes'
+    } else if (checked === 'Yes') {
+      next = 'No'
+    } else {
+      next = 'Yes'
+    }
+    onChange(next)
+  }, [checked, onChange])
+
+  return (
+    <motion.div
+      layout
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className={`rounded-sm overflow-hidden border transition-all ${
+        isActive ? 'border-gold/20' : 'border-gold/10'
+      }`}
+      style={{ opacity: isActive ? 1 : 0.55 }}
+    >
+      <button
+        type="button"
+        onClick={handleToggle}
+        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+          isActive ? 'bg-gold/10' : 'bg-cream-dark/50 hover:bg-cream-dark'
+        }`}
+      >
+        <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
+          isActive ? 'bg-gold border-gold' : 'border-gold/30 bg-cream'
+        }`}>
+          {isActive && (
+            <motion.svg
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+              className="w-3 h-3 text-cream" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
+            >
+              <path d="M5 13l4 4L19 7" />
+            </motion.svg>
+          )}
+        </div>
+        <span className={`text-sm font-medium transition-colors ${
+          isActive ? 'text-charcoal' : 'text-charcoal-light/50'
+        }`}>
+          {info.short}
+        </span>
+        {checked && (
+          <span className={`text-[10px] tracking-widest uppercase ml-auto ${
+            isActive ? 'text-gold-dark' : 'text-charcoal-light/40'
+          }`}>
+            {checked}
+          </span>
+        )}
+      </button>
+
+      <div className="px-4 pb-4 pt-3 border-t border-gold/10">
+        <div className="space-y-1.5" style={{ opacity: isActive ? 1 : 0.5 }}>
+          <p className="text-xs text-charcoal-light/70">{info.date}</p>
+          <p className="text-xs text-charcoal-light/70">{info.venue}</p>
+          <p className="text-xs text-charcoal-light/50">{info.address}</p>
+          <button
+            type="button"
+            onClick={() => onOpenDetails(weddingKey)}
+            className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1"
+          >
+            View Event Details
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function ContactForm({ user, authMode, updateContact, sideName }) {
   const { setShowAuthModal, content, switchWedding } = useAuth()
 
@@ -46,15 +124,17 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const originalEmail = user?.email || guestFromContent?.email || ''
   const originalAddress = user?.address || guestFromContent?.address || ''
   const originalDietaryPreferences = user?.dietaryPreferences || guestFromContent?.dietaryPreferences || ''
-  const originalRsvpUs = user?.rsvpUs || guestFromContent?.rsvpUs || ''
-  const originalRsvpIndia = user?.rsvpIndia || guestFromContent?.rsvpIndia || ''
+  const origRsvpUs = user?.rsvpUs || guestFromContent?.rsvpUs || ''
+  const origRsvpIndia = user?.rsvpIndia || guestFromContent?.rsvpIndia || ''
+  const originalRsvpUsRef = useRef(origRsvpUs)
+  const originalRsvpIndiaRef = useRef(origRsvpIndia)
 
   const [phone, setPhone] = useState(() => draft?.phone ?? originalPhone)
   const [email, setEmail] = useState(() => draft?.email ?? originalEmail)
   const [address, setAddress] = useState(() => draft?.address ?? originalAddress)
   const [dietaryPreferences, setDietaryPreferences] = useState(() => draft?.dietaryPreferences ?? originalDietaryPreferences)
-  const [rsvpUs, setRsvpUs] = useState(() => draft?.rsvpUs ?? originalRsvpUs)
-  const [rsvpIndia, setRsvpIndia] = useState(() => draft?.rsvpIndia ?? originalRsvpIndia)
+  const [rsvpUs, setRsvpUs] = useState(() => draft?.rsvpUs ?? origRsvpUs)
+  const [rsvpIndia, setRsvpIndia] = useState(() => draft?.rsvpIndia ?? origRsvpIndia)
 
   useEffect(() => {
     if (!phone && guestFromContent?.phone) {
@@ -63,7 +143,13 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     if (!email && guestFromContent?.email) {
       setEmail(guestFromContent.email)
     }
-  }, [guestFromContent?.phone, guestFromContent?.email])
+    if (guestFromContent?.rsvpUs && !draft?.rsvpUs) {
+      setRsvpUs(guestFromContent.rsvpUs)
+    }
+    if (guestFromContent?.rsvpIndia && !draft?.rsvpIndia) {
+      setRsvpIndia(guestFromContent.rsvpIndia)
+    }
+  }, [guestFromContent?.phone, guestFromContent?.email, guestFromContent?.rsvpUs, guestFromContent?.rsvpIndia])
 
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -78,7 +164,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const phoneChanged = phone !== originalPhone
   const emailChanged = email !== originalEmail
   const contactChanged = phoneChanged || emailChanged || address !== originalAddress || dietaryPreferences !== originalDietaryPreferences
-  const rsvpChanged = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
+  const rsvpChanged = rsvpUs !== originalRsvpUsRef.current || rsvpIndia !== originalRsvpIndiaRef.current
   const hasChanges = contactChanged || rsvpChanged
 
   const weddingsList = useMemo(() => user?.weddings || [], [user?.weddings])
@@ -100,6 +186,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         rsvpUs,
         rsvpIndia,
       })
+      originalRsvpUsRef.current = rsvpUs
+      originalRsvpIndiaRef.current = rsvpIndia
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
@@ -107,7 +195,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
-  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, hasChanges, saving, updateContact, user?.id])
+  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, hasChanges, saving, updateContact, user])
 
   useEffect(() => {
     if (!hasChanges) {
@@ -152,6 +240,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         rsvpUs,
         rsvpIndia,
       })
+      originalRsvpUsRef.current = rsvpUs
+      originalRsvpIndiaRef.current = rsvpIndia
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
@@ -159,7 +249,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
-  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, updateContact, saveStatus, user?.id])
+  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, updateContact, saveStatus, user])
 
   const handleMessageClick = useCallback(async () => {
     setSaveStatus('saving')
@@ -167,11 +257,6 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
       const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
       window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }))
-      setShowAuthModal(false)
-      setTimeout(() => {
-        const el = document.getElementById('contact')
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 300)
     } catch {
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
@@ -192,82 +277,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     }, 300)
   }, [switchWedding, setShowAuthModal])
 
-  function RsvpCheckbox({ weddingKey, checked, onChange, label }) {
-    const info = WEDDING_LABELS[weddingKey]
-    const [expanded, setExpanded] = useState(checked === 'Yes')
 
-    const handleToggle = useCallback(() => {
-      const next = checked === 'Yes' ? '' : 'Yes'
-      onChange(next)
-      setExpanded(next === 'Yes')
-    }, [checked, onChange])
-
-    return (
-      <motion.div
-        layout
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className="border border-gold/20 rounded-sm overflow-hidden"
-      >
-        <button
-          type="button"
-          onClick={handleToggle}
-          className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-            checked === 'Yes' ? 'bg-gold/10' : 'bg-cream-dark/50 hover:bg-cream-dark'
-          }`}
-        >
-          <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
-            checked === 'Yes' ? 'bg-gold border-gold' : 'border-gold/30 bg-cream'
-          }`}>
-            {checked === 'Yes' && (
-              <motion.svg
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-                className="w-3 h-3 text-cream" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
-              >
-                <path d="M5 13l4 4L19 7" />
-              </motion.svg>
-            )}
-          </div>
-          <span className={`text-sm font-medium transition-colors ${
-            checked === 'Yes' ? 'text-charcoal' : 'text-charcoal-light/50'
-          }`}>
-            {info.short}
-          </span>
-        </button>
-
-        <AnimatePresence initial={false}>
-          {expanded && checked === 'Yes' && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              className="overflow-hidden"
-            >
-              <motion.div
-                initial={{ y: -8 }}
-                animate={{ y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="px-4 pb-4 pt-1 space-y-1.5 border-t border-gold/10"
-              >
-                <p className="text-xs text-charcoal-light/70">{info.date}</p>
-                <p className="text-xs text-charcoal-light/70">{info.venue}</p>
-                <p className="text-xs text-charcoal-light/50">{info.address}</p>
-                <button
-                  type="button"
-                  onClick={() => handleOpenDetails(weddingKey)}
-                  className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1"
-                >
-                  View Event Details
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    )
-  }
 
   return (
     <div className="space-y-5">
@@ -284,6 +294,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
               weddingKey="us"
               checked={rsvpUs}
               onChange={setRsvpUs}
+              onOpenDetails={handleOpenDetails}
             />
           )}
           {weddingsList.includes('india') && (
@@ -291,6 +302,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
               weddingKey="india"
               checked={rsvpIndia}
               onChange={setRsvpIndia}
+              onOpenDetails={handleOpenDetails}
             />
           )}
         </div>
@@ -424,7 +436,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <div className="flex items-center gap-3 pt-2">
             <button
               onClick={handleClose}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal-light/50 hover:text-charcoal-light hover:bg-cream-dark transition-colors"
+              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
             >
               Close
             </button>
@@ -442,8 +454,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             </button>
             <button
               onClick={handleMessageClick}
-              disabled={!hasChanges || saveStatus === 'saving'}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
+              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors"
               style={{
                 color: hasChanges ? 'var(--color-charcoal)' : undefined,
                 borderColor: hasChanges ? 'var(--color-gold)' : undefined,

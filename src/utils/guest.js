@@ -20,6 +20,10 @@ export function guestLabel(guest, sideName) {
   if (!guest) return ''
   if (guest.role === 'bride') return 'The Bride'
   if (guest.role === 'groom') return 'The Groom'
-  if (guest.relationship) return guest.relationship
-  return `${sideName[guest.side]}'s ${(roleLabels[guest.role] || '').toLowerCase()}`
+  if (guest.relationship) {
+    const prefix = sideName[guest?.side] ? `${sideName[guest.side]}'s ` : ''
+    return `${prefix}${guest.relationship}`
+  }
+  const prefix = sideName[guest?.side] ? `${sideName[guest.side]}'s ` : ''
+  return `${prefix}${(roleLabels[guest.role] || '').toLowerCase()}`
 }

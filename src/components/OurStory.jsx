@@ -70,6 +70,10 @@ export default function OurStory() {
                 transition={{ duration: 0.8 }}
                 className="w-full h-full object-cover absolute inset-0"
                 draggable={false}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  console.warn('Story image failed to load:', slides[currentIndex]?.src)
+                }}
               />
             </AnimatePresence>
             <div className="absolute bottom-3 right-3 flex gap-1.5">
