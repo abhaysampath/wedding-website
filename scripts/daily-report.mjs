@@ -121,16 +121,17 @@ async function main() {
     process.exit(1)
   }
 
-  const { google } = await import('googleapis')
-  const auth = new google.auth.JWT({
+  const { JWT } = await import('google-auth-library')
+  const { sheets } = await import('@googleapis/sheets')
+  const auth = new JWT({
     email: GOOGLE_SERVICE_EMAIL,
     key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   })
-  const sheets = google.sheets({ version: 'v4', auth })
+  const sheetsApi = sheets({ version: 'v4', auth })
 
   console.log('Reading sheet...')
-  const res = await sheets.spreadsheets.values.get({
+  const res = await sheetsApi.spreadsheets.values.get({
     spreadsheetId: GOOGLE_SHEET_ID,
     range: `${SHEET_CONFIG.guests.tab}!${TAB_RANGES.guests}`,
   })

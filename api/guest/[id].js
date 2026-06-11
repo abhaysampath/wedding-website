@@ -22,17 +22,18 @@ export default async function handler(req, res) {
 
     const data = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}')
 
-    const { google } = await import('googleapis')
-    const auth = new google.auth.JWT({
+    const { JWT } = await import('google-auth-library')
+    const { sheets } = await import('@googleapis/sheets')
+    const auth = new JWT({
       email: serviceEmail,
       key: privateKey,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     })
-    const sheets = google.sheets({ version: 'v4', auth })
+    const sheetsApi = sheets({ version: 'v4', auth })
     const tabName = process.env.GOOGLE_SHEET_TAB || SHEET_CONFIG.guests.tab
 
     // Read headers to find column positions
-    const meta = await sheets.spreadsheets.values.get({
+    const meta = await sheetsApi.spreadsheets.values.get({
       spreadsheetId: sheetId,
       range: `${tabName}!A1:Z1`,
     })
@@ -85,7 +86,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ updated: 0 })
     }
 
-    await sheets.spreadsheets.values.batchUpdate({
+    await sheetsApi.spreadsheets.values.batchUpdate({
       spreadsheetId: sheetId,
       requestBody: { valueInputOption: 'USER_ENTERED', data: updates },
     })

@@ -55,16 +55,17 @@ async function run() {
   const privateKey = get('GOOGLE_PRIVATE_KEY')
   if (!sheetId || !serviceEmail || !privateKey) { console.log('Incomplete .env — using existing data/*.js files'); return }
 
-  const { google } = await import('googleapis')
-  const auth = new google.auth.JWT({
+  const { JWT } = await import('google-auth-library')
+  const { sheets } = await import('@googleapis/sheets')
+  const auth = new JWT({
     email: serviceEmail,
     key: privateKey.replace(/\\n/g, '\n'),
     scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   })
-  const sheets = google.sheets({ version: 'v4', auth })
+  const sheetsApi = sheets({ version: 'v4', auth })
 
   for (const [key, cfg] of Object.entries(SHEETS)) {
-    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: `${cfg.tab}!${cfg.range}` }).catch(e => {
+    const res = await sheetsApi.spreadsheets.values.get({ spreadsheetId: sheetId, range: `${cfg.tab}!${cfg.range}` }).catch(e => {
       console.error(`  ${cfg.tab}:`, e?.response?.data?.error?.message || e.message)
       return null
     })

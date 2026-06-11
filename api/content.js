@@ -41,17 +41,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { google } = await import('googleapis')
-    const auth = new google.auth.JWT({
+    const { JWT } = await import('google-auth-library')
+    const { sheets } = await import('@googleapis/sheets')
+    const auth = new JWT({
       email: serviceEmail,
       key: privateKey,
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     })
-    const sheets = google.sheets({ version: 'v4', auth })
+    const sheetsApi = sheets({ version: 'v4', auth })
 
     const sheetErrors = []
     const read = (tab, range) =>
-      sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: `${tab}!${range}` })
+      sheetsApi.spreadsheets.values.get({ spreadsheetId: sheetId, range: `${tab}!${range}` })
         .catch((e) => {
           sheetErrors.push(`${tab}: ${e?.response?.data?.error?.message || e.message}`)
           return { data: { values: null } }
