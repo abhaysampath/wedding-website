@@ -92,19 +92,20 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.queryByText('Vendor Load Out')).toBeNull()
   })
 
-  it('shows all events accessible to vendor', () => {
+  it('shows only vendor events for vendor', () => {
     mockUseAuth.mockReturnValue({
       activeWedding: 'us',
       user: { role: 'vendor' },
     })
     render(<EventDetails />)
     expect(screen.getByText('Vendor Access to Venue')).toBeTruthy()
-    expect(screen.getByText('Couple Access to Venue for Photography')).toBeTruthy()
-    expect(screen.getByText('Guest Arrival')).toBeTruthy()
-    expect(screen.getByText('Ceremony')).toBeTruthy()
-    expect(screen.getByText('Cocktail Hour')).toBeTruthy()
-    expect(screen.getByText('Reception')).toBeTruthy()
     expect(screen.getByText('Vendor Load Out')).toBeTruthy()
+
+    expect(screen.queryByText('Couple Access to Venue for Photography')).toBeNull()
+    expect(screen.queryByText('Guest Arrival')).toBeNull()
+    expect(screen.queryByText('Ceremony')).toBeNull()
+    expect(screen.queryByText('Cocktail Hour')).toBeNull()
+    expect(screen.queryByText('Reception')).toBeNull()
   })
 
   it('shows Vendor badge on vendor-highlighted events for vendor user', () => {

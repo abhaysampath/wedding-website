@@ -74,9 +74,13 @@ export default function EventDetails() {
   }
 
   const filteredTimeline = w.timeline.filter(event => {
-    if (!event.roles) return true
-    if (!userRole) return false
-    return event.roles.includes(userRole)
+    const visibility = event.visibility
+    if (!visibility) return true
+    if (!userRole) return visibility === 'public'
+    if (userRole === 'bride' || userRole === 'groom') return true
+    if (userRole === 'vendor') return visibility === 'vendor'
+    if (userRole === 'close_family') return visibility === 'close_family' || visibility === 'public'
+    return visibility === 'public'
   })
 
   return (

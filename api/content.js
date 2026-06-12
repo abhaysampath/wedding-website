@@ -5,7 +5,7 @@ const TAB_RANGES = {
   faq: 'A:C',
 }
 
-const ROLE_MAP = { 'Bride': 'bride', 'Groom': 'groom', 'CloseFamily': 'close_family', 'Br-Family': 'family' }
+const ROLE_MAP = { 'Bride': 'bride', 'Groom': 'groom', 'CloseFamily': 'close_family', 'Br-Family': 'invited_guest', 'Br-Friends': 'invited_guest', 'Gr-Friends': 'invited_guest', 'Gr-Family': 'invited_guest' }
 const PLUSONE_MAP = { 'N/A': false, 'Allowed+1': true, '+1NOTALLOWED': false }
 
 function inferSide(firstName, lastName, relationship, role) {
