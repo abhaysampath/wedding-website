@@ -50,7 +50,6 @@ const config = {
       ],
       interval: 10000,
       personalized: {
-        bride: { file: 'kiss.jpg', alt: 'Kiss' },
       },
       contact: {
         reasons: [
@@ -85,7 +84,6 @@ const config = {
         { file: 'belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
         { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
         { file: 'gala4.JPG', alt: 'Gala 4', tier: 2 },
-        { file: 'kiss.jpg', alt: 'Kiss', tier: 1 },
         { file: 'nyc.JPG', alt: 'NYC', tier: 2 },
         { file: 'save-the-date.JPEG', alt: 'Save the Date', tier: 2 },
         { file: 'scooby-doo2.jpeg', alt: 'Scooby Doo 2', tier: 3 },
