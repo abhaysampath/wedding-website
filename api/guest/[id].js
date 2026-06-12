@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     const { google } = await import('googleapis')
     const auth = new google.auth.JWT({
       email: serviceEmail,
-      key: privateKey,
+      key: privateKey.replace(/\\n/g, '\n'),
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     })
     const sheets = google.sheets({ version: 'v4', auth })

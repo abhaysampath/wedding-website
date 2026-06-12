@@ -77,10 +77,17 @@ async function writeToSheet(guestId, data) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     })
-    if (!res.ok) return false
+    if (!res.ok) {
+      console.error('Sheet write failed:', guestId, data, res.status, await res.text().catch(() => ''))
+      return false
+    }
     const body = await res.json()
+    if (!body.updated) console.warn('Sheet write returned 0 updates:', guestId, data)
     return body.updated > 0
-  } catch { return false }
+  } catch (err) {
+    console.error('Sheet write error:', guestId, data, err)
+    return false
+  }
 }
 
 export function AuthProvider({ children }) {
