@@ -7,7 +7,7 @@
  *
  * Required env vars:
  *   GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY  (sheet access)
- *   SMTP_USER, SMTP_PASS                                       (Gmail SMTP credentials)
+ *   EMAILJS_SERVICE_ID, EMAILJS_CONTACT_TEMPLATE_ID, EMAILJS_PUBLIC_KEY  (EmailJS)
  *
  * Optional:
  *   REPORT_RECIPIENT  — email to send to (default: sera.belize@gmail.com)
@@ -15,42 +15,32 @@
  *   SITE_URL          — production URL for link validation (default: https://abhayandrebecca.com)
  */
 
-import { readdirSync, statSync, writeFileSync, existsSync } from 'fs'
-import { join, relative } from 'path'
+import { readdirSync, writeFileSync, existsSync } from 'fs'
+import { join } from 'path'
 import { fileURLToPath } from 'url'
 import SHEET_CONFIG from '../api/sheets-config.js'
-
-const {
-  GOOGLE_SHEET_ID,
-  GOOGLE_SERVICE_EMAIL,
-  GOOGLE_PRIVATE_KEY,
-  SMTP_USER,
-  SMTP_PASS,
-  REPORT_RECIPIENT = 'sera.belize@gmail.com',
-  DAYS_BETWEEN = '1',
-  SITE_URL = 'https://abhayandrebecca.com',
-} = process.env
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = join(__dirname, '..')
 const PICS_DIR = join(ROOT, 'public', 'pics')
 const BACKUP_PATH = join(ROOT, 'public', 'guests-backup.json')
+const IS_TEST = !!process.env.VITEST
 
 const TAB_RANGES = { guests: 'A:Q' }
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 const PIC_DIRS = ['home', 'vert', 'gallery']
-const CDN_BASE = 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/pics'
+const CDN_BASE = process.env.CDN_BASE || 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/pics'
 
-function e(tag, content) {
+export function e(tag, content) {
   return `<${tag}>${content}</${tag}>`
 }
 
-function sanitizeCell(val) {
+export function sanitizeCell(val) {
   const v = (val || '').trim()
   return v.startsWith('#') ? '' : v
 }
 
-function parseSheet(values, columnConfig) {
+export function parseSheet(values, columnConfig) {
   if (!values || values.length < 2) return []
   const [headerRow, ...dataRows] = values
   const indexMap = {}
@@ -69,14 +59,14 @@ function parseSheet(values, columnConfig) {
   })
 }
 
-function daysAgo(dateStr) {
+export function daysAgo(dateStr) {
   if (!dateStr) return Infinity
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return Infinity
   return (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24)
 }
 
-function collectImageFiles(dir) {
+export function collectImageFiles(dir, cdnBase = CDN_BASE) {
   const results = []
   for (const subdir of PIC_DIRS) {
     const full = join(dir, subdir)
@@ -84,19 +74,20 @@ function collectImageFiles(dir) {
     for (const f of readdirSync(full)) {
       const ext = f.toLowerCase().slice(f.lastIndexOf('.'))
       if (IMAGE_EXTENSIONS.has(ext)) {
-        results.push({ file: f, subdir, url: `${CDN_BASE}/${subdir}/${f}` })
+        results.push({ file: f, subdir, url: `${cdnBase}/${subdir}/${f}` })
       }
     }
   }
   return results
 }
 
-function chunkedSettle(items, fn, limit = 10) {
+export function chunkedSettle(items, fn, limit = 10) {
   const results = []
   const chunks = []
   for (let i = 0; i < items.length; i += limit) {
     chunks.push(items.slice(i, i + limit))
   }
+  if (chunks.length === 0) return results
   return chunks.reduce(async (prev, chunk) => {
     await prev
     const settled = await Promise.allSettled(chunk.map(fn))
@@ -105,20 +96,35 @@ function chunkedSettle(items, fn, limit = 10) {
   }, Promise.resolve())
 }
 
-function nameStr(g) {
+export function nameStr(g) {
+  if (!g) return '(no name)'
   return `${g.firstName || ''} ${g.lastName || ''}`.trim() || '(no name)'
 }
 
-async function main() {
+export async function main() {
+  const {
+    GOOGLE_SHEET_ID,
+    GOOGLE_SERVICE_EMAIL,
+    GOOGLE_PRIVATE_KEY,
+    EMAILJS_SERVICE_ID,
+    EMAILJS_CONTACT_TEMPLATE_ID,
+    EMAILJS_PUBLIC_KEY,
+    REPORT_RECIPIENT = 'sera.belize@gmail.com',
+    DAYS_BETWEEN = '1',
+    SITE_URL = 'https://abhayandrebecca.com',
+  } = process.env
+
   const missing = []
   if (!GOOGLE_SHEET_ID) missing.push('GOOGLE_SHEET_ID')
   if (!GOOGLE_SERVICE_EMAIL) missing.push('GOOGLE_SERVICE_EMAIL')
   if (!GOOGLE_PRIVATE_KEY) missing.push('GOOGLE_PRIVATE_KEY')
-  if (!SMTP_USER) missing.push('SMTP_USER')
-  if (!SMTP_PASS) missing.push('SMTP_PASS')
+  if (!EMAILJS_SERVICE_ID) missing.push('EMAILJS_SERVICE_ID')
+  if (!EMAILJS_CONTACT_TEMPLATE_ID) missing.push('EMAILJS_CONTACT_TEMPLATE_ID')
+  if (!EMAILJS_PUBLIC_KEY) missing.push('EMAILJS_PUBLIC_KEY')
   if (missing.length > 0) {
     console.error(`Missing env vars: ${missing.join(', ')}`)
     process.exit(1)
+    return
   }
 
   const { google } = await import('googleapis')
@@ -341,19 +347,27 @@ async function main() {
     (dupPhones.length > 0 || dupEmails.length > 0 ? `Duplicate contacts found.\n` : 'No duplicate contacts.\n')
 
   console.log('Sending report...')
-  const nodemailer = await import('nodemailer')
-  const transporter = nodemailer.default.createTransport({
-    service: 'gmail',
-    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  const emailjsResp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      service_id: EMAILJS_SERVICE_ID,
+      template_id: EMAILJS_CONTACT_TEMPLATE_ID,
+      user_id: EMAILJS_PUBLIC_KEY,
+      template_params: {
+        email: REPORT_RECIPIENT,
+        name: 'Daily Report',
+        contact_type: 'daily-report',
+        subject: `Guest Report — ${new Date().toLocaleDateString()}`,
+        message: text,
+      },
+    }),
   })
 
-  await transporter.sendMail({
-    from: SMTP_USER,
-    to: REPORT_RECIPIENT,
-    subject: `Guest Report — ${new Date().toLocaleDateString()}`,
-    text,
-    html,
-  })
+  if (!emailjsResp.ok) {
+    const errBody = await emailjsResp.text()
+    throw new Error(`EmailJS API error (${emailjsResp.status}): ${errBody}`)
+  }
 
   console.log('Report sent to', REPORT_RECIPIENT)
   console.log(`Images checked: ${images.length}, broken: ${brokenImages.length}`)
@@ -361,7 +375,9 @@ async function main() {
   console.log(`Backup written to: ${BACKUP_PATH}`)
 }
 
-main().catch((err) => {
-  console.error('Report failed:', err)
-  process.exit(1)
-})
+if (!IS_TEST) {
+  main().catch((err) => {
+    console.error('Report failed:', err)
+    process.exit(1)
+  })
+}
