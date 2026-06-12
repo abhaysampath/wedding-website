@@ -125,7 +125,7 @@ Controls the full-screen hero slideshow on the home page.
 | `slides` | array | 4 slides | Images to cycle through (10s interval) |
 | `interval` | number | `10000` | Milliseconds between auto-advance |
 | `personalized.groom` | object | `ra-and-ak.JPG` | First image shown to Abhay's family |
-| `personalized.bride` | object | `kiss.jpg` | First image shown to Rebecca's family |
+| `personalized.bride` | object | — | Removed — no personalized image for Rebecca's family |
 | `contact.reasons` | array | 5 reasons | Dropdown options for the contact form on the last slide |
 
 Each `slide` / personalized entry needs `{ file, alt }`:
