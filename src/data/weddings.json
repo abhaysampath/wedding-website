@@ -76,9 +76,7 @@
     ],
     "dressCode": "Formal / Black-tie optional — garden party attire welcome, just no white please",
     "hotels": [
-      { "name": "The Botanic Hotel", "distance": "0.5 miles from venue", "address": "123 Garden Lane, Bronx, NY", "phone": "(555) 123-4567" },
-      { "name": "Bronx Park Inn", "distance": "1.2 miles from venue", "address": "456 Park Ave, Bronx, NY", "phone": "(555) 987-6543" },
-      { "name": "The Pelham Grand", "distance": "3 miles from venue", "address": "789 Shore Rd, Bronx, NY", "phone": "(555) 456-7890" }
+      { "name": "Residence Inn by Marriott New York The Bronx at Metro Center Atrium", "distance": "5 min from venue", "address": "1776 Eastchester Rd, Bronx, NY", "website": "https://maps.app.goo.gl/kjDsPFt8BhfUqsWV8" }
     ],
     "transport": {
       "car": "The New York Botanical Garden is located at 2900 Southern Blvd, Bronx, NY. There are several parking garages nearby.",
