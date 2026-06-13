@@ -13,6 +13,8 @@
  *   SITE_URL  — production URL (default: https://abhayandrebecca.com)
  */
 
+import { chromium } from 'playwright'
+
 const SITE_URL = process.env.SITE_URL || 'https://abhayandrebecca.com'
 const RECIPIENT = process.env.STATUS_RECIPIENT || process.env.REPORT_RECIPIENT
 
@@ -44,20 +46,32 @@ async function main() {
     check('Returns HTML', false, err.message)
   }
 
-  // ── 3. Key content present ────────────────────
+  // ── 3. SPA content checks via Playwright ────────────────────
+  let browser = null
   try {
-    const res = await fetch(SITE_URL)
-    const text = await res.text()
-    const contentChecks = [
-      ['Site title', 'Rebecca & Abhay'],
-      ['Gallery section', 'Gallery'],
-      ['Sign-in prompt', 'Sign in to find your invite'],
-    ]
-    for (const [label, keyword] of contentChecks) {
-      check(label, text.includes(keyword))
-    }
+    browser = await chromium.launch({ headless: true })
+    const page = await browser.newPage()
+
+    // Fast network idle wait
+    await page.goto(SITE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 })
+    await page.waitForLoadState('networkidle', { timeout: 10000 })
+
+    // Site title (rendered by React)
+    const title = await page.textContent('body')
+    check('Site title rendered', Boolean(title?.includes('Rebecca') && title?.includes('Abhay')))
+
+    // Gallery section
+    const galleryHeading = await page.locator('h2:has-text("Gallery")').first()
+    check('Gallery section', await galleryHeading.count() > 0)
+
+    // Sign-in prompt (only visible when not logged in)
+    const signInPrompt = await page.locator('text=Sign in to find your invite').first()
+    check('Sign-in prompt', await signInPrompt.count() > 0)
+
   } catch (err) {
-    check('Content checks', false, err.message)
+    check('SPA content checks', false, err.message)
+  } finally {
+    if (browser) await browser.close()
   }
 
   // ── 4. Response time ──────────────────────────
