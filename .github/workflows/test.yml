@@ -73,11 +73,29 @@ jobs:
       - name: Run E2E tests
         run: node scripts/deploy-e2e.mjs http://localhost:3002
 
-      # Step 7: Deploy to Vercel production
+      # Step 7: Visual preview check (2 mobile screenshots)
+      - name: Visual preview check
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SCREENSHOT_RECIPIENT: sera.belize@gmail.com
+        run: |
+          npx playwright install chromium
+          node scripts/preview-check.mjs http://localhost:3002
+
+      # Step 8: Upload preview screenshots as artifacts
+      - name: Upload preview screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-screenshots
+          path: screenshots/
+          retention-days: 14
+
+      # Step 9: Deploy to Vercel production
       - name: Deploy to Vercel
         run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Step 8: Smoke test against production
+      # Step 10: Smoke test against production
       - name: E2E smoke test on production
         run: |
           sleep 10  # Wait for Vercel to propagate
