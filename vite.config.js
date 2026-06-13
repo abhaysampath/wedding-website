@@ -21,6 +21,18 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@vercel/speed-insights'],
   },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) return 'vendor-react'
+          if (id.includes('node_modules/framer-motion')) return 'vendor-motion'
+          if (id.includes('node_modules/firebase')) return 'vendor-firebase'
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
