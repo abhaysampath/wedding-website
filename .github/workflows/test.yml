@@ -73,7 +73,25 @@ jobs:
       - name: Run E2E tests
         run: node scripts/deploy-e2e.mjs http://localhost:3002
 
-      # Step 7: Deploy to Vercel production
+      # Step 7: Mobile screenshots for visual review
+      - name: Take mobile screenshots (all roles)
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SCREENSHOT_RECIPIENT: sera.belize@gmail.com
+        run: |
+          npx playwright install chromium
+          node scripts/predeploy-screenshots.mjs http://localhost:3002
+
+      # Step 8: Upload screenshots as artifacts
+      - name: Upload screenshot artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: predeploy-screenshots
+          path: screenshots/
+          retention-days: 14
+
+      # Step 9: Deploy to Vercel production
       - name: Deploy to Vercel
         run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
