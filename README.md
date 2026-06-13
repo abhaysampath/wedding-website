@@ -6,7 +6,7 @@ Wedding website for Rebecca and Abhay, featuring events for their US and India w
 
 ## 📋 Google Sheets Configuration
 
-Guest data, RSVP status, and FAQs are stored in a Google Sheets workbook with two worksheets:
+Guest data, RSVP status, and FAQs are stored in a [Google Sheets](https://sheets.google.com) workbook with two worksheets:
 
 | Worksheet | Contents |
 |---|---|
@@ -15,10 +15,10 @@ Guest data, RSVP status, and FAQs are stored in a Google Sheets workbook with tw
 
 ### Data flow
 
-1. A Google Cloud service account (read-only) authenticates the server-side API
-2. The API reads from the sheet via the Sheets API and serves the data to the frontend
+1. A [Google Cloud](https://cloud.google.com) service account (read-only) authenticates the server-side API
+2. The API reads from the sheet via the [Sheets API](https://developers.google.com/sheets/api) and serves the data to the frontend
 3. Updates to the sheet appear on the website within minutes
-4. The contact form bypasses the sheet entirely — submissions are sent via Nodemailer (SMTP)
+4. The contact form bypasses the sheet entirely — submissions are sent via [Nodemailer](https://nodemailer.com) (SMTP)
 
 ### Comment rows
 
@@ -43,12 +43,12 @@ Unauthenticated visitors see `public` events only. Guest roles are assigned per-
 
 | Practice | How it works |
 |---|---|
-| **API keys hidden** | All keys (Firebase, EmailJS, Google APIs) are stored as environment variables, never in the code. The `.env` file is git-ignored. |
+| **API keys hidden** | All keys ([Firebase](https://firebase.google.com), [EmailJS](https://www.emailjs.com), Google APIs) are stored as environment variables, never in the code. The [`.env`](https://github.com/abhaysampath/wedding-website/blob/main/.env.example) file is git-ignored. |
 | **CI/CD secrets** | Deploy pipeline reads keys from GitHub encrypted secrets, not from files. |
 | **Public keys only in browser** | Only safe-to-expose public keys (e.g. EmailJS public key, Firebase API key) are sent to the browser. Private keys stay server-side. |
 | **Service account locked** | The Google service account can only read the one sheet, nothing else. |
-| **reCAPTCHA v3** | Contact form is protected by invisible reCAPTCHA. No CAPTCHA challenge needed — just a score check. |
-| **Dependencies pinned** | `package-lock.json` locks every dependency version. CI uses `npm ci` for reproducible installs. |
+| **[reCAPTCHA v3](https://www.google.com/recaptcha/about/)** | Contact form is protected by invisible reCAPTCHA. No CAPTCHA challenge needed — just a score check. |
+| **Dependencies pinned** | [`package-lock.json`](https://github.com/abhaysampath/wedding-website/blob/main/package-lock.json) locks every dependency version. CI uses `npm ci` for reproducible installs. |
 | **CORS restricted** | The API serverless functions only respond to requests from the wedding domain. |
 
 ---
@@ -89,7 +89,7 @@ Each guest's `role` is assigned in the Google Sheet. Unauthenticated visitors se
 git clone https://github.com/abhaysampath/wedding-website.git
 cd wedding-website
 npm install
-cp .env.example .env    # then fill in the values (see Services table above)
+cp [.env.example](https://github.com/abhaysampath/wedding-website/blob/main/.env.example) .env    # then fill in the values (see Services table above)
 npm run dev
 ```
 
@@ -101,7 +101,7 @@ npm run dev
 |---|---|
 | `npm run dev` | Start dev server (Vite + local API) on port 5173 |
 | `npm run build` | Verify env vars, validate images, build for production |
-| `npm test` | Run all unit tests (Vitest) |
+| `npm test` | Run all unit tests ([Vitest](https://vitest.dev)) |
 | `npm run test:local` | Same as `npm test` — all local-run-safe tests |
 | `npm run test:full` | Unit tests + production build (matches CI) |
 | `npm run deploy` | Build + deploy to Vercel production |
@@ -110,7 +110,7 @@ npm run dev
 | `npm run e2e:local` | Run E2E browser tests against `http://localhost:3000` |
 | `npm run e2e:prod` | Run E2E browser tests against production |
 | `npm run sync` | Sync guest data from Google Sheet to local fallback |
-| `npm run lint` | Run ESLint |
+| `npm run lint` | Run [ESLint](https://eslint.org) |
 
 ---
 
@@ -118,35 +118,35 @@ npm run dev
 
 ```
 ├── api/                  # Vercel serverless functions
-│   ├── contact.mjs       #   Contact form handler (Nodemailer)
-│   ├── faq.mjs           #   FAQ from Google Sheets
-│   └── guests.mjs        #   Guest list from Google Sheets
-├── scripts/              # Build, deploy, test, utility scripts
-│   ├── deploy-e2e.mjs    #   Browser-based E2E smoke tests (Puppeteer)
-│   ├── preview-check.mjs #   Pre-deploy mobile screenshots via email
-│   ├── daily-report.mjs  #   Scheduled guest activity report
-│   ├── verify-build.mjs  #   Env check → image validation → vite build
-│   └── sync-guests.mjs   #   Pull guest data from Sheet to local file
+│   ├── [contact.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/contact.mjs)       #   Contact form handler (Nodemailer)
+│   ├── [faq.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/faq.mjs)           #   FAQ from Google Sheets
+│   └── [guests.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/guests.mjs)        #   Guest list from Google Sheets
+├── [scripts/](https://github.com/abhaysampath/wedding-website/tree/main/scripts)              # Build, deploy, test, utility scripts
+│   ├── [deploy-e2e.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/deploy-e2e.mjs)    #   Browser-based E2E smoke tests (Puppeteer)
+│   ├── [preview-check.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/preview-check.mjs) #   Pre-deploy mobile screenshots via email
+│   ├── [daily-report.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/daily-report.mjs)  #   Scheduled guest activity report
+│   ├── [verify-build.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/verify-build.mjs)  #   Env check → image validation → vite build
+│   └── [sync-guests.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/sync-guests.mjs)   #   Pull guest data from Sheet to local file
 ├── public/
-│   └── pics/             # Site images (served via jsDelivr CDN)
-├── src/
-│   ├── components/       # React components
-│   ├── context/          # Auth context & provider
-│   ├── data/             # weddings.json (events), guests.js (fallback)
-│   ├── utils/            # Helper functions
-│   ├── config.js         # App-wide configuration
-│   └── main.jsx          # Entry point
-└── .github/workflows/    # CI/CD pipelines
-    ├── test.yml          #   Test, build, visual check, deploy
-    ├── daily-report.yml  #   Daily guest activity report
-    └── status-check.yml  #   Hourly production health check
+│   └── [pics/](https://github.com/abhaysampath/wedding-website/tree/main/public/pics)             # Site images (served via jsDelivr CDN)
+├── [src/](https://github.com/abhaysampath/wedding-website/tree/main/src)
+│   ├── [components/](https://github.com/abhaysampath/wedding-website/tree/main/src/components)       # React components
+│   ├── [context/](https://github.com/abhaysampath/wedding-website/tree/main/src/context)          # Auth context & provider
+│   ├── [data/](https://github.com/abhaysampath/wedding-website/tree/main/src/data)             # weddings.json (events), guests.js (fallback)
+│   ├── [utils/](https://github.com/abhaysampath/wedding-website/tree/main/src/utils)            # Helper functions
+│   ├── [config.js](https://github.com/abhaysampath/wedding-website/blob/main/src/config.js)         # App-wide configuration
+│   └── [main.jsx](https://github.com/abhaysampath/wedding-website/blob/main/src/main.jsx)          # Entry point
+└── [.github/workflows/](https://github.com/abhaysampath/wedding-website/tree/main/.github/workflows)    # CI/CD pipelines
+    ├── [test.yml](https://github.com/abhaysampath/wedding-website/blob/main/.github/workflows/test.yml)          #   Test, build, visual check, deploy
+    ├── [daily-report.yml](https://github.com/abhaysampath/wedding-website/blob/main/.github/workflows/daily-report.yml)  #   Daily guest activity report
+    └── [status-check.yml](https://github.com/abhaysampath/wedding-website/blob/main/.github/workflows/status-check.yml)  #   Hourly production health check
 ```
 
 ---
 
 ## 📄 Environment Variables
 
-See `.env.example` for all required variables. Each key is sourced from one of the services in the table above.
+See [`.env.example`](https://github.com/abhaysampath/wedding-website/blob/main/.env.example) for all required variables. Each key is sourced from one of the services in the table above.
 
 | Variable | Source |
 |---|---|
@@ -167,9 +167,9 @@ Every push to `main` automatically:
 2. Validates all image assets are present on the CDN
 3. Builds the production bundle
 4. Spins up a preview server
-5. Runs E2E browser smoke tests (Puppeteer) against the preview
+5. Runs E2E browser smoke tests ([Puppeteer](https://pptr.dev)) against the preview
 6. Takes 2 mobile screenshots and emails them for visual review
-7. Deploys to Vercel production
+7. Deploys to [Vercel](https://vercel.com) production
 8. Runs E2E smoke tests against the live production URL
 9. If anything fails, the deploy is blocked and an error is logged
 
