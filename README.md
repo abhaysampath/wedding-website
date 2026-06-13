@@ -184,3 +184,4 @@ Additionally, a daily report of guest activity is emailed each morning, and an h
 | Local (`npm run dev`) | ✓ (`npm test`) | ✓ (`npm run e2e:local`) | ✓ (`npm run preview:check`) | — |
 | CI — PR to `main` | ✓ | ✓ (preview) | — | — |
 | CI — Push to `main` | ✓ | ✓ (preview + prod) | ✓ | ✓ Vercel prod |
+

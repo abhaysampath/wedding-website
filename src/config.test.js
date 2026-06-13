@@ -64,13 +64,9 @@ describe('config', () => {
     })
   })
 
-  it('has images.hero personalized entries', () => {
-    const p = config.images.hero.personalized
-    if (p.groom) expect(p.groom.file).toBeTruthy()
-    if (p.bride) expect(p.bride.file).toBeTruthy()
-  })
-
-  it('has valid debug flag', () => {
-    expect(typeof config.debug).toBe('boolean')
+  it('has hero config with slides and interval', () => {
+    expect(config.images.hero.slides.length).toBeGreaterThan(0)
+    expect(config.images.hero.interval).toBeGreaterThan(0)
+    expect(config.images.hero.contact).toBeDefined()
   })
 })

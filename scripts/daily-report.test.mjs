@@ -14,6 +14,13 @@ vi.mock('googleapis', () => ({
   },
 }))
 
+const mockSendMail = vi.fn()
+vi.mock('nodemailer', () => ({
+  default: {
+    createTransport: vi.fn().mockReturnValue({ sendMail: mockSendMail }),
+  },
+}))
+
 import {
   e,
   sanitizeCell,
@@ -243,6 +250,7 @@ describe('main', () => {
     vi.restoreAllMocks()
     mockGet.mockReset()
     mockJWT.mockClear()
+    mockSendMail.mockReset()
     global.fetch = vi.fn()
     exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called')
@@ -264,9 +272,8 @@ describe('main', () => {
       GOOGLE_SHEET_ID: 'test-sheet',
       GOOGLE_SERVICE_EMAIL: 'svc@test.com',
       GOOGLE_PRIVATE_KEY: 'test-key',
-      EMAILJS_SERVICE_ID: 'svc_test',
-      EMAILJS_CONTACT_TEMPLATE_ID: 'tpl_contact_test',
-      EMAILJS_PUBLIC_KEY: 'pub_test',
+      SMTP_USER: 'sender@test.com',
+      SMTP_PASS: 'app-pass',
       DAYS_BETWEEN: '1',
       SITE_URL: 'https://test-site.com',
       REPORT_RECIPIENT: 'report@test.com',
@@ -276,7 +283,7 @@ describe('main', () => {
   it('exits with code 1 when required env vars are missing', async () => {
     // Remove all required vars
     for (const k of ['GOOGLE_SHEET_ID', 'GOOGLE_SERVICE_EMAIL', 'GOOGLE_PRIVATE_KEY',
-      'EMAILJS_SERVICE_ID', 'EMAILJS_CONTACT_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY']) {
+      'SMTP_USER', 'SMTP_PASS']) {
       delete process.env[k]
     }
     const consoleErr = vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -329,8 +336,6 @@ describe('main', () => {
     // Link checks
     mockFetch.mockResolvedValueOnce({ ok: true })
     mockFetch.mockResolvedValueOnce({ status: 404, ok: false })
-    // EmailJS API: 200
-    mockFetch.mockResolvedValue({ ok: true })
     global.fetch = mockFetch
 
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
@@ -338,18 +343,13 @@ describe('main', () => {
     await main()
 
     expect(mockGet).toHaveBeenCalledOnce()
-
-    const emailCall = global.fetch.mock.calls.find(
-      (c) => c[0] === 'https://api.emailjs.com/api/v1.0/email/send'
-    )
-    expect(emailCall).toBeTruthy()
-    const body = JSON.parse(emailCall[1].body)
-    expect(body.service_id).toBe('svc_test')
-    expect(body.template_id).toBe('tpl_contact_test')
-    expect(body.user_id).toBe('pub_test')
-    expect(body.template_params.email).toBe('report@test.com')
-    expect(body.template_params.subject).toContain('Guest Report')
-    expect(body.template_params.message).toContain('Total: 2')
+    expect(mockSendMail).toHaveBeenCalledOnce()
+    const mailCall = mockSendMail.mock.calls[0][0]
+    expect(mailCall.from).toBe('sender@test.com')
+    expect(mailCall.to).toBe('report@test.com')
+    expect(mailCall.subject).toContain('Guest Report')
+    expect(mailCall.text).toContain('Total: 2')
+    expect(mailCall.html).toContain('<table')
 
     expect(consoleLog).toHaveBeenCalledWith('Report sent to', 'report@test.com')
     consoleLog.mockRestore()
@@ -372,19 +372,14 @@ describe('main', () => {
     mockFetch = vi.fn().mockResolvedValueOnce({ ok: false, status: 404 })
     // Link check: 200
     mockFetch.mockResolvedValueOnce({ ok: true })
-    // EmailJS: 200
-    mockFetch.mockResolvedValue({ ok: true })
     global.fetch = mockFetch
 
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
 
     await main()
 
-    const emailCall = global.fetch.mock.calls.find(
-      (c) => c[0] === 'https://api.emailjs.com/api/v1.0/email/send'
-    )
-    const body = JSON.parse(emailCall[1].body)
-    expect(body.template_params.message).toContain('images')
+    expect(mockSendMail).toHaveBeenCalledOnce()
+    expect(mockSendMail.mock.calls[0][0].text).toContain('images')
     consoleLog.mockRestore()
   })
 
@@ -408,11 +403,8 @@ describe('main', () => {
 
     await main()
 
-    const emailCall = global.fetch.mock.calls.find(
-      (c) => c[0] === 'https://api.emailjs.com/api/v1.0/email/send'
-    )
-    const body = JSON.parse(emailCall[1].body)
-    expect(body.template_params.message).toContain('Duplicate')
+    expect(mockSendMail).toHaveBeenCalledOnce()
+    expect(mockSendMail.mock.calls[0][0].text).toContain('Duplicate')
     consoleLog.mockRestore()
   })
 })

@@ -21,6 +21,12 @@ const REQUIRED_VARS = {
   ],
 }
 
+const OPTIONAL_VARS = [
+  { var: 'VITE_EMAILJS_CONTACT_TEMPLATE_ID', label: 'EmailJS Contact Template ID' },
+  { var: 'VITE_RECAPTCHA_SITE_KEY', label: 'reCAPTCHA Site Key' },
+  { var: 'RECAPTCHA_SECRET_KEY', label: 'reCAPTCHA Secret Key' },
+]
+
 const missing = []
 for (const [category, vars] of Object.entries(REQUIRED_VARS)) {
   for (const { var: name, label } of vars) {
@@ -37,6 +43,15 @@ if (missing.length > 0) {
   }
   console.error('\n   Set these in your .env file or Vercel project environment variables.\n')
   process.exit(1)
+}
+
+const missingOptional = OPTIONAL_VARS.filter(({ var: name }) => !process.env[name])
+if (missingOptional.length > 0) {
+  console.warn('\n⚠️  Optional environment variables not set (some features may be limited):\n')
+  for (const { var: name, label } of missingOptional) {
+    console.warn(`   ${label} (${name})`)
+  }
+  console.warn('')
 }
 
 console.log('✅ All required environment variables are set.')

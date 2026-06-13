@@ -7,7 +7,7 @@
  *
  * Required env vars:
  *   GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY  (sheet access)
- *   EMAILJS_SERVICE_ID, EMAILJS_CONTACT_TEMPLATE_ID, EMAILJS_PUBLIC_KEY  (EmailJS)
+ *   SMTP_USER, SMTP_PASS                                       (Gmail SMTP credentials)
  *
  * Optional:
  *   REPORT_RECIPIENT  — email to send to (default: sera.belize@gmail.com)
@@ -106,9 +106,8 @@ export async function main() {
     GOOGLE_SHEET_ID,
     GOOGLE_SERVICE_EMAIL,
     GOOGLE_PRIVATE_KEY,
-    EMAILJS_SERVICE_ID,
-    EMAILJS_CONTACT_TEMPLATE_ID,
-    EMAILJS_PUBLIC_KEY,
+    SMTP_USER,
+    SMTP_PASS,
     REPORT_RECIPIENT = 'sera.belize@gmail.com',
     DAYS_BETWEEN = '1',
     SITE_URL = 'https://abhayandrebecca.com',
@@ -118,9 +117,8 @@ export async function main() {
   if (!GOOGLE_SHEET_ID) missing.push('GOOGLE_SHEET_ID')
   if (!GOOGLE_SERVICE_EMAIL) missing.push('GOOGLE_SERVICE_EMAIL')
   if (!GOOGLE_PRIVATE_KEY) missing.push('GOOGLE_PRIVATE_KEY')
-  if (!EMAILJS_SERVICE_ID) missing.push('EMAILJS_SERVICE_ID')
-  if (!EMAILJS_CONTACT_TEMPLATE_ID) missing.push('EMAILJS_CONTACT_TEMPLATE_ID')
-  if (!EMAILJS_PUBLIC_KEY) missing.push('EMAILJS_PUBLIC_KEY')
+  if (!SMTP_USER) missing.push('SMTP_USER')
+  if (!SMTP_PASS) missing.push('SMTP_PASS')
   if (missing.length > 0) {
     console.error(`Missing env vars: ${missing.join(', ')}`)
     process.exit(1)
@@ -347,27 +345,20 @@ export async function main() {
     (dupPhones.length > 0 || dupEmails.length > 0 ? `Duplicate contacts found.\n` : 'No duplicate contacts.\n')
 
   console.log('Sending report...')
-  const emailjsResp = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      service_id: EMAILJS_SERVICE_ID,
-      template_id: EMAILJS_CONTACT_TEMPLATE_ID,
-      user_id: EMAILJS_PUBLIC_KEY,
-      template_params: {
-        email: REPORT_RECIPIENT,
-        name: 'Daily Report',
-        contact_type: 'daily-report',
-        subject: `Guest Report — ${new Date().toLocaleDateString()}`,
-        message: text,
-      },
-    }),
+  const nodemailer = await import('nodemailer')
+  const transporter = nodemailer.default.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
   })
-
-  if (!emailjsResp.ok) {
-    const errBody = await emailjsResp.text()
-    throw new Error(`EmailJS API error (${emailjsResp.status}): ${errBody}`)
-  }
+  await transporter.sendMail({
+    from: SMTP_USER,
+    to: REPORT_RECIPIENT,
+    subject: `Daily Guest Report — ${new Date().toLocaleDateString()}`,
+    text,
+    html,
+  })
 
   console.log('Report sent to', REPORT_RECIPIENT)
   console.log(`Images checked: ${images.length}, broken: ${brokenImages.length}`)

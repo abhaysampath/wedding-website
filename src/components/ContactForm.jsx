@@ -12,19 +12,19 @@ function loadDraft(userId) {
   try {
     const raw = sessionStorage.getItem(getDraftKey(userId))
     return raw ? JSON.parse(raw) : null
-  } catch { return null }
+  } catch (err) { console.error('Failed to load draft from sessionStorage:', err); return null }
 }
 
 function saveDraft(userId, data) {
   try {
     sessionStorage.setItem(getDraftKey(userId), JSON.stringify(data))
-  } catch { /* noop */ }
+  } catch (err) { console.error('Failed to save draft to sessionStorage:', err) }
 }
 
 function clearDraft(userId) {
   try {
     sessionStorage.removeItem(getDraftKey(userId))
-  } catch { /* noop */ }
+  } catch (err) { console.error('Failed to clear draft from sessionStorage:', err) }
 }
 
 const WEDDING_LABELS = {
@@ -191,7 +191,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
-    } catch {
+    } catch (err) {
+      console.error('Auto-save failed:', err)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
@@ -245,7 +246,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
-    } catch {
+    } catch (err) {
+      console.error('Save failed:', err)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
@@ -257,7 +259,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
       const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
       window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }))
-    } catch {
+    } catch (err) {
+      console.error('Message save failed:', err)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }

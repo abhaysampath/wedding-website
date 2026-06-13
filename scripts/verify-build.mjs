@@ -27,5 +27,15 @@ const verify = spawnSync('node', [resolve(import.meta.dirname, 'verify-env.mjs')
 })
 if (verify.status !== 0) process.exit(verify.status)
 
+console.log('\n🔍 Validating image assets...\n')
+const images = spawnSync('node', [resolve(import.meta.dirname, 'validate-images.mjs')], {
+  stdio: 'inherit',
+  env: process.env,
+})
+if (images.status !== 0) {
+  console.error('❌ Image validation failed — add missing files or update config.\n')
+  process.exit(images.status)
+}
+
 console.log('\n🔨 Running vite build...\n')
 spawnSync('vite', ['build'], { stdio: 'inherit', env: process.env })
