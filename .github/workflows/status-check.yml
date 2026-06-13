@@ -1,0 +1,26 @@
+name: Status Check
+
+on:
+  schedule:
+    # Every hour during waking hours ET (9 AM - 11 PM UTC = 5 AM - 7 PM ET)
+    - cron: '0 9-23 * * *'
+  workflow_dispatch:
+
+env:
+  SITE_URL: https://abhayandrebecca.com
+  STATUS_RECIPIENT: sera.belize@gmail.com
+  EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+  EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+  EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --omit=dev
+      - name: Run status checks
+        run: node scripts/status-check.mjs
