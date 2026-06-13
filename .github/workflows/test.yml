@@ -107,36 +107,3 @@ jobs:
           sleep 10  # Wait for Vercel to propagate
           node scripts/deploy-e2e.mjs https://abhayandrebecca.com
 
-      # Step 9: Email deploy confirmation
-      - name: Notify deploy success
-        if: success()
-        env:
-          EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
-          EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
-          EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
-        run: |
-          node -e "
-            const msg = [
-              'Deploy succeeded — $(date -u)',
-              '',
-              'Site: https://abhayandrebecca.com',
-              'Commit: ${{ github.sha }}',
-              'Tests: E2E smoke test passed',
-            ].join('\n')
-            fetch('https://api.emailjs.com/api/v1.0/email/send', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                service_id: process.env.EMAILJS_SERVICE_ID,
-                template_id: process.env.EMAILJS_TEMPLATE_ID,
-                user_id: process.env.EMAILJS_PUBLIC_KEY,
-                template_params: {
-                  email: 'sera.belize@gmail.com',
-                  name: 'Deploy Bot',
-                  contact_type: 'deploy-notify',
-                  subject: '✅ Site deployed successfully',
-                  message: msg,
-                },
-              }),
-            }).then(r => r.ok ? console.log('Notification sent') : Promise.reject(r.status))
-          "
