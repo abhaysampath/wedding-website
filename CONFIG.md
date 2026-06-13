@@ -97,7 +97,8 @@ Project Settings → General → Your apps → Web app.
 | Key | Environment Variable | Purpose |
 |-----|---------------------|---------|
 | `serviceId` | `VITE_EMAILJS_SERVICE_ID` | EmailJS service ID |
-| `templateId` | `VITE_EMAILJS_TEMPLATE_ID` | EmailJS template ID |
+| `templateId` | `VITE_EMAILJS_TEMPLATE_ID` | EmailJS OTP template ID |
+| `contactTemplateId` | `VITE_EMAILJS_CONTACT_TEMPLATE_ID` | EmailJS contact form template ID |
 | `publicKey` | `VITE_EMAILJS_PUBLIC_KEY` | EmailJS public API key |
 
 **How to populate:** Set these in `.env` or Vercel dashboard. Create a free
@@ -107,6 +108,42 @@ The template should accept these variables:
 - `{{name}}` — recipient name
 - `{{code}}` — 6-digit verification code
 - `{{verify_link}}` — full URL including `?code=XXXX`
+
+---
+
+## `recaptcha`
+
+| Key | Environment Variable | Purpose |
+|-----|---------------------|---------|
+| `siteKey` | `VITE_RECAPTCHA_SITE_KEY` | reCAPTCHA v2 site key (client-side) |
+| `secretKey` | `RECAPTCHA_SECRET_KEY` | reCAPTCHA v2 secret key (server-side) |
+
+**How to populate:** Set these in `.env` or Vercel dashboard. Create a reCAPTCHA
+v2 ("I'm not a robot") key pair at the Google reCAPTCHA Admin Console. The site
+key is exposed to clients; the secret key is used server-side by the
+`/api/contact` endpoint to verify the token.
+
+---
+
+## Guest roles & visibility
+
+Guests are assigned a `role` in the Google Sheet, which controls what they can
+see on the site:
+
+| Role | Visibility |
+|------|------------|
+| `groom` | Sees the groom's personalized hero image and all guest sections (Story, Events, Travel, FAQ, Footer) |
+| `bride` | Same access as `groom` (hero personalization is currently groom-only) |
+| `close_family` | Full guest access to all sections |
+| `family` | Full guest access to all sections |
+| `guest` | Full guest access to all sections |
+
+Unauthenticated visitors can only see the Hero, Gallery, and Contact sections.
+The `side` field (`"groom"` / `"bride"`) is separate from `role` and currently
+only affects the hero slideshow.
+
+**How to populate:** Set the `Role` column in your guest spreadsheet. Role values
+are mapped via `sheets.roleMap` in `src/config.js`.
 
 ---
 

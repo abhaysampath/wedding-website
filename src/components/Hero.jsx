@@ -26,11 +26,7 @@ export default function Hero() {
   const allSlides = useMemo(() => {
     const slides = user
       ? (() => {
-          const personal = user.side === 'groom'
-            ? heroConfig.personalized.groom
-            : user.side === 'bride'
-              ? heroConfig.personalized.bride
-              : null
+          const personal = user.side === 'groom' ? heroConfig.personalized.groom : null
           return personal
             ? [{ src: heroConfig.dir + personal.file, alt: personal.alt }, ...baseSlides]
             : baseSlides

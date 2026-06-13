@@ -36,7 +36,8 @@ async function getRecaptchaToken(action = 'submit') {
   try {
     await loadRecaptchaScript()
     return window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action })
-  } catch {
+  } catch (err) {
+    console.error('reCAPTCHA load failed:', err)
     return null
   }
 }
@@ -49,7 +50,8 @@ async function verifyRecaptchaToken(token) {
       body: JSON.stringify({ token }),
     })
     return res.ok
-  } catch {
+  } catch (err) {
+    console.error('reCAPTCHA verify failed:', err)
     return false
   }
 }
@@ -137,7 +139,8 @@ export default function ContactSlide() {
         }, publicKey)
         setStatus('sent')
         setMessage('')
-      } catch {
+      } catch (err) {
+        console.error('EmailJS send failed:', err)
         setStatus('error')
       }
     } else {

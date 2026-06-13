@@ -245,7 +245,7 @@ export default function AuthModal() {
   }, [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode])
 
   const handleDiscardAndClose = useCallback(() => {
-    try { sessionStorage.removeItem('contact_draft_' + user?.id) } catch {}
+    try { sessionStorage.removeItem('contact_draft_' + user?.id) } catch (err) { console.error('Failed to remove contact draft:', err) }
     if (user) {
       recordLogin()
       setShowAuthModal(false)

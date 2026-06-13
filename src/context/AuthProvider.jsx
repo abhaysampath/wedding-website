@@ -27,7 +27,7 @@ function loadStoredUser() {
   try {
     const stored = localStorage.getItem('wedding_user')
     if (stored) return JSON.parse(stored)
-  } catch { return null }
+  } catch (err) { console.error('Failed to load stored user:', err); return null }
   return null
 }
 
@@ -78,7 +78,7 @@ async function writeToSheet(guestId, data) {
       body: JSON.stringify(data),
     })
     if (!res.ok) {
-      console.error('Sheet write failed:', guestId, data, res.status, await res.text().catch(() => ''))
+      console.error('Sheet write failed:', guestId, data, res.status, await res.text().catch((err) => { console.error('Failed to read error response text:', err); return '' }))
       return false
     }
     const body = await res.json()
@@ -121,7 +121,8 @@ export function AuthProvider({ children }) {
           }
         }
         setContent({ guests: sampleGuests, faq: [], loaded: true })
-      } catch {
+      } catch (err) {
+        console.error('Failed to load content:', err)
         setContent({ guests: sampleGuests, faq: [], loaded: true })
       }
     }
