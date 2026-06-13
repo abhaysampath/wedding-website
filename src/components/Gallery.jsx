@@ -185,7 +185,7 @@ export default function Gallery() {
           transition={{ duration: 0.7 }}
           className="text-center mb-12 pr-6"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
+          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Gallery
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
