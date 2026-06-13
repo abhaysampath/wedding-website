@@ -44,12 +44,12 @@ Unauthenticated visitors see `public` events only. Guest roles are assigned per-
 | Practice | How it works |
 |---|---|
 | **API keys hidden** | All keys ([Firebase](https://firebase.google.com), [EmailJS](https://www.emailjs.com), Google APIs) are stored as environment variables, never in the code. The [`.env`](https://github.com/abhaysampath/wedding-website/blob/main/.env.example) file is git-ignored. |
-| **CI/CD secrets** | Deploy pipeline reads keys from GitHub encrypted secrets, not from files. |
+| **CI/CD secrets** | Deploy pipeline reads keys from [GitHub encrypted secrets](https://github.com/abhaysampath/wedding-website/settings/secrets/actions), not from files. |
 | **Public keys only in browser** | Only safe-to-expose public keys (e.g. EmailJS public key, Firebase API key) are sent to the browser. Private keys stay server-side. |
 | **Service account locked** | The Google service account can only read the one sheet, nothing else. |
 | **[reCAPTCHA v3](https://www.google.com/recaptcha/about/)** | Contact form is protected by invisible reCAPTCHA. No CAPTCHA challenge needed — just a score check. |
 | **Dependencies pinned** | [`package-lock.json`](https://github.com/abhaysampath/wedding-website/blob/main/package-lock.json) locks every dependency version. CI uses `npm ci` for reproducible installs. |
-| **CORS restricted** | The API serverless functions only respond to requests from the wedding domain. |
+| **CORS restricted** | The API serverless functions only respond to requests from the wedding domain, enforced by [Vercel](https://vercel.com) configuration. |
 
 ---
 
@@ -128,7 +128,7 @@ npm run dev
 │   ├── [verify-build.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/verify-build.mjs)  #   Env check → image validation → vite build
 │   └── [sync-guests.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/sync-guests.mjs)   #   Pull guest data from Sheet to local file
 ├── public/
-│   └── [pics/](https://github.com/abhaysampath/wedding-website/tree/main/public/pics)             # Site images (served via jsDelivr CDN)
+│   └── [pics/](https://github.com/abhaysampath/wedding-website/tree/main/public/pics)             # Site images (served via [jsDelivr CDN](https://www.jsdelivr.com/github))
 ├── [src/](https://github.com/abhaysampath/wedding-website/tree/main/src)
 │   ├── [components/](https://github.com/abhaysampath/wedding-website/tree/main/src/components)       # React components
 │   ├── [context/](https://github.com/abhaysampath/wedding-website/tree/main/src/context)          # Auth context & provider
