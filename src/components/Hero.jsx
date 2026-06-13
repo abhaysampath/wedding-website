@@ -23,17 +23,7 @@ export default function Hero() {
     alt: s.alt,
   }))
 
-  const allSlides = useMemo(() => {
-    const slides = user
-      ? (() => {
-          const personal = user.side === 'groom' ? heroConfig.personalized.groom : null
-          return personal
-            ? [{ src: heroConfig.dir + personal.file, alt: personal.alt }, ...baseSlides]
-            : baseSlides
-        })()
-      : baseSlides
-    return slides
-  }, [user, baseSlides, heroConfig])
+  const allSlides = baseSlides
 
   const slideCountRef = useRef(allSlides.length)
   useEffect(() => {
