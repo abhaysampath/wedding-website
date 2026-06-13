@@ -2,9 +2,11 @@ name: Status Check
 
 on:
   schedule:
-    # Every hour during waking hours ET (9 AM - 11 PM UTC = 5 AM - 7 PM ET)
     - cron: '0 9-23 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   SITE_URL: https://abhayandrebecca.com

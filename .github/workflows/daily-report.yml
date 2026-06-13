@@ -1,20 +1,12 @@
 name: Daily Guest Report
 
 on:
-  # ─────────────────────────────────────────────
-  # FREQUENCY: Change the cron expression below.
-  #   '0 12 * * *'  = every day at 12 PM UTC (8 AM ET / 5 AM PT)
-  #   '0 12 */2 * *' = every 2 days at 12 PM UTC
-  #   '0 12 * * 1'   = every Monday at 12 PM UTC
-  #   See https://crontab.guru for help.
-  #   Adjust UTC offset for your timezone:
-  #     12 PM UTC = 8 AM ET / 5 AM PT
-  # ─────────────────────────────────────────────
   schedule:
     - cron: '0 12 * * *'
-
-  # Also allow manual trigger from the Actions tab
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 env:
   GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}

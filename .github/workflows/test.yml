@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   # Required for vite build (client-side)
   VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -45,6 +48,9 @@ jobs:
     # Only deploy on push to main (not PRs)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: test
+    permissions:
+      contents: read
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
