@@ -78,7 +78,7 @@ export default function FAQ() {
         )}
 
         {faqs.length === 0 ? (
-          <p className="text-center text-charcoal-light/40 text-sm">FAQs coming soon</p>
+          <p className="text-center text-charcoal-light/40 text-sm">No FAQs available yet. Check back closer to the wedding date.</p>
         ) : (
           <motion.div
             initial={{ opacity: 0, y: 30 }}

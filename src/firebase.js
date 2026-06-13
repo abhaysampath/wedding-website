@@ -95,7 +95,7 @@ let _recaptchaVerifier = null
 
 export function getRecaptchaVerifier(containerElement) {
   if (_recaptchaVerifier) {
-    try { _recaptchaVerifier.clear() } catch { /* verifier may not be rendered */ }
+    try { _recaptchaVerifier.clear() } catch (err) { console.warn('Failed to clear reCAPTCHA verifier:', err) }
     _recaptchaVerifier = null
   }
   const a = init()
@@ -110,7 +110,7 @@ export function getRecaptchaVerifier(containerElement) {
 
 export function clearRecaptchaVerifier() {
   if (_recaptchaVerifier) {
-    try { _recaptchaVerifier.clear() } catch { /* verifier may not be rendered */ }
+    try { _recaptchaVerifier.clear() } catch (err) { console.warn('Failed to clear reCAPTCHA verifier:', err) }
     _recaptchaVerifier = null
   }
 }

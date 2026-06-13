@@ -17,7 +17,12 @@ const REQUIRED_VARS = {
   email: [
     { var: 'VITE_EMAILJS_SERVICE_ID', label: 'EmailJS Service ID' },
     { var: 'VITE_EMAILJS_TEMPLATE_ID', label: 'EmailJS Template ID' },
+    { var: 'VITE_EMAILJS_CONTACT_TEMPLATE_ID', label: 'EmailJS Contact Template ID' },
     { var: 'VITE_EMAILJS_PUBLIC_KEY', label: 'EmailJS Public Key' },
+  ],
+  recaptcha: [
+    { var: 'VITE_RECAPTCHA_SITE_KEY', label: 'reCAPTCHA Site Key' },
+    { var: 'RECAPTCHA_SECRET_KEY', label: 'reCAPTCHA Secret Key' },
   ],
 }
 

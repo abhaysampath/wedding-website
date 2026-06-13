@@ -1,7 +1,6 @@
 const IMAGE_CDN = 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public'
 
 const config = {
-  debug: false,
   site: {
     siteTitle: 'Rebecca & Abhay',
     coupleNames: {
@@ -16,7 +15,7 @@ const config = {
     },
   },
   google: {
-    sheetUrl: `https://docs.google.com/spreadsheets/d/${import.meta.env.GOOGLE_SHEET_ID || ''}/edit?usp=sharing`,
+    sheetUrl: `https://docs.google.com/spreadsheets/d/${import.meta.env.VITE_GOOGLE_SHEET_ID || ''}/edit?usp=sharing`,
   },
   sheets: {
     mode: 'api',
@@ -49,8 +48,6 @@ const config = {
         { file: 'scooby-doo2.jpeg', alt: 'Scooby Doo 2' },
       ],
       interval: 10000,
-      personalized: {
-      },
       contact: {
         reasons: [
           { value: 'wishes', label: 'Wishes to the Couple' },
