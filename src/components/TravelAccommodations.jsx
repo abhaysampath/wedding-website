@@ -28,7 +28,7 @@ export default function TravelAccommodations() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
+          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Travel & Accommodations
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />

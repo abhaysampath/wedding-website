@@ -61,7 +61,7 @@ export default function FAQ() {
           transition={{ duration: 0.7 }}
           className="text-center mb-14"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light mb-3">
+            <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             FAQ
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
