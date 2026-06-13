@@ -5,11 +5,11 @@ import config from '../config'
 import weddings from '../data/weddings.json'
 
 export default function Footer() {
-  const { bride, groom } = config.site.coupleNames
+  const { bride = '', groom = '' } = config.site.coupleNames || {}
   const { activeWedding } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-50px' })
-  const w = weddings[activeWedding]
+  const w = weddings[activeWedding] || {}
 
   return (
     <motion.footer

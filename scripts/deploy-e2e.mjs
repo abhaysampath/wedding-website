@@ -155,6 +155,60 @@ async function main() {
     await page.evaluate(() => window.scrollTo(0, 0))
     await new Promise(r => setTimeout(r, 300))
 
+    // ── Test: Sign in as groom to exercise groom-specific code paths ──
+    const groomErrors = pageErrors.length
+    const groomUser = {
+      id: 'g002',
+      firstName: 'Abhay',
+      lastName: '',
+      side: 'groom',
+      role: 'groom',
+      relationship: 'The Groom',
+      weddings: ['us', 'india'],
+      plusOne: false,
+      phone: '',
+      email: '',
+      address: '',
+      dietaryPreferences: '',
+      lastLogin: new Date().toISOString(),
+      uid: null,
+    }
+    await page.evaluate((guest) => {
+      localStorage.setItem('wedding_user', JSON.stringify(guest))
+    }, groomUser)
+    await page.reload({ waitUntil: 'networkidle0', timeout: 30000 })
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await new Promise(r => setTimeout(r, 500))
+    const newGroomErrors = pageErrors.length - groomErrors
+    assert('No errors as groom', newGroomErrors === 0, `${newGroomErrors} error(s)`)
+
+    // ── Test: Sign in as invited_guest to exercise that code path ──
+    const guestErrors = pageErrors.length
+    const invitedGuest = {
+      id: 'g003',
+      firstName: 'Test',
+      lastName: 'Guest',
+      side: '',
+      role: 'invited_guest',
+      relationship: 'Friend of Couple',
+      weddings: ['us', 'india'],
+      plusOne: false,
+      phone: '',
+      email: '',
+      address: '',
+      dietaryPreferences: '',
+      lastLogin: new Date().toISOString(),
+      uid: null,
+    }
+    await page.evaluate((guest) => {
+      localStorage.setItem('wedding_user', JSON.stringify(guest))
+    }, invitedGuest)
+    await page.reload({ waitUntil: 'networkidle0', timeout: 30000 })
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+    await new Promise(r => setTimeout(r, 500))
+    const newGuestErrors = pageErrors.length - guestErrors
+    assert('No errors as invited_guest', newGuestErrors === 0, `${newGuestErrors} error(s)`)
+
     // Test 7: Console errors filtered for noise
     const appErrors = consoleErrors.filter(e =>
       !e.includes('runtime.lastError') &&

@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 env:
   # Required for vite build (client-side)
   VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
@@ -45,6 +48,9 @@ jobs:
     # Only deploy on push to main (not PRs)
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: test
+    permissions:
+      contents: read
+      actions: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,12 +79,64 @@ jobs:
       - name: Run E2E tests
         run: node scripts/deploy-e2e.mjs http://localhost:3002
 
-      # Step 7: Deploy to Vercel production
+      # Step 7: Visual preview check (2 mobile screenshots)
+      - name: Visual preview check
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SCREENSHOT_RECIPIENT: sera.belize@gmail.com
+        run: |
+          npx playwright install chromium
+          node scripts/preview-check.mjs http://localhost:3002
+
+      # Step 8: Upload preview screenshots as artifacts
+      - name: Upload preview screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-screenshots
+          path: screenshots/
+          retention-days: 14
+
+      # Step 9: Deploy to Vercel production
       - name: Deploy to Vercel
         run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Step 8: Smoke test against production
+      # Step 10: Smoke test against production
       - name: E2E smoke test on production
         run: |
           sleep 10  # Wait for Vercel to propagate
           node scripts/deploy-e2e.mjs https://abhayandrebecca.com
+
+      # Step 9: Email deploy confirmation
+      - name: Notify deploy success
+        if: success()
+        env:
+          EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
+        run: |
+          node -e "
+            const msg = [
+              'Deploy succeeded — $(date -u)',
+              '',
+              'Site: https://abhayandrebecca.com',
+              'Commit: ${{ github.sha }}',
+              'Tests: E2E smoke test passed',
+            ].join('\n')
+            fetch('https://api.emailjs.com/api/v1.0/email/send', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                service_id: process.env.EMAILJS_SERVICE_ID,
+                template_id: process.env.EMAILJS_TEMPLATE_ID,
+                user_id: process.env.EMAILJS_PUBLIC_KEY,
+                template_params: {
+                  email: 'sera.belize@gmail.com',
+                  name: 'Deploy Bot',
+                  contact_type: 'deploy-notify',
+                  subject: '✅ Site deployed successfully',
+                  message: msg,
+                },
+              }),
+            }).then(r => r.ok ? console.log('Notification sent') : Promise.reject(r.status))
+          "

@@ -10,6 +10,7 @@ export default function Hero() {
   const timerRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [manual, setManual] = useState(false)
+  const [transitionDuration, setTransitionDuration] = useState(3)
 
   const { scrollY } = useScroll()
   const imageY = useTransform(scrollY, [0, 600], [0, 80])
@@ -18,15 +19,21 @@ export default function Hero() {
   const textOpacity = useTransform(scrollY, [0, 300], [1, 0.6])
 
   const heroConfig = config.images.hero
-  const baseSlides = heroConfig.slides.map(s => ({
-    src: heroConfig.dir + s.file,
-    alt: s.alt,
-  }))
+  const baseSlides = useMemo(() =>
+    heroConfig.slides.map(s => ({
+      src: heroConfig.dir + s.file,
+      alt: s.alt,
+    })),
+  [heroConfig])
 
   const allSlides = useMemo(() => {
     const slides = user
       ? (() => {
-          const personal = user.side === 'groom' ? heroConfig.personalized.groom : null
+          const personal = user.side === 'groom'
+            ? heroConfig.personalized?.groom
+            : user.side === 'bride'
+              ? heroConfig.personalized?.bride
+              : null
           return personal
             ? [{ src: heroConfig.dir + personal.file, alt: personal.alt }, ...baseSlides]
             : baseSlides
@@ -43,27 +50,24 @@ export default function Hero() {
     }
   }, [allSlides.length])
 
-  const goTo = useCallback((i) => {
+  const goTo = useCallback((i, fast = false) => {
+    setTransitionDuration(fast ? 0.8 : 3)
     setCurrentIndex(i)
     setManual(true)
     setTimeout(() => setManual(false), heroConfig.interval)
   }, [heroConfig.interval])
 
-  const goNext = useCallback(() => {
-    let next
-    do {
-      next = Math.floor(Math.random() * allSlides.length)
-    } while (allSlides.length > 1 && next === currentIndex)
-    goTo(next)
+  const goNext = useCallback((fast = false) => {
+    goTo((currentIndex + 1) % allSlides.length, fast)
   }, [currentIndex, allSlides.length, goTo])
 
   const goPrev = useCallback(() => {
-    goTo((currentIndex - 1 + allSlides.length) % allSlides.length)
+    goTo((currentIndex - 1 + allSlides.length) % allSlides.length, true)
   }, [currentIndex, allSlides.length, goTo])
 
   useEffect(() => {
     if (manual) return
-    timerRef.current = setInterval(goNext, heroConfig.interval)
+    timerRef.current = setInterval(() => goNext(), heroConfig.interval)
     return () => clearInterval(timerRef.current)
   }, [manual, goNext, heroConfig.interval])
 
@@ -82,7 +86,7 @@ export default function Hero() {
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 3, ease: 'easeOut' }}
+            transition={{ duration: transitionDuration, ease: 'easeOut' }}
             className="absolute inset-0"
           >
             <img
@@ -119,14 +123,14 @@ export default function Hero() {
             {allSlides.map((_, i) => (
               <button
                 key={i}
-                onClick={(e) => { e.stopPropagation(); goTo(i) }}
+                onClick={(e) => { e.stopPropagation(); goTo(i, true) }}
                 className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? 'bg-cream w-4' : 'bg-cream/30 hover:bg-cream/50'}`}
                 aria-label={`Go to slide ${i + 1}`}
               />
             ))}
           </div>
           <button
-            onClick={(e) => { e.stopPropagation(); goNext() }}
+            onClick={(e) => { e.stopPropagation(); goNext(true) }}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
             aria-label="Next image"
           >
