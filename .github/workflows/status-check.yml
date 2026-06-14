@@ -24,5 +24,6 @@ jobs:
         with:
           node-version: 22
       - run: npm ci --omit=dev
+      - run: npx playwright install chromium 2>&1 | tail -5
       - name: Run status checks
         run: node scripts/status-check.mjs
