@@ -1,6 +1,5 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
-import { useAuth } from '../context/useAuth'
 import config, { imgUrl, imgSrcSet } from '../config'
 
 const INITIAL_LOAD = 10
@@ -39,8 +38,7 @@ function buildAllImages() {
   return shuffle(result)
 }
 
-const ALL_HOME_IMAGES = shuffle(buildSectionImages('home'))
-const ALL_FULL_IMAGES = shuffle(buildAllImages())
+const ALL_IMAGES = buildAllImages()
 
 function Skeleton() {
   return (
@@ -51,17 +49,13 @@ function Skeleton() {
 }
 
 export default function Gallery() {
-  const { user, setShowAuthModal } = useAuth()
   const ref = useRef(null)
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
-  const isAuthenticated = !!user
-  const images = isAuthenticated ? ALL_FULL_IMAGES : ALL_HOME_IMAGES
+  const images = ALL_IMAGES
   const [loadedImages, setLoadedImages] = useState({})
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
-  const [showOverlay, setShowOverlay] = useState(false)
-  const overlayShown = useRef(false)
   const [eagerReady, setEagerReady] = useState(false)
   const preloaded = useRef(new Set())
   const lightboxRef = useRef(null)
@@ -116,39 +110,17 @@ export default function Gallery() {
     return () => observer.disconnect()
   }, [images.length])
 
-  useEffect(() => {
-    if (user) return
-    if (sectionInView && !overlayShown.current) {
-      overlayShown.current = true
-      const id = setTimeout(() => setShowOverlay(true), 3000)
-      return () => clearTimeout(id)
-    }
-  }, [sectionInView, user])
-
-  useEffect(() => {
-    if (!user) return
-    overlayShown.current = true
-    const id = setTimeout(() => setShowOverlay(false), 0)
-    return () => clearTimeout(id)
-  }, [user])
-
   const handleImageLoad = useCallback((src) => {
     setLoadedImages((prev) => ({ ...prev, [src]: true }))
   }, [])
 
-  useEffect(() => {
-    if (expanded >= images.length) {
-      setExpanded(images.length > 0 ? 0 : null)
-    }
-  }, [images.length])
-
   const goNext = useCallback(() => {
     setExpanded((prev) => (prev < images.length - 1 ? prev + 1 : 0))
-  }, [images.length])
+  }, [])
 
   const goPrev = useCallback(() => {
     setExpanded((prev) => (prev > 0 ? prev - 1 : images.length - 1))
-  }, [images.length])
+  }, [])
 
   useEffect(() => {
     if (expanded === null) return
@@ -347,42 +319,6 @@ export default function Gallery() {
           )}
         </AnimatePresence>
       </div>
-
-      <AnimatePresence>
-        {showOverlay && !user && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-            className="absolute inset-0 bg-gradient-to-b from-transparent via-cream/80 to-cream backdrop-blur-[1px] flex flex-col items-center justify-center"
-          >
-            <button
-              type="button"
-              onClick={() => setShowOverlay(false)}
-              className="absolute top-6 right-6 w-[42px] h-[42px] flex items-center justify-center text-charcoal-light/40 hover:text-charcoal transition-colors"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                <path d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="text-center px-6">
-              <p className="text-charcoal-light/70 text-sm mb-4">
-                Sign in to find your invite and view the full gallery
-              </p>
-              <motion.button
-                type="button"
-                onClick={() => { setShowOverlay(false); setShowAuthModal(true) }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 500, damping: 12 } }}
-                className="inline-flex items-center gap-3 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm font-medium"
-              >
-                Find Your Invite
-              </motion.button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   )
 }
