@@ -45,18 +45,17 @@ export default function Registry() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {registries.map((item, i) => (
-            <motion.a
+            <motion.div
               key={item.name}
-              href={item.url}
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.15 * i }}
-              className="block bg-cream border border-gold/20 rounded-sm p-8 text-center hover:shadow-lg hover:shadow-sage/5 transition-all duration-300 group"
+              className="block bg-cream border border-gold/20 rounded-sm p-8 text-center group"
             >
               <div className="w-8 h-[1px] bg-gold mx-auto mb-4 group-hover:w-12 transition-all duration-300" />
               <h3 className="font-heading text-xl text-charcoal mb-2">{item.name}</h3>
               <p className="text-charcoal-light/50 text-xs">{item.description}</p>
-            </motion.a>
+            </motion.div>
           ))}
         </div>
       </div>

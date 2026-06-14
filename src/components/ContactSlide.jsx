@@ -163,6 +163,7 @@ export default function ContactSlide() {
         <p className="text-cream/90 font-heading text-xl mb-2">Thank You!</p>
         <p className="text-cream/60 text-sm max-w-xs">Your message has been sent. We'll get back to you soon.</p>
         <button
+          type="button"
           onClick={() => setStatus(null)}
           className="mt-6 text-xs tracking-widest uppercase text-cream/50 hover:text-cream/80 transition-colors"
         >
@@ -189,7 +190,9 @@ export default function ContactSlide() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label htmlFor="contact-reason" className="sr-only">Reason for contacting</label>
             <select
+              id="contact-reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               required
@@ -204,7 +207,9 @@ export default function ContactSlide() {
           </div>
 
           <div>
+            <label htmlFor="contact-name" className="sr-only">Your name</label>
             <input
+              id="contact-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -214,7 +219,9 @@ export default function ContactSlide() {
           </div>
 
           <div>
+            <label htmlFor="contact-email" className="sr-only">Your email</label>
             <input
+              id="contact-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -224,7 +231,9 @@ export default function ContactSlide() {
           </div>
 
           <div>
+            <label htmlFor="contact-message" className="sr-only">Your message</label>
             <textarea
+              id="contact-message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Your message..."

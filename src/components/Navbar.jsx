@@ -17,7 +17,7 @@ const authLinks = [
 
 function LogoButton({ onClick, scrolled }) {
   return (
-    <button onClick={onClick} className="relative font-heading font-semibold tracking-wide">
+    <button type="button" onClick={onClick} className="relative font-heading font-semibold tracking-wide">
       <motion.span
         whileTap={{ scale: 0.85 }}
         transition={{ type: 'spring', stiffness: 500, damping: 14 }}
@@ -90,6 +90,7 @@ export default function Navbar() {
                 <p className="text-[10px] opacity-60 tracking-wider uppercase">{guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}</p>
               </div>
               <button
+                type="button"
                 onClick={() => { signOut() }}
                 className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
                 title="Sign out"
@@ -100,6 +101,7 @@ export default function Navbar() {
           )}
           {!user && (
             <button
+              type="button"
               onClick={handleSignInClick}
               className="text-xs md:text-sm tracking-widest uppercase font-medium hover:text-gold transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
             >

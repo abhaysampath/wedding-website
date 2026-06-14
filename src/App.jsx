@@ -83,6 +83,7 @@ function BackToTop() {
 
   return (
     <button
+      type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       aria-label="Back to top"
       className="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-charcoal/70 backdrop-blur-sm text-cream/70 hover:bg-charcoal hover:text-cream transition-all duration-300 shadow-lg"
@@ -121,6 +122,7 @@ function SectionNav() {
     <nav aria-label="Section navigation" className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
       {filtered.map(s => (
         <button
+          type="button"
           key={s.id}
           onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}
           aria-label={s.label}
@@ -149,6 +151,7 @@ function BottomNav() {
       <div className="flex items-center justify-around h-14 px-2">
         {filtered.map(s => (
           <button
+            type="button"
             key={s.id}
             onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' })}
             aria-label={s.label}

@@ -217,6 +217,7 @@ export default function EventDetails() {
                       </AnimatePresence>
 
                       <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); toggleEvent(i) }}
                         className="mt-3 inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-gold-dark/60 hover:text-gold-dark transition-colors py-1"
                       >
@@ -233,6 +234,9 @@ export default function EventDetails() {
                       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                       className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-11 h-11 rounded-full border-2 border-gold/50 bg-cream flex items-center justify-center z-10 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
                       onClick={() => toggleEvent(i)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleEvent(i) } }}
+                      role="button"
+                      tabIndex={0}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >

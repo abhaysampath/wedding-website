@@ -318,11 +318,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       </p>
 
         <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+          <label htmlFor="cf-phone" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Phone Number
           </label>
           <div className="relative">
             <input
+              id="cf-phone"
               type="tel"
               value={!phoneFocused && phone === originalPhone ? `(${phone.slice(0,3)}) ${phone.slice(3,6)}-${phone.slice(6,10)}` : phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
@@ -334,6 +335,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             />
             <AnimatePresence>
               <motion.button
+                type="button"
                 key="phone-save"
                 onClick={handleSaveField}
                 disabled={!phoneChanged || !validPhone || saving}
@@ -349,11 +351,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         </div>
 
         <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+          <label htmlFor="cf-email" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Email Address
           </label>
           <div className="relative">
             <input
+              id="cf-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -362,6 +365,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             />
             <AnimatePresence>
               <motion.button
+                type="button"
                 key="email-save"
                 onClick={handleSaveField}
                 disabled={!emailChanged || !validEmail || saving}
@@ -377,11 +381,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         </div>
 
         <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+          <label htmlFor="cf-address" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Mailing Address
           </label>
           <div className="relative">
             <textarea
+              id="cf-address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               rows={2}
@@ -396,11 +401,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         </div>
 
         <div>
-          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+          <label htmlFor="cf-diet" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
             Dietary Preferences
           </label>
           <div className="relative">
             <textarea
+              id="cf-diet"
               value={dietaryPreferences}
               onChange={(e) => setDietaryPreferences(e.target.value)}
               rows={2}
@@ -438,12 +444,14 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         {authMode === 'settings' && (
           <div className="flex items-center gap-3 pt-2">
             <button
+              type="button"
               onClick={handleClose}
               className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
             >
               Close
             </button>
             <button
+              type="button"
               onClick={handleSave}
               disabled={!hasChanges || saveStatus === 'saving'}
               className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
@@ -456,6 +464,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
               {saveStatus === 'saving' ? 'Saving...' : 'Save'}
             </button>
             <button
+              type="button"
               onClick={handleMessageClick}
               className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors"
               style={{

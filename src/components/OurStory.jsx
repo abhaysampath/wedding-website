@@ -79,6 +79,7 @@ export default function OurStory() {
             <div className="absolute bottom-3 right-3 flex gap-1.5">
               {slides.map((_, i) => (
                 <button
+                  type="button"
                   key={i}
                   onClick={() => setCurrentIndex(i)}
                   className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentIndex ? 'bg-cream w-3' : 'bg-cream/40 hover:bg-cream/60'}`}

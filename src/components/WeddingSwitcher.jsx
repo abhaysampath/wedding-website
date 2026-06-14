@@ -51,6 +51,7 @@ export default function WeddingSwitcher() {
           const isOn = activeWedding === opt.value
           return (
             <button
+              type="button"
               key={opt.value}
               onClick={() => toggle(opt.value)}
               role="radio"

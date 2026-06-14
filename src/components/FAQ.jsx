@@ -9,6 +9,7 @@ function AccordionItem({ item, isOpen, onClick }) {
   return (
     <div className="border-b border-gold/10 last:border-b-0">
       <button
+        type="button"
         className="w-full flex items-center justify-between py-5 text-left"
         onClick={onClick}
       >

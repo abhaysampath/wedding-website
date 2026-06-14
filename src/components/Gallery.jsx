@@ -229,6 +229,9 @@ export default function Gallery() {
                   opacity,
                 }}
                 onClick={() => setExpanded(i)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(i) } }}
+                role="button"
+                tabIndex={0}
               >
                 <div
                   className="relative overflow-hidden rounded-sm bg-sage-light/10"
@@ -268,6 +271,8 @@ export default function Gallery() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-charcoal/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
               onClick={() => setExpanded(null)}
+              onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); setExpanded(null) } }}
+              role="presentation"
             >
               <motion.div
                 ref={lightboxRef}
@@ -279,6 +284,7 @@ export default function Gallery() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
+                  type="button"
                   onClick={() => setExpanded(null)}
                   className="absolute -top-12 right-0 text-cream/50 hover:text-cream text-[11px] tracking-[0.2em] uppercase transition-colors"
                 >
@@ -288,6 +294,7 @@ export default function Gallery() {
                 {images.length > 1 && (
                   <>
                     <button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); goPrev() }}
                       aria-label="Previous image"
                       className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
@@ -297,6 +304,7 @@ export default function Gallery() {
                       </svg>
                     </button>
                     <button
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); goNext() }}
                       aria-label="Next image"
                       className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
@@ -350,6 +358,7 @@ export default function Gallery() {
             className="absolute inset-0 bg-gradient-to-b from-transparent via-cream/80 to-cream backdrop-blur-[1px] flex flex-col items-center justify-center"
           >
             <button
+              type="button"
               onClick={() => setShowOverlay(false)}
               className="absolute top-6 right-6 w-[42px] h-[42px] flex items-center justify-center text-charcoal-light/40 hover:text-charcoal transition-colors"
             >
@@ -362,6 +371,7 @@ export default function Gallery() {
                 Sign in to find your invite and view the full gallery
               </p>
               <motion.button
+                type="button"
                 onClick={() => { setShowOverlay(false); setShowAuthModal(true) }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.9, transition: { type: 'spring', stiffness: 500, damping: 12 } }}

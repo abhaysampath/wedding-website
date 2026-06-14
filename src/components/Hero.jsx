@@ -116,6 +116,7 @@ export default function Hero() {
       {allSlides.length > 1 && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 flex items-center gap-4">
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); goPrev() }}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
             aria-label="Previous image"
@@ -127,6 +128,7 @@ export default function Hero() {
           <div className="flex gap-2">
             {allSlides.map((_, i) => (
               <button
+                type="button"
                 key={i}
                 onClick={(e) => { e.stopPropagation(); goTo(i, true) }}
                 className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? 'bg-cream w-4' : 'bg-cream/30 hover:bg-cream/50'}`}
@@ -135,6 +137,7 @@ export default function Hero() {
             ))}
           </div>
           <button
+            type="button"
             onClick={(e) => { e.stopPropagation(); goNext(true) }}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
             aria-label="Next image"
@@ -164,6 +167,7 @@ export default function Hero() {
             </motion.p>
 
             <motion.button
+              type="button"
               onClick={user ? () => openSettings() : undefined}
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
               whileTap={user ? { scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 15 } } : undefined}
@@ -192,6 +196,9 @@ export default function Hero() {
             <div className="flex items-center gap-3">
               <motion.div
                 onClick={() => setShowAuthModal(true)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowAuthModal(true) } }}
+                role="button"
+                tabIndex={0}
                 whileTap={{ scale: 0.95, transition: { type: 'spring', stiffness: 500, damping: 12 } }}
                 className="flex-1 flex items-center gap-2 cursor-pointer"
               >
@@ -204,6 +211,7 @@ export default function Hero() {
               </motion.div>
               <span className="flex items-center gap-2">
                 <motion.button
+                  type="button"
                   onClick={(e) => { e.stopPropagation(); handleFirebaseSignIn('google') }}
                   disabled={firebaseLoading}
                   whileHover={{ scale: 1.15 }}

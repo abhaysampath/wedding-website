@@ -523,10 +523,11 @@ export default function AuthModal() {
                  {firebaseError ? ` — error: ${firebaseError}` : ''}
                </div>
                <div ref={recaptchaContainerRef} />
-                <button
-                 onClick={handleDiscardAndClose}
-                 className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
-               >
+                 <button
+                  type="button"
+                  onClick={handleDiscardAndClose}
+                  className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+                >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                   <path d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -536,6 +537,7 @@ export default function AuthModal() {
               {authMode === 'signin' && !selectedMatch && (
                 <div className="space-y-4">
                   <motion.button
+                    type="button"
                     onClick={() => handleOAuthSignIn('google')}
                     disabled={firebaseLoading}
                     whileHover={{ scale: 1.03 }}
@@ -585,7 +587,8 @@ export default function AuthModal() {
                           className="mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
                         >
                           {matches.map((g, i) => (
-                            <button
+                             <button
+                              type="button"
                               key={g.id}
                               role="option"
                               aria-selected={i === highlightedIndex}
@@ -612,6 +615,7 @@ export default function AuthModal() {
 
                   <div className="text-center pt-2">
                     <button
+                      type="button"
                       onClick={handleNeedHelp}
                       className="text-[10px] tracking-widest uppercase text-charcoal-light/30 hover:text-charcoal-light transition-colors"
                     >
@@ -635,11 +639,12 @@ export default function AuthModal() {
                     </div>
 
                      <div className="flex justify-center">
-                        <button
-                          onClick={() => handleOAuthSignIn('google')}
-                          disabled={firebaseLoading}
-                          className="flex items-center justify-center gap-2 py-2.5 px-6 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
-                        >
+                         <button
+                           type="button"
+                           onClick={() => handleOAuthSignIn('google')}
+                           disabled={firebaseLoading}
+                           className="flex items-center justify-center gap-2 py-2.5 px-6 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
+                         >
                           {firebaseLoading ? (
                             <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
                           ) : (
@@ -659,21 +664,23 @@ export default function AuthModal() {
                       {/* Phone — always visible when guest has phone */}
                       {guestPhone && isUsNumber(guestPhone) && !awaitingSmsCode && (
                         <div>
-                          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                          <label htmlFor="am-phone" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
                             Phone Number
                           </label>
                           <div className="relative">
                              <input
+                               id="am-phone"
                                type="tel"
                                value={maskPhone(guestPhone)}
                                readOnly
                                className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
                              />
-                            <button
-                              onClick={handlePhoneConfirm}
-                               disabled={sendingSms}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                            >
+                             <button
+                               type="button"
+                               onClick={handlePhoneConfirm}
+                                disabled={sendingSms}
+                               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                             >
                                {sendingSms ? 'Sending...' : 'Confirm'}
                              </button>
                            </div>
@@ -683,21 +690,23 @@ export default function AuthModal() {
                        {/* Email — always visible when guest has email */}
                       {guestEmail && !awaitingEmailLink && (
                         <div>
-                          <label className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
+                          <label htmlFor="am-email" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
                             Email Address
                           </label>
                           <div className="relative">
                              <input
+                               id="am-email"
                                type="email"
                                value={maskEmail(guestEmail)}
                                readOnly
                                className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
                              />
-                            <button
-                              onClick={handleEmailConfirm}
-                               disabled={saving}
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
-                            >
+                             <button
+                               type="button"
+                               onClick={handleEmailConfirm}
+                                disabled={saving}
+                               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:text-sage"
+                             >
                                {saving ? 'Sending...' : 'Confirm'}
                              </button>
                            </div>
@@ -764,11 +773,12 @@ export default function AuthModal() {
                           </div>
                             <div className="mt-2 flex items-center justify-center gap-3">
                               {smsResendable ? (
-                                 <button
-                                   onClick={handlePhoneConfirm}
-                                   disabled={sendingSms}
-                                   className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
-                                 >
+                                  <button
+                                    type="button"
+                                    onClick={handlePhoneConfirm}
+                                    disabled={sendingSms}
+                                    className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                  >
                                    {sendingSms ? 'Sending...' : 'Resend Code'}
                                  </button>
                                ) : null}
@@ -835,11 +845,12 @@ export default function AuthModal() {
                           </div>
                             <div className="mt-2 flex items-center justify-center gap-3">
                               {emailResendable ? (
-                                 <button
-                                   onClick={handleEmailConfirm}
-                                   disabled={saving}
-                                   className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
-                                 >
+                                  <button
+                                    type="button"
+                                    onClick={handleEmailConfirm}
+                                    disabled={saving}
+                                    className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                  >
                                    {saving ? 'Sending...' : 'Resend Code'}
                                  </button>
                                ) : null}
@@ -855,6 +866,7 @@ export default function AuthModal() {
 
                     <div className="flex pt-2">
                     <button
+                      type="button"
                       onClick={handleRejectName}
                       className="w-full py-2.5 border border-gold/20 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
                     >

@@ -59,6 +59,7 @@ class ErrorBoundary extends Component {
                   </div>
                 )}
                 <button 
+                  type="button"
                   onClick={() => window.location.reload()}
                   className="mt-6 inline-flex items-center gap-2 bg-sage hover:bg-sage-dark text-cream text-xs tracking-widest uppercase px-6 py-3 rounded-sm transition-colors font-medium"
                 >
