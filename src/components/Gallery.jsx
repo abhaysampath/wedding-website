@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useAuth } from '../context/useAuth'
 import config, { imgUrl, imgSrcSet } from '../config'
 
 const INITIAL_LOAD = 10
@@ -38,7 +39,8 @@ function buildAllImages() {
   return shuffle(result)
 }
 
-const ALL_IMAGES = buildAllImages()
+const ALL_HOME_IMAGES = shuffle(buildSectionImages('home'))
+const ALL_FULL_IMAGES = shuffle(buildAllImages())
 
 function Skeleton() {
   return (
@@ -49,13 +51,17 @@ function Skeleton() {
 }
 
 export default function Gallery() {
+  const { user, setShowAuthModal } = useAuth()
   const ref = useRef(null)
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
-  const images = ALL_IMAGES
+  const isAuthenticated = !!user
+  const images = useMemo(() => (isAuthenticated ? ALL_FULL_IMAGES : ALL_HOME_IMAGES), [isAuthenticated])
   const [loadedImages, setLoadedImages] = useState({})
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
+  const [showOverlay, setShowOverlay] = useState(false)
+  const overlayShown = useRef(false)
   const [eagerReady, setEagerReady] = useState(false)
   const preloaded = useRef(new Set())
   const lightboxRef = useRef(null)
@@ -110,17 +116,39 @@ export default function Gallery() {
     return () => observer.disconnect()
   }, [images.length])
 
+  useEffect(() => {
+    if (user) return
+    if (sectionInView && !overlayShown.current) {
+      overlayShown.current = true
+      const id = setTimeout(() => setShowOverlay(true), 3000)
+      return () => clearTimeout(id)
+    }
+  }, [sectionInView, user])
+
+  useEffect(() => {
+    if (!user) return
+    overlayShown.current = true
+    const id = setTimeout(() => setShowOverlay(false), 0)
+    return () => clearTimeout(id)
+  }, [user])
+
   const handleImageLoad = useCallback((src) => {
     setLoadedImages((prev) => ({ ...prev, [src]: true }))
   }, [])
 
+  useEffect(() => {
+    if (expanded >= images.length) {
+      setExpanded(images.length > 0 ? 0 : null)
+    }
+  }, [expanded, images.length])
+
   const goNext = useCallback(() => {
     setExpanded((prev) => (prev < images.length - 1 ? prev + 1 : 0))
-  }, [])
+  }, [images.length])
 
   const goPrev = useCallback(() => {
     setExpanded((prev) => (prev > 0 ? prev - 1 : images.length - 1))
-  }, [])
+  }, [images.length])
 
   useEffect(() => {
     if (expanded === null) return

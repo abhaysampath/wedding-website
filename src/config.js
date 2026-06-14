@@ -47,7 +47,6 @@ const config = {
     baseUrl: IMAGE_CDN,
     hero: {
       slides: [
-        { path: 'pics/vert/ar-w-akshay.jpeg', alt: 'Ar W Akshay' },
         { path: 'pics/home/belize-engagement.jpeg', alt: 'Belize Engagement' },
         { path: 'pics/home/belize-sunset-l.jpeg', alt: 'Belize Sunset' },
         { path: 'pics/home/gala4.JPG', alt: 'Gala 4' },
