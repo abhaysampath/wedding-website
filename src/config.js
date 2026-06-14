@@ -84,7 +84,6 @@ const config = {
     },
     gallery: {
       home: [
-        { path: 'pics/vert/ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
         { path: 'pics/home/belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
         { path: 'pics/home/belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
         { path: 'pics/home/gala4.JPG', alt: 'Gala 4', tier: 2 },
