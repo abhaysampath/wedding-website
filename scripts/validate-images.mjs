@@ -22,6 +22,15 @@ const SECTION_DIR_MAP = [
   { key: 'gallery.vert', dir: 'vert' },
 ];
 
+function getDirFromPath(path) {
+  const parts = path.split('/');
+  return parts.length > 1 ? parts[1] : 'home';
+}
+
+function getFileFromPath(path) {
+  return path.split('/').pop();
+}
+
 function extractInnerBlock(text, property) {
   const idx = text.indexOf(`${property}:`);
   if (idx === -1) return null;
@@ -52,7 +61,7 @@ function extractArrayFileRefs(text, arrayProp) {
   }
   if (depth !== 0) return [];
   const arrayContent = text.slice(bracket, pos);
-  return [...arrayContent.matchAll(/file:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
+  return [...arrayContent.matchAll(/path:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
 }
 
 let configText;
@@ -88,10 +97,11 @@ if (galleryBlock) {
 }
 
 const configuredByDir = {};
-for (const { key, dir } of SECTION_DIR_MAP) {
-  if (!configuredByDir[dir]) configuredByDir[dir] = new Set();
+for (const { key } of SECTION_DIR_MAP) {
   for (const f of sections[key]) {
-    configuredByDir[dir].add(f);
+    const dir = getDirFromPath(f);
+    if (!configuredByDir[dir]) configuredByDir[dir] = new Set();
+    configuredByDir[dir].add(getFileFromPath(f));
   }
 }
 
@@ -124,15 +134,17 @@ console.log('');
 console.log('--- Configured References ---');
 console.log('');
 
-for (const { key, dir } of SECTION_DIR_MAP) {
+for (const { key, dir: expectedDir } of SECTION_DIR_MAP) {
   const files = sections[key];
-  console.log(`  ${key}  (public/pics/${dir}/)`);
+  console.log(`  ${key}  (public/pics/${expectedDir}/)`);
   for (const file of files) {
-    const exists = diskByDir[dir]?.has(file) ?? false;
+    const actualDir = getDirFromPath(file);
+    const filename = getFileFromPath(file);
+    const exists = diskByDir[actualDir]?.has(filename) ?? false;
     const mark = exists ? ' ✓' : ' ✗';
     console.log(`    ${mark}  ${file}`);
     if (!exists) {
-      const url = `${CDN_BASE}/pics/${dir}/${file}`;
+      const url = `${CDN_BASE}/${file}`;
       console.log(`         ${url}`);
       hasErrors = true;
     }
@@ -174,9 +186,11 @@ let totalOnDisk = 0;
 for (const dir of SUBDIRS) totalOnDisk += (diskByDir[dir] || new Set()).size;
 
 let totalMissing = 0;
-for (const { key, dir } of SECTION_DIR_MAP) {
+for (const { key } of SECTION_DIR_MAP) {
   for (const file of sections[key]) {
-    if (!diskByDir[dir]?.has(file)) totalMissing++;
+    const actualDir = getDirFromPath(file);
+    const filename = getFileFromPath(file);
+    if (!diskByDir[actualDir]?.has(filename)) totalMissing++;
   }
 }
 
