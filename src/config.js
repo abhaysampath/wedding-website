@@ -77,7 +77,6 @@ const config = {
     },
     gallery: {
       home: [
-        { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2, dir: 'vert' },
         { file: 'belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
         { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
         { file: 'gala4.JPG', alt: 'Gala 4', tier: 2 },
@@ -97,6 +96,7 @@ const config = {
         { file: 'ra-and-steve.jpeg', alt: 'Ra & Steve', tier: 2 },
       ],
       vert: [
+        { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
         { file: 'BNE-l.jpeg', alt: 'BNE', tier: 3 },
         { file: 'botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi', tier: 2 },
         { file: 'diwali.jpeg', alt: 'Diwali', tier: 3 },
