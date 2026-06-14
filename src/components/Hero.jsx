@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { roleLabels } from '../utils/guest'
-import config from '../config'
+import config, { imgUrl, imgSrcSet } from '../config'
 
 export default function Hero() {
   const { user, openSettings, setShowAuthModal, handleFirebaseSignIn, firebaseLoading } = useAuth()
@@ -21,8 +21,8 @@ export default function Hero() {
   const heroConfig = config.images.hero
   const baseSlides = useMemo(() =>
     heroConfig.slides.map(s => ({
-      src: heroConfig.dir + s.file,
-      srcset: `${heroConfig.dir + s.file} 1920w, ${heroConfig.dir + s.file.replace(/\.[^.]+$/, '-1200w.')} 1200w, ${heroConfig.dir + s.file.replace(/\.[^.]+$/, '-800w.')} 800w`,
+      src: imgUrl(s.path),
+      srcset: imgSrcSet(s.path),
       alt: s.alt,
     })),
   [heroConfig])
@@ -36,7 +36,7 @@ export default function Hero() {
               ? heroConfig.personalized?.bride
               : null
           return personal
-            ? [{ src: heroConfig.dir + personal.file, alt: personal.alt }, ...baseSlides]
+            ? [{ src: imgUrl(personal.path), srcset: imgSrcSet(personal.path), alt: personal.alt }, ...baseSlides]
             : baseSlides
         })()
       : baseSlides

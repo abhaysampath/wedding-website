@@ -1,5 +1,14 @@
 const IMAGE_CDN = 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public'
 
+function imgUrl(path) {
+  return `${IMAGE_CDN}/${path}`
+}
+
+function imgSrcSet(path) {
+  const base = imgUrl(path)
+  return `${base}?w=400&auto=format 400w, ${base}?w=800&auto=format 800w, ${base}?w=1200&auto=format 1200w, ${base}?w=1920&auto=format 1920w`
+}
+
 const config = {
   site: {
     siteTitle: 'Rebecca & Abhay',
@@ -37,14 +46,14 @@ const config = {
   images: {
     baseUrl: IMAGE_CDN,
     hero: {
-      dir: `${IMAGE_CDN}/pics/vert/`,
       slides: [
-        { file: 'belize-engagement.jpeg', alt: 'Belize Engagement' },
-        { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset' },
-        { file: 'gala4.JPG', alt: 'Gala 4' },
-        { file: 'nyc.JPG', alt: 'NYC' },
-        { file: 'save-the-date.JPEG', alt: 'Save the Date' },
-        { file: 'scooby-doo2.jpeg', alt: 'Scooby Doo 2' },
+        { path: 'pics/vert/ar-w-akshay.jpeg', alt: 'Ar W Akshay' },
+        { path: 'pics/home/belize-engagement.jpeg', alt: 'Belize Engagement' },
+        { path: 'pics/home/belize-sunset-l.jpeg', alt: 'Belize Sunset' },
+        { path: 'pics/home/gala4.JPG', alt: 'Gala 4' },
+        { path: 'pics/home/nyc.JPG', alt: 'NYC' },
+        { path: 'pics/home/save-the-date.JPEG', alt: 'Save the Date' },
+        { path: 'pics/home/scooby-doo2.jpeg', alt: 'Scooby Doo 2' },
       ],
       interval: 10000,
       contact: {
@@ -58,59 +67,60 @@ const config = {
       },
     },
     ourStory: {
-      dir: `${IMAGE_CDN}/pics/vert/`,
       slides: [
-        { file: 'BNE-l.jpeg', alt: 'BNE' },
-        { file: 'botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi' },
-        { file: 'diwali.jpeg', alt: 'Diwali' },
-        { file: 'gala-l.jpeg', alt: 'Gala' },
-        { file: 'IMG_1197.jpeg', alt: '1197' },
-        { file: 'IMG_3031.jpeg', alt: '3031' },
-        { file: 'IMG_3982.JPG', alt: '3982' },
-        { file: 'IMG_4340.jpeg', alt: '4340' },
-        { file: 'IMG_4388.JPG', alt: '4388' },
-        { file: 'IMG_6034.JPG', alt: '6034' },
-        { file: 'PNG-image.jpeg', alt: 'PNG Image' },
-        { file: 'scooby-doo-l.jpeg', alt: 'Scooby Doo' },
+        { path: 'pics/vert/BNE-l.jpeg', alt: 'BNE' },
+        { path: 'pics/vert/botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi' },
+        { path: 'pics/vert/diwali.jpeg', alt: 'Diwali' },
+        { path: 'pics/vert/gala-l.jpeg', alt: 'Gala' },
+        { path: 'pics/vert/IMG_1197.jpeg', alt: '1197' },
+        { path: 'pics/vert/IMG_3031.jpeg', alt: '3031' },
+        { path: 'pics/vert/IMG_3982.JPG', alt: '3982' },
+        { path: 'pics/vert/IMG_4340.jpeg', alt: '4340' },
+        { path: 'pics/vert/IMG_4388.JPG', alt: '4388' },
+        { path: 'pics/vert/IMG_6034.JPG', alt: '6034' },
+        { path: 'pics/vert/PNG-image.jpeg', alt: 'PNG Image' },
+        { path: 'pics/vert/scooby-doo-l.jpeg', alt: 'Scooby Doo' },
       ],
     },
     gallery: {
       home: [
-        { file: 'belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
-        { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
-        { file: 'gala4.JPG', alt: 'Gala 4', tier: 2 },
-        { file: 'nyc.JPG', alt: 'NYC', tier: 2 },
-        { file: 'save-the-date.JPEG', alt: 'Save the Date', tier: 2 },
-        { file: 'scooby-doo2.jpeg', alt: 'Scooby Doo 2', tier: 3 },
+        { path: 'pics/vert/ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
+        { path: 'pics/home/belize-engagement.jpeg', alt: 'Belize Engagement', tier: 1 },
+        { path: 'pics/home/belize-sunset-l.jpeg', alt: 'Belize Sunset', tier: 1 },
+        { path: 'pics/home/gala4.JPG', alt: 'Gala 4', tier: 2 },
+        { path: 'pics/home/nyc.JPG', alt: 'NYC', tier: 2 },
+        { path: 'pics/home/save-the-date.JPEG', alt: 'Save the Date', tier: 2 },
+        { path: 'pics/home/scooby-doo2.jpeg', alt: 'Scooby Doo 2', tier: 3 },
       ],
       gallery: [
-        { file: 'belize3.jpeg', alt: 'Belize 3', tier: 2 },
-        { file: 'bk-w-geordi.jpeg', alt: 'BK with Geordi', tier: 2 },
-        { file: 'botanical-garden.jpeg', alt: 'Botanical Garden', tier: 2 },
-        { file: 'eng-smiles.jpeg', alt: 'Engagement Smiles', tier: 2 },
-        { file: 'family.JPG', alt: 'Family', tier: 2 },
-        { file: 'gala2.jpeg', alt: 'Gala 2', tier: 2 },
-        { file: 'mural-selfie.jpeg', alt: 'Mural Selfie', tier: 2 },
-        { file: 'nich.jpeg', alt: 'Nich', tier: 2 },
-        { file: 'ra-and-steve.jpeg', alt: 'Ra & Steve', tier: 2 },
+        { path: 'pics/gallery/belize3.jpeg', alt: 'Belize 3', tier: 2 },
+        { path: 'pics/gallery/bk-w-geordi.jpeg', alt: 'BK with Geordi', tier: 2 },
+        { path: 'pics/gallery/botanical-garden.jpeg', alt: 'Botanical Garden', tier: 2 },
+        { path: 'pics/gallery/eng-smiles.jpeg', alt: 'Engagement Smiles', tier: 2 },
+        { path: 'pics/gallery/family.JPG', alt: 'Family', tier: 2 },
+        { path: 'pics/gallery/gala2.jpeg', alt: 'Gala 2', tier: 2 },
+        { path: 'pics/gallery/mural-selfie.jpeg', alt: 'Mural Selfie', tier: 2 },
+        { path: 'pics/gallery/nich.jpeg', alt: 'Nich', tier: 2 },
+        { path: 'pics/gallery/ra-and-steve.jpeg', alt: 'Ra & Steve', tier: 2 },
       ],
       vert: [
-        { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
-        { file: 'BNE-l.jpeg', alt: 'BNE', tier: 3 },
-        { file: 'botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi', tier: 2 },
-        { file: 'diwali.jpeg', alt: 'Diwali', tier: 3 },
-        { file: 'gala-l.jpeg', alt: 'Gala', tier: 2 },
-        { file: 'IMG_1197.jpeg', alt: '1197', tier: 1 },
-        { file: 'IMG_3031.jpeg', alt: '3031', tier: 1 },
-        { file: 'IMG_3982.JPG', alt: '3982', tier: 1 },
-        { file: 'IMG_4340.jpeg', alt: '4340', tier: 1 },
-        { file: 'IMG_4388.JPG', alt: '4388', tier: 1 },
-        { file: 'IMG_6034.JPG', alt: '6034', tier: 1 },
-        { file: 'PNG-image.jpeg', alt: 'PNG Image', tier: 3 },
-        { file: 'scooby-doo-l.jpeg', alt: 'Scooby Doo', tier: 3 },
+        { path: 'pics/vert/ar-w-akshay.jpeg', alt: 'Ar W Akshay', tier: 2 },
+        { path: 'pics/vert/BNE-l.jpeg', alt: 'BNE', tier: 3 },
+        { path: 'pics/vert/botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi', tier: 2 },
+        { path: 'pics/vert/diwali.jpeg', alt: 'Diwali', tier: 3 },
+        { path: 'pics/vert/gala-l.jpeg', alt: 'Gala', tier: 2 },
+        { path: 'pics/vert/IMG_1197.jpeg', alt: '1197', tier: 1 },
+        { path: 'pics/vert/IMG_3031.jpeg', alt: '3031', tier: 1 },
+        { path: 'pics/vert/IMG_3982.JPG', alt: '3982', tier: 1 },
+        { path: 'pics/vert/IMG_4340.jpeg', alt: '4340', tier: 1 },
+        { path: 'pics/vert/IMG_4388.JPG', alt: '4388', tier: 1 },
+        { path: 'pics/vert/IMG_6034.JPG', alt: '6034', tier: 1 },
+        { path: 'pics/vert/PNG-image.jpeg', alt: 'PNG Image', tier: 3 },
+        { path: 'pics/vert/scooby-doo-l.jpeg', alt: 'Scooby Doo', tier: 3 },
       ],
     },
   },
 }
 
+export { imgUrl, imgSrcSet }
 export default config

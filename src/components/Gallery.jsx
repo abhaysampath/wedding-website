@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence, useInView } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-import config from '../config'
+import config, { imgUrl, imgSrcSet } from '../config'
 
 const INITIAL_LOAD = 10
 const LOAD_MORE = 4
@@ -11,25 +11,16 @@ const TIER_SCALE = { 1: 1, 2: 0.82, 3: 0.66 }
 const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
 
-const DIR_MAP = {
-  home: `${config.images.baseUrl}/pics/home/`,
-  gallery: `${config.images.baseUrl}/pics/gallery/`,
-  vert: `${config.images.baseUrl}/pics/vert/`,
-}
-
 function buildAllImages() {
   const { gallery } = config.images
   const result = []
   for (const [section, images] of Object.entries(gallery)) {
     if (!images || !Array.isArray(images)) continue
-    const defaultDir = DIR_MAP[section] || '/pics/'
     images.forEach(img => {
-      if (!img || !img.file) return
-      const dir = img.dir ? DIR_MAP[img.dir] : defaultDir
-      const basePath = dir + img.file
+      if (!img || !img.path) return
       result.push({
-        jpg: basePath,
-        srcset: `${basePath} 1200w, ${basePath.replace(/\.[^.]+$/, '-800w.')} 800w, ${basePath.replace(/\.[^.]+$/, '-400w.')} 400w`,
+        jpg: imgUrl(img.path),
+        srcset: imgSrcSet(img.path),
         alt: img.alt,
         tier: img.tier || 2,
       })
