@@ -41,6 +41,7 @@ vi.mock('./components/FAQ', () => ({ default: () => <section data-testid="faq">F
 vi.mock('./components/ContactSection', () => ({ default: () => <section data-testid="contact">Contact</section> }))
 vi.mock('./components/Footer', () => ({ default: () => <footer data-testid="footer">Footer</footer> }))
 vi.mock('./components/AuthModal', () => ({ default: () => <div data-testid="auth-modal">AuthModal</div> }))
+vi.mock('./components/SEO', () => ({ SEO: () => null, weddingJSONLD: () => null, weddingJSONLD: {} }))
 
 const originalScrollTo = window.scrollTo
 
@@ -71,8 +72,8 @@ describe('App', () => {
   it('renders Hero and Navbar', async () => {
     const App = (await import('./App')).default
     render(<App />)
-    expect(screen.getByTestId('navbar')).toBeTruthy()
-    expect(screen.getByTestId('hero')).toBeTruthy()
+    expect(await screen.findByTestId('navbar')).toBeTruthy()
+    expect(await screen.findByTestId('hero')).toBeTruthy()
   })
 
   it('renders gallery lazily', async () => {
@@ -126,7 +127,7 @@ describe('App', () => {
   it('has skip-to-content link', async () => {
     const App = (await import('./App')).default
     render(<App />)
-    expect(screen.getByText('Skip to content').getAttribute('href')).toBe('#gallery')
+    expect(screen.getByText('Skip to main content').getAttribute('href')).toBe('#main-content')
   })
 
   it('renders section navigation dots for logged-in user', async () => {
