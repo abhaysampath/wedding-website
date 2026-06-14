@@ -39,7 +39,6 @@ const config = {
     hero: {
       dir: `${IMAGE_CDN}/pics/vert/`,
       slides: [
-        { file: 'ar-w-akshay.jpeg', alt: 'Ar W Akshay' },
         { file: 'belize-engagement.jpeg', alt: 'Belize Engagement' },
         { file: 'belize-sunset-l.jpeg', alt: 'Belize Sunset' },
         { file: 'gala4.JPG', alt: 'Gala 4' },
