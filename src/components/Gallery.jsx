@@ -11,21 +11,8 @@ const TIER_SCALE = { 1: 1, 2: 0.82, 3: 0.66 }
 const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
 
-function buildAllImages() {
-  const { gallery } = config.images
-  const result = []
-  for (const [section, images] of Object.entries(gallery)) {
-    if (!images || !Array.isArray(images)) continue
-    images.forEach(img => {
-      if (!img || !img.path) return
-      result.push({
-        jpg: imgUrl(img.path),
-        srcset: imgSrcSet(img.path),
-        alt: img.alt,
-        tier: img.tier || 2,
-      })
-    })
-  }
+function shuffle(arr) {
+  const result = [...arr]
   for (let i = result.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [result[i], result[j]] = [result[j], result[i]]
@@ -33,7 +20,27 @@ function buildAllImages() {
   return result
 }
 
-const ALL_IMAGES = buildAllImages()
+function buildSectionImages(sectionKey) {
+  const images = config.images.gallery[sectionKey]
+  if (!images || !Array.isArray(images)) return []
+  return images.filter(img => img?.path).map(img => ({
+    jpg: imgUrl(img.path),
+    srcset: imgSrcSet(img.path),
+    alt: img.alt,
+    tier: img.tier || 2,
+  }))
+}
+
+function buildAllImages() {
+  const result = []
+  for (const key of Object.keys(config.images.gallery)) {
+    result.push(...buildSectionImages(key))
+  }
+  return shuffle(result)
+}
+
+const ALL_HOME_IMAGES = shuffle(buildSectionImages('home'))
+const ALL_FULL_IMAGES = shuffle(buildAllImages())
 
 function Skeleton() {
   return (
@@ -49,6 +56,8 @@ export default function Gallery() {
   const sentinelRef = useRef(null)
   const [expanded, setExpanded] = useState(null)
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
+  const isAuthenticated = !!user
+  const images = isAuthenticated ? ALL_FULL_IMAGES : ALL_HOME_IMAGES
   const [loadedImages, setLoadedImages] = useState({})
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const [showOverlay, setShowOverlay] = useState(false)
@@ -82,15 +91,15 @@ export default function Gallery() {
 
   useEffect(() => {
     if (!eagerReady) return
-    preload(ALL_IMAGES.slice(0, FIRST_BATCH))
-  }, [eagerReady])
+    preload(images.slice(0, FIRST_BATCH))
+  }, [eagerReady, images])
 
   useEffect(() => {
     if (!sectionInView) return
-    preload(ALL_IMAGES.slice(FIRST_BATCH))
-  }, [sectionInView])
+    preload(images.slice(FIRST_BATCH))
+  }, [sectionInView, images])
 
-  const visibleImages = ALL_IMAGES.slice(0, visibleCount)
+  const visibleImages = images.slice(0, visibleCount)
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -98,14 +107,14 @@ export default function Gallery() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, ALL_IMAGES.length))
+          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, images.length))
         }
       },
       { rootMargin: '200px' }
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [])
+  }, [images.length])
 
   useEffect(() => {
     if (user) return
@@ -127,13 +136,19 @@ export default function Gallery() {
     setLoadedImages((prev) => ({ ...prev, [src]: true }))
   }, [])
 
+  useEffect(() => {
+    if (expanded >= images.length) {
+      setExpanded(images.length > 0 ? 0 : null)
+    }
+  }, [images.length])
+
   const goNext = useCallback(() => {
-    setExpanded((prev) => (prev < ALL_IMAGES.length - 1 ? prev + 1 : 0))
-  }, [])
+    setExpanded((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+  }, [images.length])
 
   const goPrev = useCallback(() => {
-    setExpanded((prev) => (prev > 0 ? prev - 1 : ALL_IMAGES.length - 1))
-  }, [])
+    setExpanded((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+  }, [images.length])
 
   useEffect(() => {
     if (expanded === null) return
@@ -246,7 +261,7 @@ export default function Gallery() {
         </div>
 
         <AnimatePresence>
-          {expanded !== null && ALL_IMAGES[expanded] && (
+          {expanded !== null && images[expanded] && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -270,7 +285,7 @@ export default function Gallery() {
                   Close <span className="text-cream/30 ml-1">(Esc)</span>
                 </button>
 
-                {ALL_IMAGES.length > 1 && (
+                {images.length > 1 && (
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); goPrev() }}
@@ -294,14 +309,14 @@ export default function Gallery() {
                 )}
 
                 <motion.div
-                  layoutId={`gallery-${ALL_IMAGES[expanded].jpg}`}
+                  layoutId={`gallery-${images[expanded].jpg}`}
                   className="w-full"
                 >
                   <img
-                    src={ALL_IMAGES[expanded].jpg}
-                    srcSet={ALL_IMAGES[expanded].srcset}
+                    src={images[expanded].jpg}
+                    srcSet={images[expanded].srcset}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
-                    alt={ALL_IMAGES[expanded].alt}
+                    alt={images[expanded].alt}
                     className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
                       zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
                     }`}
@@ -317,7 +332,7 @@ export default function Gallery() {
                 </motion.div>
 
                 <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-cream/40 text-[11px] tracking-wider">
-                  {expanded + 1} / {ALL_IMAGES.length}
+                  {expanded + 1} / {images.length}
                 </div>
               </motion.div>
             </motion.div>
