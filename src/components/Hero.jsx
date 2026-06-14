@@ -22,6 +22,7 @@ export default function Hero() {
   const baseSlides = useMemo(() =>
     heroConfig.slides.map(s => ({
       src: heroConfig.dir + s.file,
+      srcset: `${heroConfig.dir + s.file} 1920w, ${heroConfig.dir + s.file.replace(/\.[^.]+$/, '-1200w.')} 1200w, ${heroConfig.dir + s.file.replace(/\.[^.]+$/, '-800w.')} 800w`,
       alt: s.alt,
     })),
   [heroConfig])
@@ -91,10 +92,14 @@ export default function Hero() {
           >
             <img
               src={currentSlide?.src}
+              srcSet={currentSlide?.srcset}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
               alt={currentSlide?.alt}
               className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: 'center 65%' }}
+              style={{ objectPosition: 'center top' }}
               draggable={false}
+              loading={currentIndex === 0 ? 'eager' : 'lazy'}
+              fetchPriority={currentIndex === 0 ? 'high' : 'low'}
               onError={(e) => {
                 e.target.style.display = 'none'
                 console.warn('Hero image failed to load:', currentSlide?.src)

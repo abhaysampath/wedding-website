@@ -50,6 +50,11 @@ export default function Navbar() {
     setShowAuthModal(true)
   }
 
+  const handleSignInClick = () => {
+    setAuthMode('signin')
+    setShowAuthModal(true)
+  }
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -92,6 +97,14 @@ export default function Navbar() {
                 ✕
               </button>
             </div>
+          )}
+          {!user && (
+            <button
+              onClick={handleSignInClick}
+              className="text-xs md:text-sm tracking-widest uppercase font-medium hover:text-gold transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
+            >
+              Sign in
+            </button>
           )}
           <div ref={desktopBtnRef}>
             <LogoButton onClick={() => handleLogoClick(desktopBtnRef)} scrolled={scrolled} />

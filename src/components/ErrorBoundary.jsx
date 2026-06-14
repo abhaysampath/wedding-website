@@ -4,6 +4,7 @@ class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
+    this.alertSent = false;
   }
 
   static getDerivedStateFromError(error) {
@@ -16,6 +17,22 @@ class ErrorBoundary extends Component {
       error: error,
       errorInfo: errorInfo
     });
+
+    if (!this.alertSent) {
+      this.alertSent = true;
+      fetch('/api/alert-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'react_error',
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          error: error?.stack || error?.message || String(error),
+          componentStack: errorInfo?.componentStack,
+        }),
+      }).catch(() => {})
+    }
   }
 
   render() {

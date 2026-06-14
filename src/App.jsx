@@ -1,15 +1,18 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, Suspense, lazy, useMemo } from 'react'
+import { HelmetProvider } from 'react-helmet-async'
 import { MotionConfig } from 'framer-motion'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import { Analytics } from '@vercel/analytics/react'
 import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import OurStory from './components/OurStory'
-import AuthModal from './components/AuthModal'
-import config from './config'
+import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
+import NotFound from './components/NotFound'
+import { SEO, weddingJSONLD } from './components/SEO'
 
+const Navbar = lazy(() => import('./components/Navbar'))
+const Hero = lazy(() => import('./components/Hero'))
+const OurStory = lazy(() => import('./components/OurStory'))
+const AuthModal = lazy(() => import('./components/AuthModal'))
 const Gallery = lazy(() => import('./components/Gallery'))
 const EventDetails = lazy(() => import('./components/EventDetails'))
 const TravelAccommodations = lazy(() => import('./components/TravelAccommodations'))
@@ -35,6 +38,36 @@ function ScrollProgress() {
       <div className="h-full bg-gold transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} />
     </div>
   )
+}
+
+function NavbarSkeleton() {
+  return (
+    <nav className="fixed top-0 left-0 w-full z-50 h-20 bg-cream/95 backdrop-blur-md animate-pulse">
+      <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
+        <div className="h-6 bg-cream-dark rounded-sm w-24" />
+        <div className="h-6 bg-cream-dark rounded-sm w-24" />
+      </div>
+    </nav>
+  )
+}
+
+function HeroSkeleton() {
+  return (
+    <section id="hero" className="relative min-h-screen flex flex-col items-center overflow-hidden select-none bg-charcoal">
+      <div className="absolute inset-0 bg-sage-light/10 animate-pulse" />
+      <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/30 to-charcoal/60" />
+      <div className="relative z-10 flex flex-col items-center w-full px-6 pt-20 md:pt-28">
+        <div className="flex flex-col items-center">
+          <div className="h-6 bg-sage-light/10 rounded-sm w-48 mx-auto mb-3 animate-pulse" />
+          <div className="h-16 bg-sage-light/10 rounded-sm w-96 mx-auto animate-pulse" />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function AuthModalSkeleton() {
+  return null
 }
 
 function BackToTop() {
@@ -71,26 +104,16 @@ const SECTIONS = [
   { id: 'contact', label: 'Contact' },
 ]
 
+const RESTRICTED_SECTIONS = ['story', 'details', 'travel', 'faq']
+
+function filterSections(user) {
+  return SECTIONS.filter(s => user || !RESTRICTED_SECTIONS.includes(s.id))
+}
+
 function SectionNav() {
-  const [active, setActive] = useState('')
   const { user } = useAuth()
-
-  useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0) setActive(visible[0].target.id)
-    }, { rootMargin: '-80px 0px -60% 0px', threshold: [0, 0.25, 0.5] })
-
-    ids.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [user])
-
-  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id))
+  const filtered = filterSections(user)
+  const active = useScrollSpy(filtered.map(s => s.id), '-80px 0px -60% 0px')
 
   if (filtered.length === 0) return null
 
@@ -117,25 +140,9 @@ function SectionNav() {
 }
 
 function BottomNav() {
-  const [active, setActive] = useState('')
   const { user } = useAuth()
-
-  useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0) setActive(visible[0].target.id)
-    }, { rootMargin: '0px 0px -80% 0px', threshold: [0, 0.25, 0.5] })
-
-    ids.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    return () => observer.disconnect()
-  }, [user])
-
-  const filtered = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id))
+  const filtered = filterSections(user)
+  const active = useScrollSpy(filtered.map(s => s.id), '0px 0px -80% 0px')
 
   return (
     <nav aria-label="Bottom navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
@@ -221,7 +228,7 @@ function UserSkeleton() {
 
 function GallerySkeleton() {
   return (
-    <section className="py-24 md:py-32 pl-6 bg-cream">
+    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream">
       <div className="max-w-7xl mx-auto text-center mb-12 pr-6">
         <div className="h-8 bg-cream-dark rounded-sm w-48 mx-auto mb-3" />
         <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
@@ -238,99 +245,79 @@ function GallerySkeleton() {
   )
 }
 
-function useSectionHash() {
-  const { user } = useAuth()
-
-  useEffect(() => {
-    const ids = SECTIONS.filter(s => user || !['story', 'details', 'travel', 'faq'].includes(s.id)).map(s => s.id)
-    let lastId = ''
-
-    const updateHash = (id) => {
-      if (id === lastId) return
-      lastId = id
-      const hash = id === 'hero' ? '' : `#${id}`
-      const url = hash ? `${window.location.pathname.replace(/\/$/, '')}${hash}` : window.location.pathname.replace(/\/$/, '') || '/'
-      history.replaceState(null, '', url)
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0) updateHash(visible[0].target.id)
-    }, { rootMargin: '-80px 0px -50% 0px', threshold: [0, 0.25, 0.5] })
-
-    ids.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    const onPopState = () => {
-      const hash = window.location.hash.slice(1)
-      if (hash && ids.includes(hash)) {
-        document.getElementById(hash)?.scrollIntoView({ behavior: 'instant' })
-      } else if (!hash) {
-        window.scrollTo({ top: 0, behavior: 'instant' })
-      }
-    }
-    window.addEventListener('popstate', onPopState)
-
-    return () => {
-      observer.disconnect()
-      window.removeEventListener('popstate', onPopState)
-    }
-  }, [user])
-}
-
 function PageContent() {
   const { activeWedding, user } = useAuth()
+  const pathname = useMemo(() => window.location.pathname, [])
 
-  useSectionHash()
+  const isValidRoute = pathname === '/' || pathname.startsWith('/g/')
+
+  if (!isValidRoute) {
+    return (
+      <>
+        <SEO title="Page Not Found" description="The page you're looking for doesn't exist." noIndex />
+        <NotFound />
+      </>
+    )
+  }
+
+  useSectionHash(filterSections(user).map(s => s.id))
 
   return (
-    <div data-wedding={activeWedding} className="wedding-page min-h-screen pb-14 md:pb-0">
+    <>
+      <SEO />
+      <weddingJSONLD data={weddingJSONLD} />
+      <div data-wedding={activeWedding} className="wedding-page min-h-screen pb-14 md:pb-0">
       <a
-        href="#gallery"
+        href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
       >
-        Skip to content
+        Skip to main content
       </a>
       <SectionNav />
       <ScrollProgress />
-      <Navbar />
-      <Hero />
-      <Suspense fallback={<GallerySkeleton />}>
-        <Gallery />
+      <Suspense fallback={<NavbarSkeleton />}>
+        <Navbar />
       </Suspense>
-      {user && (
-        <Suspense fallback={<UserSkeleton />}>
-          <OurStory />
-          <EventDetails />
-          <TravelAccommodations />
-          <FAQ />
-          <Footer />
+      <Suspense fallback={<HeroSkeleton />}>
+        <Hero />
+      </Suspense>
+      <main id="main-content" role="main">
+        <Suspense fallback={<GallerySkeleton />}>
+          <Gallery />
         </Suspense>
-      )}
-      <Suspense fallback={null}>
-        <ContactSection />
+        {user && (
+          <Suspense fallback={<UserSkeleton />}>
+            <OurStory />
+            <EventDetails />
+            <TravelAccommodations />
+            <FAQ />
+            <Footer />
+          </Suspense>
+        )}
+        <Suspense fallback={null}>
+          <ContactSection />
+        </Suspense>
+      </main>
+      <Suspense fallback={<AuthModalSkeleton />}>
+        <AuthModal />
       </Suspense>
-      <AuthModal />
       <BackToTop />
       <BottomNav />
     </div>
-  )
-}
-
-function Page() {
-  return <PageContent />
+  </>
+)
 }
 
 export default function App() {
   return (
-    <MotionConfig reducedMotion="user">
-      <AuthProvider>
-        <Page />
-        <SpeedInsights />
-        <Analytics />
-      </AuthProvider>
-    </MotionConfig>
+    <HelmetProvider>
+      <MotionConfig reducedMotion="user">
+        <AuthProvider>
+          <PageContent />
+          <SpeedInsights />
+          <Analytics />
+        </AuthProvider>
+      </MotionConfig>
+    </HelmetProvider>
   )
 }

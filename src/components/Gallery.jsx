@@ -22,11 +22,14 @@ function buildAllImages() {
   const result = []
   for (const [section, images] of Object.entries(gallery)) {
     if (!images || !Array.isArray(images)) continue
-    const dir = DIR_MAP[section] || '/pics/'
+    const defaultDir = DIR_MAP[section] || '/pics/'
     images.forEach(img => {
       if (!img || !img.file) return
+      const dir = img.dir ? DIR_MAP[img.dir] : defaultDir
+      const basePath = dir + img.file
       result.push({
-        jpg: dir + img.file,
+        jpg: basePath,
+        srcset: `${basePath} 1200w, ${basePath.replace(/\.[^.]+$/, '-800w.')} 800w, ${basePath.replace(/\.[^.]+$/, '-400w.')} 400w`,
         alt: img.alt,
         tier: img.tier || 2,
       })
@@ -228,10 +231,13 @@ export default function Gallery() {
                   {!loadedImages[img.jpg] && <Skeleton />}
                   <img
                     src={img.jpg}
+                    srcSet={img.srcset}
+                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 300px, 320px"
                     alt={img.alt}
                     draggable={false}
                     className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
                     loading={i < FIRST_BATCH && eagerReady ? 'eager' : 'lazy'}
+                    fetchPriority={i < FIRST_BATCH && eagerReady ? 'high' : 'low'}
                     onLoad={() => handleImageLoad(img.jpg)}
                     onError={(e) => {
                       e.target.style.display = 'none'
@@ -302,11 +308,14 @@ export default function Gallery() {
                 >
                   <img
                     src={ALL_IMAGES[expanded].jpg}
+                    srcSet={ALL_IMAGES[expanded].srcset}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
                     alt={ALL_IMAGES[expanded].alt}
                     className={`w-full h-auto rounded-sm select-none transition-transform duration-300 cursor-zoom-in ${
                       zoomed ? 'max-h-none scale-[2] origin-center' : 'max-h-[85vh] object-contain'
                     }`}
                     draggable={false}
+                    fetchPriority="high"
                     onClick={() => {
                       const now = Date.now()
                       if (now - lastTap.current < 300) { setZoomed(z => !z); lastTap.current = 0 }
