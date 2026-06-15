@@ -1,31 +1,35 @@
-const ENTRIES = [
-  ['Mehendi', 'https://en.wikipedia.org/wiki/Mehndi'],
-  ['Sarees', 'https://en.wikipedia.org/wiki/Sari'],
-  ['Saree', 'https://en.wikipedia.org/wiki/Sari'],
-  ['Lehengas', 'https://en.wikipedia.org/wiki/Lehenga'],
-  ['Lehenga', 'https://en.wikipedia.org/wiki/Lehenga'],
-  ['Kurta', 'https://en.wikipedia.org/wiki/Kurta'],
-  ['Sherwani', 'https://en.wikipedia.org/wiki/Sherwani'],
-  ['Viratham', 'https://en.wikipedia.org/wiki/Vrata'],
-  ['Vrutham', 'https://en.wikipedia.org/wiki/Vrata'],
-  ['Muhurtham', 'https://en.wikipedia.org/wiki/Muhurta'],
-  ['Kaasi Yathirai', 'https://en.wikipedia.org/wiki/Kashi_Yatra'],
-  ['Oonjal', 'https://en.wikipedia.org/wiki/Oonjal'],
-  ['Kanya daanam', 'https://en.wikipedia.org/wiki/Kanyadan'],
-  ['Pani grahanam', 'https://en.wikipedia.org/wiki/Panigrahana'],
-  ['Sapthapathi', 'https://en.wikipedia.org/wiki/Saptapadi'],
-  ['Grihastha', 'https://en.wikipedia.org/wiki/Grihastha'],
-  ['Brahmins', 'https://en.wikipedia.org/wiki/Brahmin'],
-  ['Hindu Vedic Astrology', 'https://en.wikipedia.org/wiki/Hindu_astrology'],
-  ['Nischayathaartham', 'https://99pandit.com/blog/tamil-brahmin-nichayathartham-ceremony/'],
-  ['Aayka Fashion', 'https://aaykafashion.com/'],
-  ['All Borrow', 'https://www.allborrow.com'],
-]
+const GLOSSARY = new Map([
+  ['mehendi', 'https://en.wikipedia.org/wiki/Mehndi'],
+  ['sarees', 'https://en.wikipedia.org/wiki/Sari'],
+  ['saree', 'https://en.wikipedia.org/wiki/Sari'],
+  ['lehengas', 'https://en.wikipedia.org/wiki/Lehenga'],
+  ['lehenga', 'https://en.wikipedia.org/wiki/Lehenga'],
+  ['kurta', 'https://en.wikipedia.org/wiki/Kurta'],
+  ['sherwani', 'https://en.wikipedia.org/wiki/Sherwani'],
+  ['viratham', 'https://en.wikipedia.org/wiki/Vrata'],
+  ['vrutham', 'https://en.wikipedia.org/wiki/Vrata'],
+  ['muhurtham', 'https://en.wikipedia.org/wiki/Muhurta'],
+  ['kaasi yathirai', 'https://en.wikipedia.org/wiki/Kashi_Yatra'],
+  ['oonjal', 'https://en.wikipedia.org/wiki/Oonjal'],
+  ['kanya daanam', 'https://en.wikipedia.org/wiki/Kanyadan'],
+  ['pani grahanam', 'https://en.wikipedia.org/wiki/Panigrahana'],
+  ['sapthapathi', 'https://en.wikipedia.org/wiki/Saptapadi'],
+  ['grihastha', 'https://en.wikipedia.org/wiki/Grihastha'],
+  ['brahmins', 'https://en.wikipedia.org/wiki/Brahmin'],
+  ['hindu vedic astrology', 'https://en.wikipedia.org/wiki/Hindu_astrology'],
+  ['nischayathaartham', 'https://99pandit.com/blog/tamil-brahmin-nichayathartham-ceremony/'],
+  ['aayka fashion', 'https://aaykafashion.com/'],
+  ['all borrow', 'https://www.allborrow.com'],
+])
 
-const GLOSSARY = new Map(ENTRIES.map(([name, url]) => [name.toLowerCase(), url]))
+const escaped = [
+  'Mehendi', 'Sarees', 'Saree', 'Lehengas', 'Lehenga',
+  'Kurta', 'Sherwani', 'Viratham', 'Vrutham', 'Muhurtham',
+  'Kaasi Yathirai', 'Oonjal', 'Kanya daanam', 'Pani grahanam',
+  'Sapthapathi', 'Grihastha', 'Brahmins', 'Hindu Vedic Astrology',
+  'Nischayathaartham', 'Aayka Fashion', 'All Borrow',
+].map(t => t.replace(/[.*+?^${}()|[\]\\]/g, c => '\\' + c))
 
-const names = ENTRIES.map(([name]) => name)
-const escaped = names.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, c => '\\' + c))
 const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
 
 export function linkTerms(text) {

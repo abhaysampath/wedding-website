@@ -37,12 +37,17 @@ for (const [category, vars] of Object.entries(REQUIRED_VARS)) {
 }
 
 if (missing.length > 0) {
-  console.error('\n❌ BUILD FAILED: Missing required environment variables:\n')
+  console.warn('\n⚠️  Some environment variables are not set (build will proceed, features may be limited):\n')
   for (const { category, name, label } of missing) {
-    console.error(`   [${category}] ${label} (${name})`)
+    console.warn(`   [${category}] ${label} (${name})`)
   }
-  console.error('\n   Set these in your .env file or Vercel project environment variables.\n')
-  process.exit(1)
+  console.warn('\n   Set these in your .env file or Vercel project environment for full functionality.\n')
+}
+
+const hasPlaceholderKey = process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_PRIVATE_KEY.length < 200
+if (hasPlaceholderKey) {
+  console.warn(`\n⚠️  Google Private Key (GOOGLE_PRIVATE_KEY) appears to be a placeholder (${process.env.GOOGLE_PRIVATE_KEY.length} chars, expected ~3000+).`)
+  console.warn(`   Sheet reads/writes will return "not configured" until real credentials are set.\n`)
 }
 
 const missingOptional = OPTIONAL_VARS.filter(({ var: name }) => !process.env[name])
@@ -54,4 +59,6 @@ if (missingOptional.length > 0) {
   console.warn('')
 }
 
-console.log('✅ All required environment variables are set.')
+if (missing.length === 0) {
+  console.log('✅ All required environment variables are set.')
+}

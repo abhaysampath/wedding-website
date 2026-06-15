@@ -102,7 +102,7 @@ export default function EventDetails() {
           </div>
 
           <div className="inline-block w-full md:w-auto border border-gold/30 rounded-sm px-6 md:px-10 py-6 md:py-8 bg-cream transition-wedding shadow-sm">
-            <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2">
+            <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2 pt-1">
               {w.date}
             </p>
             <p className="text-charcoal-light text-sm md:text-base tracking-wide">

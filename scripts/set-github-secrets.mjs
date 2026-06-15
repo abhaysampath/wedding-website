@@ -70,7 +70,7 @@ for (const key of KEYS) {
     continue
   }
   try {
-    execSync(`gh secret set "${key}" --body "${val.replace(/"/g, '\\"')}"`, { stdio: 'pipe' })
+    execSync('gh', ['secret', 'set', key, '--body', val], { stdio: 'pipe' })
     console.log(`  ✅ ${key} set`)
     set++
   } catch {

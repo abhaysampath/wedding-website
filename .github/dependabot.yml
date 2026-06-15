@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react*"
+      vite:
+        patterns:
+          - vite
+          - "@vitejs/*"
+      eslint:
+        patterns:
+          - eslint
+          - "@eslint/*"
+          - eslint-plugin-*
+      framer-motion:
+        patterns:
+          - framer-motion

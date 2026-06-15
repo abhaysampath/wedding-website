@@ -4,6 +4,43 @@ import { useAuth } from '../context/useAuth'
 import { roleLabels } from '../utils/guest'
 import config, { imgUrl, imgSrcSet } from '../config'
 
+function HeroImage({ src, srcSet, alt, isFirst, onError }) {
+  return (
+    <div className="absolute inset-0" style={{ overflow: 'hidden' }}>
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url(${src})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center 25%',
+          filter: 'blur(40px) brightness(0.6)',
+          pointerEvents: 'none',
+        }}
+        aria-hidden="true"
+      />
+      <motion.div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ pointerEvents: 'none' }}
+        animate={{ y: [0, 50] }}
+        transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+      >
+        <img
+          src={src}
+          srcSet={srcSet}
+          sizes="(max-width: 1000px) 100vw, 1000px"
+          alt={alt}
+          className="w-full h-full object-cover"
+          style={{ maxWidth: '1000px', objectPosition: 'center 25%' }}
+          draggable={false}
+          loading={isFirst ? 'eager' : 'lazy'}
+          fetchPriority={isFirst ? 'high' : 'low'}
+          onError={onError}
+        />
+      </motion.div>
+    </div>
+  )
+}
+
 export default function Hero() {
   const { user, openSettings, setShowAuthModal, handleFirebaseSignIn, firebaseLoading } = useAuth()
   const containerRef = useRef(null)
@@ -90,16 +127,11 @@ export default function Hero() {
             transition={{ duration: transitionDuration, ease: 'easeOut' }}
             className="absolute inset-0"
           >
-            <img
+            <HeroImage
               src={currentSlide?.src}
               srcSet={currentSlide?.srcset}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 1920px"
               alt={currentSlide?.alt}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ objectPosition: 'center top' }}
-              draggable={false}
-              loading={currentIndex === 0 ? 'eager' : 'lazy'}
-              fetchPriority={currentIndex === 0 ? 'high' : 'low'}
+              isFirst={currentIndex === 0}
               onError={(e) => {
                 e.target.style.display = 'none'
                 console.warn('Hero image failed to load:', currentSlide?.src)
@@ -171,7 +203,7 @@ export default function Hero() {
               onClick={user ? () => openSettings() : undefined}
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
               whileTap={user ? { scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 15 } } : undefined}
-              className="font-heading text-4xl md:text-7xl lg:text-8xl font-light text-cream leading-tight text-center"
+              className="font-heading text-4xl md:text-7xl lg:text-8xl font-light text-cream leading-tight text-center pt-1"
             >
               Abhay
               <span className="text-gold">&</span>
