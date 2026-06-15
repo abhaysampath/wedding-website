@@ -35,6 +35,7 @@ const WEDDING_LABELS = {
 function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
   const info = WEDDING_LABELS[weddingKey]
   const isActive = checked === 'Yes'
+  const hasRsvp = checked && checked !== ''
 
   const handleToggle = useCallback(() => {
     let next
@@ -55,31 +56,29 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
       className={`rounded-sm overflow-hidden border transition-all ${
         isActive ? 'border-gold/20' : 'border-gold/10'
       }`}
-      style={{ opacity: isActive ? 1 : 0.55 }}
     >
       <button
         type="button"
         onClick={handleToggle}
         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-          isActive ? 'bg-gold/10' : 'bg-cream-dark/50 hover:bg-cream-dark'
-        }`}
-      >
-        <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
-          isActive ? 'bg-gold border-gold' : 'border-gold/30 bg-cream'
+          isActive ? 'bg-gold/10' : hasRsvp ? 'bg-cream-dark/50' : 'bg-cream-dark/50 hover:bg-cream-dark'
         }`}>
-          {isActive && (
-            <motion.svg
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-              className="w-3 h-3 text-cream" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
-            >
-              <path d="M5 13l4 4L19 7" />
-            </motion.svg>
-          )}
-        </div>
+          <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
+            isActive ? 'bg-gold border-gold text-cream' : 'border-charcoal-light/30 text-transparent'
+          }`}>
+            {isActive && (
+              <motion.svg
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+                className="w-3 h-3 text-cream" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
+              >
+                <path d="M5 13l4 4L19 7" />
+              </motion.svg>
+            )}
+          </div>
         <span className={`text-sm font-medium transition-colors ${
-          isActive ? 'text-charcoal' : 'text-charcoal-light/50'
+          isActive ? 'text-charcoal' : 'text-charcoal-light/70'
         }`}>
           {info.short}
         </span>
@@ -93,7 +92,7 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
       </button>
 
       <div className="px-4 pb-4 pt-3 border-t border-gold/10">
-        <div className="space-y-1.5" style={{ opacity: isActive ? 1 : 0.5 }}>
+        <div className="space-y-1.5">
           <p className="text-xs text-charcoal-light/70">{info.date}</p>
           <p className="text-xs text-charcoal-light/70">{info.venue}</p>
           <p className="text-xs text-charcoal-light/50">{info.address}</p>
@@ -231,6 +230,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
 
   const handleSave = useCallback(async () => {
     if (saveStatus === 'saving') return
+    const hadRsvpChange = rsvpUs !== originalRsvpUsRef.current || rsvpIndia !== originalRsvpIndiaRef.current
     setSaveStatus('saving')
     try {
       await updateContact({
@@ -243,9 +243,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       })
       originalRsvpUsRef.current = rsvpUs
       originalRsvpIndiaRef.current = rsvpIndia
-      setSaveStatus('saved')
+      setSaveStatus(hadRsvpChange ? 'rsvp-saved' : 'saved')
       clearDraft(user?.id)
-      setTimeout(() => setSaveStatus(null), 2500)
+      setTimeout(() => setSaveStatus(null), 4000)
     } catch (err) {
       console.error('Save failed:', err)
       setSaveStatus('error')
@@ -420,14 +420,14 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           </div>
         </div>
 
-        {saveStatus === 'saved' && (
+        {(saveStatus === 'saved' || saveStatus === 'rsvp-saved') && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center" aria-live="polite"
           >
-            Saved successfully!
+            {saveStatus === 'rsvp-saved' ? 'Thank you! Your RSVP has been saved.' : 'Saved successfully!'}
           </motion.div>
         )}
         {saveStatus === 'error' && (

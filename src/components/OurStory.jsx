@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import config from '../config'
+import config, { imgUrl, imgSrcSet } from '../config'
 
 function SectionTitle({ children }) {
   return (
@@ -21,7 +21,8 @@ export default function OurStory() {
 
   const storyConfig = config.images.ourStory
   const slides = storyConfig.slides.map(s => ({
-    src: storyConfig.dir + s.file,
+    src: imgUrl(s.path),
+    srcset: imgSrcSet(s.path),
     alt: s.alt,
   }))
 
@@ -63,6 +64,8 @@ export default function OurStory() {
               <motion.img
                 key={currentIndex}
                 src={slides[currentIndex]?.src}
+                srcSet={slides[currentIndex]?.srcset}
+                sizes="(max-width: 768px) 100vw, 50vw"
                 alt={slides[currentIndex]?.alt}
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}

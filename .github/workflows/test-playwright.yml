@@ -1,0 +1,49 @@
+name: Playwright E2E
+
+on:
+  push:
+    branches: [playwright-tests]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+  VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+  VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+  VITE_EMAILJS_SERVICE_ID: ${{ secrets.VITE_EMAILJS_SERVICE_ID }}
+  VITE_EMAILJS_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_TEMPLATE_ID }}
+  VITE_EMAILJS_CONTACT_TEMPLATE_ID: ${{ secrets.VITE_EMAILJS_CONTACT_TEMPLATE_ID }}
+  VITE_EMAILJS_PUBLIC_KEY: ${{ secrets.VITE_EMAILJS_PUBLIC_KEY }}
+  VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+  GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+  GOOGLE_SERVICE_EMAIL: ${{ secrets.GOOGLE_SERVICE_EMAIL }}
+  GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+  RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 3002 &
+          sleep 3
+
+      - name: Run Playwright E2E tests
+        run: npx playwright test

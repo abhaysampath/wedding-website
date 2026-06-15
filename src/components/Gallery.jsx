@@ -264,6 +264,36 @@ export default function Gallery() {
         </div>
 
         <AnimatePresence>
+          {showOverlay && !user && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-charcoal/50 backdrop-blur-[2px]"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="text-center px-6"
+              >
+                <p className="text-cream/70 text-sm tracking-wide mb-4">
+                  Sign in to see our galleries
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-sage hover:bg-sage-dark text-cream text-sm tracking-widest uppercase px-6 py-3 rounded-sm font-medium transition-colors"
+                >
+                  Sign In
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
           {expanded !== null && images[expanded] && (
             <motion.div
               initial={{ opacity: 0 }}
