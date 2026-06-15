@@ -21,14 +21,15 @@ vi.mock('../config', () => ({
   default: {
     images: {
       ourStory: {
-        dir: 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/pics/vert/',
         slides: [
-          { file: 'BNE-l.jpeg', alt: 'BNE' },
-          { file: 'botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi' },
+          { path: 'pics/vert/BNE-l.jpeg', alt: 'BNE' },
+          { path: 'pics/vert/botgrdn-w-geordi.jpeg', alt: 'Botanical Garden with Geordi' },
         ],
       },
     },
   },
+  imgUrl: (path) => `https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/${path}`,
+  imgSrcSet: (path) => `${path}?w=400 400w, ${path}?w=800 800w`,
 }))
 
 import OurStory from './OurStory'

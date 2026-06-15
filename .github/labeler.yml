@@ -1,0 +1,26 @@
+src/components/**:
+  - component
+
+src/context/**:
+  - auth
+
+src/utils/**:
+  - utils
+
+src/config*:
+  - config
+
+.github/workflows/**:
+  - ci
+
+scripts/**:
+  - scripts
+
+api/**:
+  - api
+
+*.md:
+  - docs
+
+package.json:
+  - dependencies

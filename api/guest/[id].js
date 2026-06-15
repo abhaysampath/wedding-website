@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const serviceEmail = process.env.GOOGLE_SERVICE_EMAIL
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
 
-  if (!sheetId || !serviceEmail || !privateKey) {
+  if (!sheetId || !serviceEmail || !privateKey || privateKey.length < 200) {
     return res.status(503).json({ error: 'Sheet not configured' })
   }
 
