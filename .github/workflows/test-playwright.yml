@@ -40,10 +40,5 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install chromium
 
-      - name: Start preview server
-        run: |
-          npx vite preview --port 3002 &
-          sleep 3
-
       - name: Run Playwright E2E tests
         run: npx playwright test
