@@ -19,7 +19,7 @@ const TERMS = [
   ['Hindu Vedic Astrology', 'https://en.wikipedia.org/wiki/Hindu_astrology'],
   ['Nischayathaartham', 'https://99pandit.com/blog/tamil-brahmin-nichayathartham-ceremony/'],
   ['Aayka Fashion', 'https://aaykafashion.com/'],
-  ['All Borrow', 'https://www.allborrow.com/'],
+  ['All Borrow', 'https://www.allborrow.com'],
 ]
 
 const pattern = new RegExp(`\\b(${TERMS.map(([t]) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'gi')

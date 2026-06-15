@@ -73,7 +73,7 @@ async function main() {
           (req.url().includes('/_vercel/') || req.url().includes('/api/'))) return  // Vercel scripts & API expected off-platform
       // Allow CDN ORB errors for responsive image variants
       if (req.failure()?.errorText === 'net::ERR_BLOCKED_BY_ORB' && 
-          req.url().includes('cdn.jsdelivr.net')) return
+          new URL(req.url()).hostname === 'cdn.jsdelivr.net') return
       failedRequests.push({ url: req.url(), error: req.failure()?.errorText })
     })
 
