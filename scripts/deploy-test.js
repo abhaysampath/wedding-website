@@ -38,11 +38,11 @@ async function runDeploymentTests() {
     'VITE_FIREBASE_PROJECT_ID'
   ];
   
-  const missingVars = requiredVars.filter(var => !process.env[var]);
+  const missingVars = requiredVars.filter(v => !process.env[v]);
   
   if (missingVars.length > 0) {
     console.error('❌ Missing required environment variables:');
-    missingVars.forEach(var => console.error(`  - ${var}`));
+    missingVars.forEach(v => console.error(`  - ${v}`));
     process.exit(1);
   }
   

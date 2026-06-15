@@ -1,4 +1,4 @@
-const TERMS = [
+const ENTRIES = [
   ['Mehendi', 'https://en.wikipedia.org/wiki/Mehndi'],
   ['Sarees', 'https://en.wikipedia.org/wiki/Sari'],
   ['Saree', 'https://en.wikipedia.org/wiki/Sari'],
@@ -22,7 +22,11 @@ const TERMS = [
   ['All Borrow', 'https://www.allborrow.com'],
 ]
 
-const pattern = new RegExp(`\\b(${TERMS.map(([t]) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'gi')
+const GLOSSARY = new Map(ENTRIES.map(([name, url]) => [name.toLowerCase(), url]))
+
+const names = ENTRIES.map(([name]) => name)
+const escaped = names.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, c => '\\' + c))
+const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
 
 export function linkTerms(text) {
   if (!text) return text
@@ -34,9 +38,9 @@ export function linkTerms(text) {
       parts.push(text.slice(lastIndex, match.index))
     }
     const word = match[0]
-    const term = TERMS.find(([t]) => t.toLowerCase() === word.toLowerCase())
-    if (term) {
-      parts.push({ word: word, url: term[1] })
+    const url = GLOSSARY.get(word.toLowerCase())
+    if (url) {
+      parts.push({ word, url })
     } else {
       parts.push(word)
     }
