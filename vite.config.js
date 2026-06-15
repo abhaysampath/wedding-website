@@ -8,6 +8,15 @@ const API_PORT = parseInt(process.env.API_PORT || '3001', 10)
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('framer-motion')) return 'vendor'
+        },
+      },
+    },
+  },
   server: {
     port: PORT,
     allowedHosts: true,

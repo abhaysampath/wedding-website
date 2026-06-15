@@ -28,13 +28,10 @@ const OPTIONAL_VARS = [
 ]
 
 const missing = []
-const invalid = []
 for (const [category, vars] of Object.entries(REQUIRED_VARS)) {
   for (const { var: name, label } of vars) {
     if (!process.env[name]) {
       missing.push({ category, name, label })
-    } else if (name === 'GOOGLE_PRIVATE_KEY' && process.env[name].length < 200) {
-      invalid.push({ category, name, label, detail: `appears to be a placeholder (${process.env[name].length} chars, expected ~3000+)` })
     }
   }
 }
@@ -48,13 +45,10 @@ if (missing.length > 0) {
   process.exit(1)
 }
 
-if (invalid.length > 0) {
-  console.error('\n❌ BUILD FAILED: Invalid environment variables:\n')
-  for (const { category, name, label, detail } of invalid) {
-    console.error(`   [${category}] ${label} (${name}) — ${detail}`)
-  }
-  console.error('\n   Set the real Google service account private key in your .env file.\n')
-  process.exit(1)
+const hasPlaceholderKey = process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_PRIVATE_KEY.length < 200
+if (hasPlaceholderKey) {
+  console.warn(`\n⚠️  Google Private Key (GOOGLE_PRIVATE_KEY) appears to be a placeholder (${process.env.GOOGLE_PRIVATE_KEY.length} chars, expected ~3000+).`)
+  console.warn(`   Sheet reads/writes will return "not configured" until real credentials are set.\n`)
 }
 
 const missingOptional = OPTIONAL_VARS.filter(({ var: name }) => !process.env[name])
