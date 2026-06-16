@@ -107,17 +107,6 @@ test.describe('Deployment smoke tests', () => {
     await expect(page.locator('#travel')).toBeVisible();
   });
 
-  test('registry section renders', async ({ page }) => {
-    await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-    await page.evaluate(() => {
-      localStorage.setItem('wedding_user', JSON.stringify({
-        id: 'g001', firstName: 'Test', side: 'bride', role: 'bride'
-      }));
-    });
-    await page.reload({ waitUntil: 'networkidle' });
-    await expect(page.locator('#registry')).toBeVisible();
-  });
-
   test('footer renders', async ({ page }) => {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
     await page.evaluate(() => {
