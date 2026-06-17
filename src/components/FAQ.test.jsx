@@ -3,16 +3,30 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
 
 vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'useInView') return () => true
-      return ({ children, ...props }) => {
-        const { initial, animate, exit, whileHover, whileTap, variants, transition, layoutId, onAnimationComplete, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        if (prop === 'useInView') return () => true
+        return ({ children, ...props }) => {
+          const {
+            initial,
+            animate,
+            exit,
+            whileHover,
+            whileTap,
+            variants,
+            transition,
+            layoutId,
+            onAnimationComplete,
+            ...rest
+          } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
   AnimatePresence: ({ children }) => <>{children}</>,
   useInView: () => true,
 }))
@@ -44,7 +58,9 @@ describe('FAQ', () => {
 
   it('shows empty state when no FAQs are available', () => {
     render(<FAQ />)
-    expect(screen.getByText('No FAQs available yet. Check back closer to the wedding date.')).toBeTruthy()
+    expect(
+      screen.getByText('No FAQs available yet. Check back closer to the wedding date.'),
+    ).toBeTruthy()
   })
 
   it('shows both-wedding FAQ items for unauthenticated user', () => {
@@ -52,9 +68,7 @@ describe('FAQ', () => {
       user: null,
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'Both question?', a: 'Both answer.', wedding: 'both' },
-        ],
+        faq: [{ q: 'Both question?', a: 'Both answer.', wedding: 'both' }],
       },
     })
     render(<FAQ />)
@@ -66,9 +80,7 @@ describe('FAQ', () => {
       user: null,
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'US only?', a: 'US answer.', wedding: 'us' },
-        ],
+        faq: [{ q: 'US only?', a: 'US answer.', wedding: 'us' }],
       },
     })
     render(<FAQ />)
@@ -128,9 +140,7 @@ describe('FAQ', () => {
       user: { weddings: ['us', 'india'] },
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'Hidden?', a: 'Hidden answer.', wedding: 'hide' },
-        ],
+        faq: [{ q: 'Hidden?', a: 'Hidden answer.', wedding: 'hide' }],
       },
     })
     render(<FAQ />)
@@ -157,9 +167,7 @@ describe('FAQ', () => {
       user: { weddings: ['us', 'india'] },
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'Test question?', a: 'Test answer.', wedding: 'both' },
-        ],
+        faq: [{ q: 'Test question?', a: 'Test answer.', wedding: 'both' }],
       },
     })
     render(<FAQ />)
@@ -174,9 +182,7 @@ describe('FAQ', () => {
       user: { weddings: ['us', 'india'] },
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'Test question?', a: 'Test answer.', wedding: 'both' },
-        ],
+        faq: [{ q: 'Test question?', a: 'Test answer.', wedding: 'both' }],
       },
     })
     render(<FAQ />)
@@ -212,9 +218,7 @@ describe('FAQ', () => {
       user: { weddings: ['us'] },
       activeWedding: 'us',
       content: {
-        faq: [
-          { q: 'Only US?', a: 'Only US answer.', wedding: 'us' },
-        ],
+        faq: [{ q: 'Only US?', a: 'Only US answer.', wedding: 'us' }],
       },
     })
     render(<FAQ />)

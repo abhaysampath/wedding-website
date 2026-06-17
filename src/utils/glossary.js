@@ -23,11 +23,27 @@ const GLOSSARY = new Map([
 ])
 
 const escaped = [
-  'Mehendi', 'Sarees', 'Saree', 'Lehengas', 'Lehenga',
-  'Kurta', 'Sherwani', 'Viratham', 'Vrutham', 'Muhurtham',
-  'Kaasi Yathirai', 'Oonjal', 'Kanya daanam', 'Pani grahanam',
-  'Sapthapathi', 'Grihastha', 'Brahmins', 'Hindu Vedic Astrology',
-  'Nischayathaartham', 'Aayka Fashion', 'All Borrow',
+  'Mehendi',
+  'Sarees',
+  'Saree',
+  'Lehengas',
+  'Lehenga',
+  'Kurta',
+  'Sherwani',
+  'Viratham',
+  'Vrutham',
+  'Muhurtham',
+  'Kaasi Yathirai',
+  'Oonjal',
+  'Kanya daanam',
+  'Pani grahanam',
+  'Sapthapathi',
+  'Grihastha',
+  'Brahmins',
+  'Hindu Vedic Astrology',
+  'Nischayathaartham',
+  'Aayka Fashion',
+  'All Borrow',
 ].map(t => t.replace(/[.*+?^${}()|[\]\\]/g, c => '\\' + c))
 
 const pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')

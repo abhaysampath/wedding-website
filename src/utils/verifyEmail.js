@@ -22,14 +22,19 @@ export async function sendVerificationCode(email, name = '') {
   const { serviceId, templateId, publicKey } = config.emailjs
   if (serviceId && templateId && publicKey) {
     try {
-      await emailjs.send(serviceId, templateId, {
-        email: email,
-        verification_code: code,
-        name: name,
-        to_email: email,
-        code: code,
-        verify_link: verifyUrl,
-      }, publicKey)
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          email: email,
+          verification_code: code,
+          name: name,
+          to_email: email,
+          code: code,
+          verify_link: verifyUrl,
+        },
+        publicKey,
+      )
     } catch (error) {
       console.error('EmailJS error:', error)
       throw error

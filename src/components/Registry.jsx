@@ -25,7 +25,11 @@ export default function Registry() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="registry" className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700" ref={ref}>
+    <section
+      id="registry"
+      className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700"
+      ref={ref}
+    >
       <div className="max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -33,7 +37,7 @@ export default function Registry() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-            <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
+          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Registry
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />

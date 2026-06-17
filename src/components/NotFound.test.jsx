@@ -3,15 +3,18 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 
 vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      return ({ children, ...props }) => {
-        const { initial, animate, transition, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        return ({ children, ...props }) => {
+          const { initial, animate, transition, ...rest } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
 }))
 
 describe('NotFound', () => {

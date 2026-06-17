@@ -9,16 +9,28 @@ function Bomb() {
 
 describe('ErrorBoundary', () => {
   it('renders children when no error occurs', () => {
-    render(<ErrorBoundary><p>all good</p></ErrorBoundary>)
+    render(
+      <ErrorBoundary>
+        <p>all good</p>
+      </ErrorBoundary>,
+    )
     expect(screen.getByText('all good')).toBeTruthy()
   })
 
   it('renders fallback UI when child throws', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    render(<ErrorBoundary><Bomb /></ErrorBoundary>)
+    render(
+      <ErrorBoundary>
+        <Bomb />
+      </ErrorBoundary>,
+    )
     expect(screen.getByText('Something went wrong')).toBeTruthy()
     expect(screen.getByText('Refresh Page')).toBeTruthy()
-    expect(screen.getByText("We've encountered an issue, but our team has been notified. Please try refreshing the page or come back later.")).toBeTruthy()
+    expect(
+      screen.getByText(
+        "We've encountered an issue, but our team has been notified. Please try refreshing the page or come back later.",
+      ),
+    ).toBeTruthy()
     vi.restoreAllMocks()
   })
 
@@ -26,7 +38,11 @@ describe('ErrorBoundary', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const env = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
-    render(<ErrorBoundary><Bomb /></ErrorBoundary>)
+    render(
+      <ErrorBoundary>
+        <Bomb />
+      </ErrorBoundary>,
+    )
     expect(screen.getByText('Error details:')).toBeTruthy()
     process.env.NODE_ENV = env
     vi.restoreAllMocks()
@@ -36,7 +52,11 @@ describe('ErrorBoundary', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const env = process.env.NODE_ENV
     process.env.NODE_ENV = 'production'
-    render(<ErrorBoundary><Bomb /></ErrorBoundary>)
+    render(
+      <ErrorBoundary>
+        <Bomb />
+      </ErrorBoundary>,
+    )
     expect(screen.queryByText('Error details:')).toBeNull()
     process.env.NODE_ENV = env
     vi.restoreAllMocks()

@@ -3,15 +3,29 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 
 vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      return ({ children, ...props }) => {
-        const { initial, animate, exit, whileHover, whileTap, variants, transition, layoutId, onAnimationComplete, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        return ({ children, ...props }) => {
+          const {
+            initial,
+            animate,
+            exit,
+            whileHover,
+            whileTap,
+            variants,
+            transition,
+            layoutId,
+            onAnimationComplete,
+            ...rest
+          } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
 }))
 
 vi.mock('@emailjs/browser', () => ({
@@ -50,7 +64,7 @@ vi.mock('../config', () => ({
 
 beforeEach(() => {
   mockUseAuth.mockReturnValue({ user: null })
-  window.grecaptcha = { ready: (cb) => cb(), execute: () => Promise.resolve(null) }
+  window.grecaptcha = { ready: cb => cb(), execute: () => Promise.resolve(null) }
   window.__recaptchaOnload = undefined
   const existing = document.querySelector('script[src*="recaptcha/api.js"]')
   if (existing) existing.remove()
@@ -105,7 +119,9 @@ describe('ContactSlide', () => {
     emailjs.default.send.mockResolvedValue({})
     const ContactSlide = (await import('./ContactSlide')).default
     render(<ContactSlide />)
-    fireEvent.change(screen.getByPlaceholderText('Your message...'), { target: { value: 'Test message' } })
+    fireEvent.change(screen.getByPlaceholderText('Your message...'), {
+      target: { value: 'Test message' },
+    })
     screen.getByRole('button', { name: 'Send' }).click()
     await waitFor(() => {
       expect(screen.getByText('Thank You!')).toBeTruthy()
@@ -134,9 +150,12 @@ describe('ContactSlide', () => {
   it('handles pending-contact-msg with object detail', async () => {
     const ContactSlide = (await import('./ContactSlide')).default
     render(<ContactSlide />)
-    fireEvent(window, new CustomEvent('pending-contact-msg', {
-      detail: { reason: 'travel', message: 'Object msg' },
-    }))
+    fireEvent(
+      window,
+      new CustomEvent('pending-contact-msg', {
+        detail: { reason: 'travel', message: 'Object msg' },
+      }),
+    )
     expect(screen.getByPlaceholderText('Your message...').value).toBe('Object msg')
   })
 

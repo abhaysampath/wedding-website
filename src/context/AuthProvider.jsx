@@ -27,7 +27,10 @@ function loadStoredUser() {
   try {
     const stored = localStorage.getItem('wedding_user')
     if (stored) return JSON.parse(stored)
-  } catch (err) { console.error('Failed to load stored user:', err); return null }
+  } catch (err) {
+    console.error('Failed to load stored user:', err)
+    return null
+  }
   return null
 }
 
@@ -45,7 +48,10 @@ function findGuestByName(guests, name) {
   for (const g of guests) {
     const full = normalize(`${g.firstName} ${g.lastName}`)
     const score = similarity(full, t)
-    if (score > bestScore && score > 0.4) { bestScore = score; best = g }
+    if (score > bestScore && score > 0.4) {
+      bestScore = score
+      best = g
+    }
   }
   return best
 }
@@ -78,7 +84,16 @@ async function writeToSheet(guestId, data) {
       body: JSON.stringify(data),
     })
     if (!res.ok) {
-      console.error('Sheet write failed:', guestId, data, res.status, await res.text().catch((err) => { console.error('Failed to read error response text:', err); return '' }))
+      console.error(
+        'Sheet write failed:',
+        guestId,
+        data,
+        res.status,
+        await res.text().catch(err => {
+          console.error('Failed to read error response text:', err)
+          return ''
+        }),
+      )
       return false
     }
     const body = await res.json()
@@ -213,59 +228,69 @@ export function AuthProvider({ children }) {
     }, 300)
   }, [])
 
-  const handleFirebaseSignIn = useCallback(async (provider) => {
-    setFirebaseLoading(true)
-    setFirebaseError(null)
-    try {
-      const result = await signInWithGoogle()
-      if (result?.user) {
-        const authUser = {
-          name: result.user.displayName || '',
-          email: result.user.email || '',
-          photo: result.user.photoURL || '',
-          uid: result.user.uid,
-        }
+  const handleFirebaseSignIn = useCallback(
+    async provider => {
+      setFirebaseLoading(true)
+      setFirebaseError(null)
+      try {
+        const result = await signInWithGoogle()
+        if (result?.user) {
+          const authUser = {
+            name: result.user.displayName || '',
+            email: result.user.email || '',
+            photo: result.user.photoURL || '',
+            uid: result.user.uid,
+          }
 
-        const guest = content.guests?.length
-          ? (findGuestByName(content.guests, authUser.name) || findGuestByEmail(content.guests, authUser.email))
-          : null
-        if (guest) {
-          processSignIn(guest, authUser)
-        } else {
-          setFirebaseError(`Could not find "${authUser.name}" on the guest list. Try a different account or contact the couple.`)
-          track('guest_not_found', { name: authUser.name, email: authUser.email })
+          const guest = content.guests?.length
+            ? findGuestByName(content.guests, authUser.name) ||
+              findGuestByEmail(content.guests, authUser.email)
+            : null
+          if (guest) {
+            processSignIn(guest, authUser)
+          } else {
+            setFirebaseError(
+              `Could not find "${authUser.name}" on the guest list. Try a different account or contact the couple.`,
+            )
+            track('guest_not_found', { name: authUser.name, email: authUser.email })
+          }
         }
+      } catch (err) {
+        setFirebaseError(err.message || 'Sign in failed')
+        track('signin_failed', { method: provider, reason: err.message })
+      } finally {
+        setFirebaseLoading(false)
       }
-    } catch (err) {
-      setFirebaseError(err.message || 'Sign in failed')
-      track('signin_failed', { method: provider, reason: err.message })
-    } finally {
-      setFirebaseLoading(false)
-    }
-  }, [content.guests, processSignIn])
+    },
+    [content.guests, processSignIn],
+  )
 
-  const updateContact = useCallback(async (data) => {
-    if (!user) return
-    const now = eastTime()
-    const cleanedPhone = (data.phone || '').replace(/\D/g, '')
-    const sheetData = {}
-    if (data.phone !== undefined) sheetData.phone = cleanedPhone
-    if (data.email !== undefined) sheetData.email = data.email
-    if (data.address !== undefined) sheetData.address = data.address
-    if (data.dietaryPreferences !== undefined) sheetData.dietaryPreferences = data.dietaryPreferences
-    if (data.rsvpUs !== undefined) sheetData.rsvpUs = data.rsvpUs
-    if (data.rsvpIndia !== undefined) sheetData.rsvpIndia = data.rsvpIndia
-    const hasDataChanges = Object.keys(sheetData).length > 0
-    if (hasDataChanges) sheetData.lastUpdated = now
-    const updated = { ...user, ...sheetData, phone: cleanedPhone || user.phone, lastLogin: now }
-    setUser(updated)
-    localStorage.setItem('wedding_user', JSON.stringify(updated))
-    if (!hasDataChanges) return
-    const ok = await writeToSheet(user.id, sheetData)
-    if (!ok) throw new Error('Failed to save to sheet')
-  }, [user])
+  const updateContact = useCallback(
+    async data => {
+      if (!user) return
+      const now = eastTime()
+      const cleanedPhone = (data.phone || '').replace(/\D/g, '')
+      const sheetData = {}
+      if (data.phone !== undefined) sheetData.phone = cleanedPhone
+      if (data.email !== undefined) sheetData.email = data.email
+      if (data.address !== undefined) sheetData.address = data.address
+      if (data.dietaryPreferences !== undefined)
+        sheetData.dietaryPreferences = data.dietaryPreferences
+      if (data.rsvpUs !== undefined) sheetData.rsvpUs = data.rsvpUs
+      if (data.rsvpIndia !== undefined) sheetData.rsvpIndia = data.rsvpIndia
+      const hasDataChanges = Object.keys(sheetData).length > 0
+      if (hasDataChanges) sheetData.lastUpdated = now
+      const updated = { ...user, ...sheetData, phone: cleanedPhone || user.phone, lastLogin: now }
+      setUser(updated)
+      localStorage.setItem('wedding_user', JSON.stringify(updated))
+      if (!hasDataChanges) return
+      const ok = await writeToSheet(user.id, sheetData)
+      if (!ok) throw new Error('Failed to save to sheet')
+    },
+    [user],
+  )
 
-  const recordLoginAttempt = useCallback(async (guestId) => {
+  const recordLoginAttempt = useCallback(async guestId => {
     if (!guestId) return
     const now = eastTime()
     await writeToSheet(guestId, { loginFailed: now })
@@ -287,9 +312,12 @@ export function AuthProvider({ children }) {
     updateUrlSlug('')
   }, [])
 
-  const switchWedding = useCallback((w) => {
-    if (user?.weddings?.includes(w)) setActiveWedding(w)
-  }, [user])
+  const switchWedding = useCallback(
+    w => {
+      if (user?.weddings?.includes(w)) setActiveWedding(w)
+    },
+    [user],
+  )
 
   const openSettings = useCallback(() => {
     setAuthMode('settings')

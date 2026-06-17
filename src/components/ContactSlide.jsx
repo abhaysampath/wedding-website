@@ -8,7 +8,7 @@ import { fullName } from '../utils/guest'
 const RECAPTCHA_SITE_KEY = config.recaptcha.siteKey
 
 function loadRecaptchaScript() {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     if (typeof window.grecaptcha !== 'undefined' && window.grecaptcha?.ready) {
       window.grecaptcha.ready(resolve)
       return
@@ -82,73 +82,83 @@ export default function ContactSlide() {
     return () => window.removeEventListener('pending-contact-msg', handlePendingMsg)
   }, [])
 
-  const handleSubmit = useCallback(async (e) => {
-    e.preventDefault()
-    if (!message.trim() || !reason) return
-    setSending(true)
-    setStatus(null)
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault()
+      if (!message.trim() || !reason) return
+      setSending(true)
+      setStatus(null)
 
-    const token = await getRecaptchaToken('contact_submit')
-    if (token) {
-      const valid = await verifyRecaptchaToken(token)
-      if (!valid) {
-        setStatus('error')
-        setSending(false)
-        return
+      const token = await getRecaptchaToken('contact_submit')
+      if (token) {
+        const valid = await verifyRecaptchaToken(token)
+        if (!valid) {
+          setStatus('error')
+          setSending(false)
+          return
+        }
       }
-    }
 
-    const reasonLabel = reasons.find(r => r.value === reason)?.label || reason
-    const subject = `Contact from ${name || 'Anonymous'}`
+      const reasonLabel = reasons.find(r => r.value === reason)?.label || reason
+      const subject = `Contact from ${name || 'Anonymous'}`
 
-    const nameModified = user && name !== defaultName
-    const emailModified = user && email !== defaultEmail
+      const nameModified = user && name !== defaultName
+      const emailModified = user && email !== defaultEmail
 
-    const sessionInfo = {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-      screen: `${window.screen.width}x${window.screen.height}`,
-      timestamp: new Date().toISOString(),
-      url: window.location.href,
-    }
+      const sessionInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        screen: `${window.screen.width}x${window.screen.height}`,
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+      }
 
-    const userData = user ? {
-      id: user.id,
-      role: user.role,
-      side: user.side,
-      relationship: user.relationship,
-      nameModified,
-      emailModified,
-      session: sessionInfo,
-    } : {
-      session: sessionInfo,
-    }
+      const userData = user
+        ? {
+            id: user.id,
+            role: user.role,
+            side: user.side,
+            relationship: user.relationship,
+            nameModified,
+            emailModified,
+            session: sessionInfo,
+          }
+        : {
+            session: sessionInfo,
+          }
 
-    const { serviceId, templateId, contactTemplateId, publicKey } = config.emailjs
-    const activeTemplateId = contactTemplateId || templateId
-    if (serviceId && activeTemplateId && publicKey) {
-      try {
-        await emailjs.send(serviceId, activeTemplateId, {
-          email: email || 'anonymous@wedding-site',
-          name: name || 'Not provided',
-          contact_type: reasonLabel,
-          subject,
-          message: message.trim(),
-          user_data: JSON.stringify(userData, null, 2),
-        }, publicKey)
+      const { serviceId, templateId, contactTemplateId, publicKey } = config.emailjs
+      const activeTemplateId = contactTemplateId || templateId
+      if (serviceId && activeTemplateId && publicKey) {
+        try {
+          await emailjs.send(
+            serviceId,
+            activeTemplateId,
+            {
+              email: email || 'anonymous@wedding-site',
+              name: name || 'Not provided',
+              contact_type: reasonLabel,
+              subject,
+              message: message.trim(),
+              user_data: JSON.stringify(userData, null, 2),
+            },
+            publicKey,
+          )
+          setStatus('sent')
+          setMessage('')
+        } catch (err) {
+          console.error('EmailJS send failed:', err)
+          setStatus('error')
+        }
+      } else {
         setStatus('sent')
         setMessage('')
-      } catch (err) {
-        console.error('EmailJS send failed:', err)
-        setStatus('error')
       }
-    } else {
-      setStatus('sent')
-      setMessage('')
-    }
-    setSending(false)
-  }, [reason, name, email, message, reasons, user, defaultName, defaultEmail])
+      setSending(false)
+    },
+    [reason, name, email, message, reasons, user, defaultName, defaultEmail],
+  )
 
   if (status === 'sent') {
     return (
@@ -161,7 +171,9 @@ export default function ContactSlide() {
           <img src="/ar-logo.png" alt="AR" className="w-full h-full object-contain opacity-70" />
         </div>
         <p className="text-cream/90 font-heading text-xl mb-2">Thank You!</p>
-        <p className="text-cream/60 text-sm max-w-xs">Your message has been sent. We'll get back to you soon.</p>
+        <p className="text-cream/60 text-sm max-w-xs">
+          Your message has been sent. We'll get back to you soon.
+        </p>
         <button
           type="button"
           onClick={() => setStatus(null)}
@@ -184,21 +196,21 @@ export default function ContactSlide() {
         <p className="font-heading text-gold-light text-lg tracking-[0.3em] uppercase mb-1 text-center">
           Get in Touch
         </p>
-        <p className="text-cream/50 text-xs text-center mb-8">
-          We'd love to hear from you
-        </p>
+        <p className="text-cream/50 text-xs text-center mb-8">We'd love to hear from you</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="contact-reason" className="sr-only">Reason for contacting</label>
+            <label htmlFor="contact-reason" className="sr-only">
+              Reason for contacting
+            </label>
             <select
               id="contact-reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               required
               className="w-full bg-cream/10 border border-cream/20 rounded-sm px-4 py-3 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/50 transition-colors appearance-none cursor-pointer"
             >
-              {reasons.map((r) => (
+              {reasons.map(r => (
                 <option key={r.value} value={r.value} className="bg-charcoal text-cream">
                   {r.label}
                 </option>
@@ -207,35 +219,41 @@ export default function ContactSlide() {
           </div>
 
           <div>
-            <label htmlFor="contact-name" className="sr-only">Your name</label>
+            <label htmlFor="contact-name" className="sr-only">
+              Your name
+            </label>
             <input
               id="contact-name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               placeholder="Your name (optional)"
               className="w-full bg-cream/10 border border-cream/20 rounded-sm px-4 py-3 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="contact-email" className="sr-only">Your email</label>
+            <label htmlFor="contact-email" className="sr-only">
+              Your email
+            </label>
             <input
               id="contact-email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               placeholder="Your email (optional)"
               className="w-full bg-cream/10 border border-cream/20 rounded-sm px-4 py-3 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
 
           <div>
-            <label htmlFor="contact-message" className="sr-only">Your message</label>
+            <label htmlFor="contact-message" className="sr-only">
+              Your message
+            </label>
             <textarea
               id="contact-message"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={e => setMessage(e.target.value)}
               placeholder="Your message..."
               required
               rows={4}
@@ -244,7 +262,9 @@ export default function ContactSlide() {
           </div>
 
           {status === 'error' && (
-            <p className="text-xs text-red-400 text-center" aria-live="polite">Failed to send. Please try again later.</p>
+            <p className="text-xs text-red-400 text-center" aria-live="polite">
+              Failed to send. Please try again later.
+            </p>
           )}
 
           <button

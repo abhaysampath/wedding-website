@@ -20,10 +20,16 @@ vi.mock('../config', () => ({
 beforeAll(() => {
   const store = {}
   globalThis.sessionStorage = {
-    getItem: (key) => store[key] ?? null,
-    setItem: (key, val) => { store[key] = val },
-    removeItem: (key) => { delete store[key] },
-    clear: () => { Object.keys(store).forEach(k => delete store[k]) },
+    getItem: key => store[key] ?? null,
+    setItem: (key, val) => {
+      store[key] = val
+    },
+    removeItem: key => {
+      delete store[key]
+    },
+    clear: () => {
+      Object.keys(store).forEach(k => delete store[k])
+    },
   }
   globalThis.location = { origin: 'http://localhost', pathname: '/' }
   globalThis.window = { __emailCode: undefined, location: globalThis.location }

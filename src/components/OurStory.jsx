@@ -43,7 +43,11 @@ export default function OurStory() {
   }, [isInView, slides.length])
 
   return (
-    <section id="story" className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700" ref={ref}>
+    <section
+      id="story"
+      className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700"
+      ref={ref}
+    >
       <div className="max-w-5xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -73,7 +77,7 @@ export default function OurStory() {
                 transition={{ duration: 0.8 }}
                 className="w-full h-full object-cover absolute inset-0"
                 draggable={false}
-                onError={(e) => {
+                onError={e => {
                   e.target.style.display = 'none'
                   console.warn('Story image failed to load:', slides[currentIndex]?.src)
                 }}
@@ -102,26 +106,27 @@ export default function OurStory() {
             </p>
             <div className="space-y-5 text-charcoal-light leading-relaxed text-[15px] md:text-base">
               <p>
-                Our story began in the modern way: a dating app, no expectations, and somehow, against
-                all odds, our soulmates on the other side of the screen.
+                Our story began in the modern way: a dating app, no expectations, and somehow,
+                against all odds, our soulmates on the other side of the screen.
               </p>
               <p>
-                From the very first conversation, something felt different. As we got to know each other,
-                it became clear why: Rebecca has one of the biggest, most loving hearts of anyone I'd ever known.
+                From the very first conversation, something felt different. As we got to know each
+                other, it became clear why: Rebecca has one of the biggest, most loving hearts of
+                anyone I'd ever known.
               </p>
               <p>
-                And it didn't take long to see where it comes from. Our moms share that same warmth and care, and
-                our dads, in one of life's strange coincidences, ended up in very similar careers.
-                No wonder we felt like we were already home from the start.
+                And it didn't take long to see where it comes from. Our moms share that same warmth
+                and care, and our dads, in one of life's strange coincidences, ended up in very
+                similar careers. No wonder we felt like we were already home from the start.
               </p>
               <p>
-                Last December, we escaped the New York winter for the warm waters and open skies of Belize.
-                On a perfect evening, I got down on one knee and asked the question that changed everything.
-                With a full heart, Rebecca said yes.
+                Last December, we escaped the New York winter for the warm waters and open skies of
+                Belize. On a perfect evening, I got down on one knee and asked the question that
+                changed everything. With a full heart, Rebecca said yes.
               </p>
               <p>
-                Now we can't wait to begin our greatest adventure yet, as husband and wife, surrounded by everyone
-                we love most at our wedding in 2027!!
+                Now we can't wait to begin our greatest adventure yet, as husband and wife,
+                surrounded by everyone we love most at our wedding in 2027!!
                 <span className="text-gold ml-1">❤</span>
               </p>
             </div>

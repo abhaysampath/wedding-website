@@ -37,7 +37,10 @@ function ScrollProgress() {
 
   return (
     <div className="fixed top-0 left-0 w-full h-[2px] z-[60] pointer-events-none">
-      <div className="h-full bg-gold transition-[width] duration-150 ease-out" style={{ width: `${progress}%` }} />
+      <div
+        className="h-full bg-gold transition-[width] duration-150 ease-out"
+        style={{ width: `${progress}%` }}
+      />
     </div>
   )
 }
@@ -55,7 +58,10 @@ function NavbarSkeleton() {
 
 function HeroSkeleton() {
   return (
-    <section id="hero" className="relative min-h-screen flex flex-col items-center overflow-hidden select-none bg-charcoal">
+    <section
+      id="hero"
+      className="relative min-h-screen flex flex-col items-center overflow-hidden select-none bg-charcoal"
+    >
       <div className="absolute inset-0 bg-sage-light/10 animate-pulse" />
       <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/30 to-charcoal/60" />
       <div className="relative z-10 flex flex-col items-center w-full px-6 pt-20 md:pt-28">
@@ -90,7 +96,13 @@ function BackToTop() {
       aria-label="Back to top"
       className="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-charcoal/70 backdrop-blur-sm text-cream/70 hover:bg-charcoal hover:text-cream transition-all duration-300 shadow-lg"
     >
-      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+      <svg
+        className="w-4 h-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
         <path d="M18 15l-6-6-6 6" />
       </svg>
     </button>
@@ -116,12 +128,18 @@ function filterSections(user) {
 function SectionNav() {
   const { user } = useAuth()
   const filtered = filterSections(user)
-  const active = useScrollSpy(filtered.map(s => s.id), '-80px 0px -60% 0px')
+  const active = useScrollSpy(
+    filtered.map(s => s.id),
+    '-80px 0px -60% 0px',
+  )
 
   if (filtered.length === 0) return null
 
   return (
-    <nav aria-label="Section navigation" className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3">
+    <nav
+      aria-label="Section navigation"
+      className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3"
+    >
       {filtered.map(s => (
         <button
           type="button"
@@ -131,9 +149,11 @@ function SectionNav() {
           aria-current={active === s.id ? 'true' : undefined}
           className="group relative flex items-center justify-center"
         >
-          <span className={`w-2 h-2 rounded-full transition-all duration-300 ${
-            active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
-          }`} />
+          <span
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
+            }`}
+          />
           <span className="absolute right-full mr-3 px-2 py-0.5 bg-charcoal/80 text-cream text-[10px] tracking-wider whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             {s.label}
           </span>
@@ -146,10 +166,17 @@ function SectionNav() {
 function BottomNav() {
   const { user } = useAuth()
   const filtered = filterSections(user)
-  const active = useScrollSpy(filtered.map(s => s.id), '0px 0px -80% 0px')
+  const active = useScrollSpy(
+    filtered.map(s => s.id),
+    '0px 0px -80% 0px',
+  )
 
   return (
-    <nav aria-label="Bottom navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+    <nav
+      aria-label="Bottom navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       <div className="flex items-center justify-around h-14 px-2">
         {filtered.map(s => (
           <button
@@ -163,19 +190,37 @@ function BottomNav() {
             }`}
           >
             {s.id === 'story' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
               </svg>
             )}
             {s.id === 'gallery' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
               </svg>
             )}
             {s.id === 'details' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                 <line x1="16" y1="2" x2="16" y2="6" />
                 <line x1="8" y1="2" x2="8" y2="6" />
@@ -183,20 +228,38 @@ function BottomNav() {
               </svg>
             )}
             {s.id === 'travel' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <circle cx="12" cy="10" r="3" />
                 <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" />
               </svg>
             )}
             {s.id === 'faq' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
             )}
             {s.id === 'contact' && (
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
               </svg>
@@ -227,7 +290,10 @@ function GallerySkeleton() {
       </div>
       <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="shrink-0 w-[260px] md:w-[300px] h-[320px] md:h-[360px] bg-sage-light/10 rounded-sm relative overflow-hidden">
+          <div
+            key={i}
+            className="shrink-0 w-[260px] md:w-[300px] h-[320px] md:h-[360px] bg-sage-light/10 rounded-sm relative overflow-hidden"
+          >
             <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-cream/20 to-transparent" />
           </div>
         ))}
@@ -247,7 +313,11 @@ function PageContent() {
   if (!isValidRoute) {
     return (
       <>
-        <SEO title="Page Not Found" description="The page you're looking for doesn't exist." noIndex />
+        <SEO
+          title="Page Not Found"
+          description="The page you're looking for doesn't exist."
+          noIndex
+        />
         <NotFound />
       </>
     )
@@ -258,57 +328,57 @@ function PageContent() {
       <SEO />
       <JSONLD data={weddingJSONLD} />
       <div data-wedding={activeWedding} className="wedding-page min-h-screen pb-14 md:pb-0">
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
-      >
-        Skip to main content
-      </a>
-      <SectionNav />
-      <ScrollProgress />
-      <ErrorBoundary name="Navbar">
-        <Suspense fallback={<NavbarSkeleton />}>
-          <Navbar />
-        </Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary name="Hero">
-        <Suspense fallback={<HeroSkeleton />}>
-          <Hero />
-        </Suspense>
-      </ErrorBoundary>
-      <main id="main-content" role="main">
-        <ErrorBoundary name="Gallery">
-          <Suspense fallback={<GallerySkeleton />}>
-            <Gallery />
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
+        >
+          Skip to main content
+        </a>
+        <SectionNav />
+        <ScrollProgress />
+        <ErrorBoundary name="Navbar">
+          <Suspense fallback={<NavbarSkeleton />}>
+            <Navbar />
           </Suspense>
         </ErrorBoundary>
-        {user && (
-          <ErrorBoundary name="Content">
-            <Suspense fallback={<UserSkeleton />}>
-              <OurStory />
-              <EventDetails />
-              <TravelAccommodations />
-              <FAQ />
-              <Footer />
+        <ErrorBoundary name="Hero">
+          <Suspense fallback={<HeroSkeleton />}>
+            <Hero />
+          </Suspense>
+        </ErrorBoundary>
+        <main id="main-content" role="main">
+          <ErrorBoundary name="Gallery">
+            <Suspense fallback={<GallerySkeleton />}>
+              <Gallery />
             </Suspense>
           </ErrorBoundary>
-        )}
-        <ErrorBoundary name="Contact">
-          <Suspense fallback={null}>
-            <ContactSection />
+          {user && (
+            <ErrorBoundary name="Content">
+              <Suspense fallback={<UserSkeleton />}>
+                <OurStory />
+                <EventDetails />
+                <TravelAccommodations />
+                <FAQ />
+                <Footer />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+          <ErrorBoundary name="Contact">
+            <Suspense fallback={null}>
+              <ContactSection />
+            </Suspense>
+          </ErrorBoundary>
+        </main>
+        <ErrorBoundary name="AuthModal">
+          <Suspense fallback={<AuthModalSkeleton />}>
+            <AuthModal />
           </Suspense>
         </ErrorBoundary>
-      </main>
-      <ErrorBoundary name="AuthModal">
-        <Suspense fallback={<AuthModalSkeleton />}>
-          <AuthModal />
-        </Suspense>
-      </ErrorBoundary>
-      <BackToTop />
-      <BottomNav />
-    </div>
-  </>
-)
+        <BackToTop />
+        <BottomNav />
+      </div>
+    </>
+  )
 }
 
 export default function App() {

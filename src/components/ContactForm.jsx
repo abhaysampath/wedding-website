@@ -12,24 +12,41 @@ function loadDraft(userId) {
   try {
     const raw = sessionStorage.getItem(getDraftKey(userId))
     return raw ? JSON.parse(raw) : null
-  } catch (err) { console.error('Failed to load draft from sessionStorage:', err); return null }
+  } catch (err) {
+    console.error('Failed to load draft from sessionStorage:', err)
+    return null
+  }
 }
 
 function saveDraft(userId, data) {
   try {
     sessionStorage.setItem(getDraftKey(userId), JSON.stringify(data))
-  } catch (err) { console.error('Failed to save draft to sessionStorage:', err) }
+  } catch (err) {
+    console.error('Failed to save draft to sessionStorage:', err)
+  }
 }
 
 function clearDraft(userId) {
   try {
     sessionStorage.removeItem(getDraftKey(userId))
-  } catch (err) { console.error('Failed to clear draft from sessionStorage:', err) }
+  } catch (err) {
+    console.error('Failed to clear draft from sessionStorage:', err)
+  }
 }
 
 const WEDDING_LABELS = {
-  us: { short: 'US Wedding — Bronx', date: weddings.us.date, venue: weddings.us.venue, address: weddings.us.address },
-  india: { short: 'India Wedding — Chennai', date: weddings.india.date, venue: weddings.india.venue, address: weddings.india.address },
+  us: {
+    short: 'US Wedding — Bronx',
+    date: weddings.us.date,
+    venue: weddings.us.venue,
+    address: weddings.us.address,
+  },
+  india: {
+    short: 'India Wedding — Chennai',
+    date: weddings.india.date,
+    venue: weddings.india.venue,
+    address: weddings.india.address,
+  },
 }
 
 function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
@@ -61,31 +78,48 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
         type="button"
         onClick={handleToggle}
         className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-          isActive ? 'bg-gold/10' : hasRsvp ? 'bg-cream-dark/50' : 'bg-cream-dark/50 hover:bg-cream-dark'
-        }`}>
-          <div className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
-            isActive ? 'bg-gold border-gold text-cream' : 'border-charcoal-light/30 text-transparent'
-          }`}>
-            {isActive && (
-              <motion.svg
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-                className="w-3 h-3 text-cream" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}
-              >
-                <path d="M5 13l4 4L19 7" />
-              </motion.svg>
-            )}
-          </div>
-        <span className={`text-sm font-medium transition-colors ${
-          isActive ? 'text-charcoal' : 'text-charcoal-light/70'
-        }`}>
+          isActive
+            ? 'bg-gold/10'
+            : hasRsvp
+              ? 'bg-cream-dark/50'
+              : 'bg-cream-dark/50 hover:bg-cream-dark'
+        }`}
+      >
+        <div
+          className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center shrink-0 transition-colors ${
+            isActive
+              ? 'bg-gold border-gold text-cream'
+              : 'border-charcoal-light/30 text-transparent'
+          }`}
+        >
+          {isActive && (
+            <motion.svg
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+              className="w-3 h-3 text-cream"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={3}
+            >
+              <path d="M5 13l4 4L19 7" />
+            </motion.svg>
+          )}
+        </div>
+        <span
+          className={`text-sm font-medium transition-colors ${
+            isActive ? 'text-charcoal' : 'text-charcoal-light/70'
+          }`}
+        >
           {info.short}
         </span>
         {checked && (
-          <span className={`text-[10px] tracking-widest uppercase ml-auto ${
-            isActive ? 'text-gold-dark' : 'text-charcoal-light/40'
-          }`}>
+          <span
+            className={`text-[10px] tracking-widest uppercase ml-auto ${
+              isActive ? 'text-gold-dark' : 'text-charcoal-light/40'
+            }`}
+          >
             {checked}
           </span>
         )}
@@ -123,7 +157,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const originalPhone = stripPhone(user?.phone || guestFromContent?.phone || '')
   const originalEmail = user?.email || guestFromContent?.email || ''
   const originalAddress = user?.address || guestFromContent?.address || ''
-  const originalDietaryPreferences = user?.dietaryPreferences || guestFromContent?.dietaryPreferences || ''
+  const originalDietaryPreferences =
+    user?.dietaryPreferences || guestFromContent?.dietaryPreferences || ''
   const origRsvpUs = user?.rsvpUs || guestFromContent?.rsvpUs || ''
   const origRsvpIndia = user?.rsvpIndia || guestFromContent?.rsvpIndia || ''
   const [originalRsvpUs, setOriginalRsvpUs] = useState(origRsvpUs)
@@ -132,7 +167,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const [phone, setPhone] = useState(() => draft?.phone ?? originalPhone)
   const [email, setEmail] = useState(() => draft?.email ?? originalEmail)
   const [address, setAddress] = useState(() => draft?.address ?? originalAddress)
-  const [dietaryPreferences, setDietaryPreferences] = useState(() => draft?.dietaryPreferences ?? originalDietaryPreferences)
+  const [dietaryPreferences, setDietaryPreferences] = useState(
+    () => draft?.dietaryPreferences ?? originalDietaryPreferences,
+  )
   const [rsvpUs, setRsvpUs] = useState(() => draft?.rsvpUs ?? origRsvpUs)
   const [rsvpIndia, setRsvpIndia] = useState(() => draft?.rsvpIndia ?? origRsvpIndia)
 
@@ -152,7 +189,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       }
     }, 0)
     return () => clearTimeout(id)
-  }, [guestFromContent?.phone, guestFromContent?.email, guestFromContent?.rsvpUs, guestFromContent?.rsvpIndia])
+  }, [
+    guestFromContent?.phone,
+    guestFromContent?.email,
+    guestFromContent?.rsvpUs,
+    guestFromContent?.rsvpIndia,
+  ])
 
   const [phoneFocused, setPhoneFocused] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -166,7 +208,11 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
 
   const phoneChanged = phone !== originalPhone
   const emailChanged = email !== originalEmail
-  const contactChanged = phoneChanged || emailChanged || address !== originalAddress || dietaryPreferences !== originalDietaryPreferences
+  const contactChanged =
+    phoneChanged ||
+    emailChanged ||
+    address !== originalAddress ||
+    dietaryPreferences !== originalDietaryPreferences
   const rsvpChanged = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
   const hasChanges = contactChanged || rsvpChanged
 
@@ -199,7 +245,18 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
-  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, hasChanges, saving, updateContact, user])
+  }, [
+    phone,
+    email,
+    address,
+    dietaryPreferences,
+    rsvpUs,
+    rsvpIndia,
+    hasChanges,
+    saving,
+    updateContact,
+    user,
+  ])
 
   useEffect(() => {
     if (!hasChanges) {
@@ -208,7 +265,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     }
     if (inactivityRef.current) clearTimeout(inactivityRef.current)
     inactivityRef.current = setTimeout(autoSave, 60000)
-    return () => { if (inactivityRef.current) clearTimeout(inactivityRef.current) }
+    return () => {
+      if (inactivityRef.current) clearTimeout(inactivityRef.current)
+    }
   }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, hasChanges, autoSave])
 
   useEffect(() => {
@@ -219,14 +278,19 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     return () => document.removeEventListener('visibilitychange', handler)
   }, [hasChanges, autoSave])
 
-  const handlePhoneChange = useCallback((raw) => {
+  const handlePhoneChange = useCallback(raw => {
     setPhone(raw.replace(/\D/g, ''))
   }, [])
 
   const handleSaveField = useCallback(async () => {
     if (saving) return
     setSaving(true)
-    await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
+    await updateContact({
+      phone: stripPhone(phone),
+      email: email.trim(),
+      address,
+      dietaryPreferences,
+    })
     setSaving(false)
     setShowConfirmation(true)
     setTimeout(() => setShowConfirmation(false), 2000)
@@ -255,14 +319,31 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
-  }, [phone, email, address, dietaryPreferences, rsvpUs, rsvpIndia, updateContact, saveStatus, user])
+  }, [
+    phone,
+    email,
+    address,
+    dietaryPreferences,
+    rsvpUs,
+    rsvpIndia,
+    updateContact,
+    saveStatus,
+    user,
+  ])
 
   const handleMessageClick = useCallback(async () => {
     setSaveStatus('saving')
     try {
-      await updateContact({ phone: stripPhone(phone), email: email.trim(), address, dietaryPreferences })
+      await updateContact({
+        phone: stripPhone(phone),
+        email: email.trim(),
+        address,
+        dietaryPreferences,
+      })
       const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
-      window.dispatchEvent(new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }))
+      window.dispatchEvent(
+        new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }),
+      )
     } catch (err) {
       console.error('Message save failed:', err)
       setSaveStatus('error')
@@ -275,16 +356,17 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     setShowAuthModal(false)
   }, [user?.id, setShowAuthModal])
 
-  const handleOpenDetails = useCallback((w) => {
-    if (switchWedding) switchWedding(w)
-    setShowAuthModal(false)
-    setTimeout(() => {
-      const el = document.getElementById('details')
-      if (el) el.scrollIntoView({ behavior: 'smooth' })
-    }, 300)
-  }, [switchWedding, setShowAuthModal])
-
-
+  const handleOpenDetails = useCallback(
+    w => {
+      if (switchWedding) switchWedding(w)
+      setShowAuthModal(false)
+      setTimeout(() => {
+        const el = document.getElementById('details')
+        if (el) el.scrollIntoView({ behavior: 'smooth' })
+      }, 300)
+    },
+    [switchWedding, setShowAuthModal],
+  )
 
   return (
     <div className="space-y-5">
@@ -321,166 +403,186 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           : 'Update your contact info below.'}
       </p>
 
-        <div>
-          <label htmlFor="cf-phone" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Phone Number
-          </label>
-          <div className="relative">
-            <input
-              id="cf-phone"
-              type="tel"
-              value={!phoneFocused && phone === originalPhone ? `(${phone.slice(0,3)}) ${phone.slice(3,6)}-${phone.slice(6,10)}` : phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              onFocus={() => setPhoneFocused(true)}
-              onBlur={() => setPhoneFocused(false)}
-              disabled={saving}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
-              placeholder="5551234567"
-            />
-            <AnimatePresence>
-              <motion.button
-                type="button"
-                key="phone-save"
-                onClick={handleSaveField}
-                disabled={!phoneChanged || !validPhone || saving}
-                initial={{ opacity: 0.3 }}
-                animate={{ opacity: phoneChanged && validPhone && !saving ? 1 : 0.3 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
-              >
-                {saving ? 'Saving...' : 'Save'}
-              </motion.button>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="cf-email" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Email Address
-          </label>
-          <div className="relative">
-            <input
-              id="cf-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
-              placeholder="you@email.com"
-            />
-            <AnimatePresence>
-              <motion.button
-                type="button"
-                key="email-save"
-                onClick={handleSaveField}
-                disabled={!emailChanged || !validEmail || saving}
-                initial={{ opacity: 0.3 }}
-                animate={{ opacity: emailChanged && validEmail && !saving ? 1 : 0.3 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
-              >
-                {showConfirmation && saving ? 'Saving...' : saving ? 'Saving...' : 'Save'}
-              </motion.button>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="cf-address" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Mailing Address
-          </label>
-          <div className="relative">
-            <textarea
-              id="cf-address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              rows={2}
-              maxLength={500}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-              placeholder="123 Main St, City, State ZIP"
-            />
-            <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
-              {address.length}/500
-            </span>
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="cf-diet" className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5">
-            Dietary Preferences
-          </label>
-          <div className="relative">
-            <textarea
-              id="cf-diet"
-              value={dietaryPreferences}
-              onChange={(e) => setDietaryPreferences(e.target.value)}
-              rows={2}
-              maxLength={500}
-              className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
-              placeholder="Any dietary restrictions or preferences"
-            />
-            <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
-              {dietaryPreferences.length}/500
-            </span>
-          </div>
-        </div>
-
-        {(saveStatus === 'saved' || saveStatus === 'rsvp-saved') && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center" aria-live="polite"
-          >
-            {saveStatus === 'rsvp-saved' ? 'Thank you! Your RSVP has been saved.' : 'Saved successfully!'}
-          </motion.div>
-        )}
-        {saveStatus === 'error' && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center" aria-live="polite"
-          >
-            Failed to save. Please try again.
-          </motion.div>
-        )}
-
-        {authMode === 'settings' && (
-          <div className="flex items-center gap-3 pt-2">
-            <button
+      <div>
+        <label
+          htmlFor="cf-phone"
+          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+        >
+          Phone Number
+        </label>
+        <div className="relative">
+          <input
+            id="cf-phone"
+            type="tel"
+            value={
+              !phoneFocused && phone === originalPhone
+                ? `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`
+                : phone
+            }
+            onChange={e => handlePhoneChange(e.target.value)}
+            onFocus={() => setPhoneFocused(true)}
+            onBlur={() => setPhoneFocused(false)}
+            disabled={saving}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+            placeholder="5551234567"
+          />
+          <AnimatePresence>
+            <motion.button
               type="button"
-              onClick={handleClose}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
+              key="phone-save"
+              onClick={handleSaveField}
+              disabled={!phoneChanged || !validPhone || saving}
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: phoneChanged && validPhone && !saving ? 1 : 0.3 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
             >
-              Close
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={!hasChanges || saveStatus === 'saving'}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
-              style={{
-                color: hasChanges ? 'var(--color-charcoal)' : undefined,
-                borderColor: hasChanges ? 'var(--color-gold)' : undefined,
-                backgroundColor: hasChanges ? 'var(--color-cream-dark)' : undefined,
-              }}
-            >
-              {saveStatus === 'saving' ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              type="button"
-              onClick={handleMessageClick}
-              className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors"
-              style={{
-                color: hasChanges ? 'var(--color-charcoal)' : undefined,
-                borderColor: hasChanges ? 'var(--color-gold)' : undefined,
-                backgroundColor: hasChanges ? 'var(--color-cream-dark)' : undefined,
-              }}
-            >
-              {saveStatus === 'saving' ? 'Saving...' : 'Message'}
-            </button>
-          </div>
-        )}
+              {saving ? 'Saving...' : 'Save'}
+            </motion.button>
+          </AnimatePresence>
+        </div>
       </div>
+
+      <div>
+        <label
+          htmlFor="cf-email"
+          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+        >
+          Email Address
+        </label>
+        <div className="relative">
+          <input
+            id="cf-email"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+            placeholder="you@email.com"
+          />
+          <AnimatePresence>
+            <motion.button
+              type="button"
+              key="email-save"
+              onClick={handleSaveField}
+              disabled={!emailChanged || !validEmail || saving}
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: emailChanged && validEmail && !saving ? 1 : 0.3 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
+            >
+              {showConfirmation && saving ? 'Saving...' : saving ? 'Saving...' : 'Save'}
+            </motion.button>
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="cf-address"
+          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+        >
+          Mailing Address
+        </label>
+        <div className="relative">
+          <textarea
+            id="cf-address"
+            value={address}
+            onChange={e => setAddress(e.target.value)}
+            rows={2}
+            maxLength={500}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            placeholder="123 Main St, City, State ZIP"
+          />
+          <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+            {address.length}/500
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="cf-diet"
+          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+        >
+          Dietary Preferences
+        </label>
+        <div className="relative">
+          <textarea
+            id="cf-diet"
+            value={dietaryPreferences}
+            onChange={e => setDietaryPreferences(e.target.value)}
+            rows={2}
+            maxLength={500}
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            placeholder="Any dietary restrictions or preferences"
+          />
+          <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+            {dietaryPreferences.length}/500
+          </span>
+        </div>
+      </div>
+
+      {(saveStatus === 'saved' || saveStatus === 'rsvp-saved') && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          className="p-3 bg-sage/10 border border-sage/20 rounded-sm text-xs text-sage text-center"
+          aria-live="polite"
+        >
+          {saveStatus === 'rsvp-saved'
+            ? 'Thank you! Your RSVP has been saved.'
+            : 'Saved successfully!'}
+        </motion.div>
+      )}
+      {saveStatus === 'error' && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center"
+          aria-live="polite"
+        >
+          Failed to save. Please try again.
+        </motion.div>
+      )}
+
+      {authMode === 'settings' && (
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleClose}
+            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!hasChanges || saveStatus === 'saving'}
+            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
+            style={{
+              color: hasChanges ? 'var(--color-charcoal)' : undefined,
+              borderColor: hasChanges ? 'var(--color-gold)' : undefined,
+              backgroundColor: hasChanges ? 'var(--color-cream-dark)' : undefined,
+            }}
+          >
+            {saveStatus === 'saving' ? 'Saving...' : 'Save'}
+          </button>
+          <button
+            type="button"
+            onClick={handleMessageClick}
+            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors"
+            style={{
+              color: hasChanges ? 'var(--color-charcoal)' : undefined,
+              borderColor: hasChanges ? 'var(--color-gold)' : undefined,
+              backgroundColor: hasChanges ? 'var(--color-cream-dark)' : undefined,
+            }}
+          >
+            {saveStatus === 'saving' ? 'Saving...' : 'Message'}
+          </button>
+        </div>
+      )}
+    </div>
   )
 }

@@ -13,8 +13,8 @@ const BASE_H = { mobile: 340, desktop: 380 }
 function shuffle(arr) {
   const result = [...arr]
   for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[result[i], result[j]] = [result[j], result[i]]
   }
   return result
 }
@@ -22,12 +22,14 @@ function shuffle(arr) {
 function buildSectionImages(sectionKey) {
   const images = config.images.gallery[sectionKey]
   if (!images || !Array.isArray(images)) return []
-  return images.filter(img => img?.path).map(img => ({
-    jpg: imgUrl(img.path),
-    srcset: imgSrcSet(img.path),
-    alt: img.alt,
-    tier: img.tier || 2,
-  }))
+  return images
+    .filter(img => img?.path)
+    .map(img => ({
+      jpg: imgUrl(img.path),
+      srcset: imgSrcSet(img.path),
+      alt: img.alt,
+      tier: img.tier || 2,
+    }))
 }
 
 function buildAllImages() {
@@ -56,7 +58,10 @@ export default function Gallery() {
   const [expanded, setExpanded] = useState(null)
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD)
   const isAuthenticated = !!user
-  const images = useMemo(() => (isAuthenticated ? ALL_FULL_IMAGES : ALL_HOME_IMAGES), [isAuthenticated])
+  const images = useMemo(
+    () => (isAuthenticated ? ALL_FULL_IMAGES : ALL_HOME_IMAGES),
+    [isAuthenticated],
+  )
   const [loadedImages, setLoadedImages] = useState({})
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const [showOverlay, setShowOverlay] = useState(false)
@@ -69,7 +74,7 @@ export default function Gallery() {
   const lastTap = useRef(0)
 
   function preload(images) {
-    (images || []).forEach(img => {
+    ;(images || []).forEach(img => {
       if (!img?.jpg) return
       if (!preloaded.current || preloaded.current.has(img.jpg)) return
       preloaded.current.add(img.jpg)
@@ -106,10 +111,10 @@ export default function Gallery() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + LOAD_MORE, images.length))
+          setVisibleCount(prev => Math.min(prev + LOAD_MORE, images.length))
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '200px' },
     )
     observer.observe(el)
     return () => observer.disconnect()
@@ -131,8 +136,8 @@ export default function Gallery() {
     return () => clearTimeout(id)
   }, [user])
 
-  const handleImageLoad = useCallback((src) => {
-    setLoadedImages((prev) => ({ ...prev, [src]: true }))
+  const handleImageLoad = useCallback(src => {
+    setLoadedImages(prev => ({ ...prev, [src]: true }))
   }, [])
 
   useEffect(() => {
@@ -143,35 +148,48 @@ export default function Gallery() {
   }, [expanded, images.length])
 
   const goNext = useCallback(() => {
-    setExpanded((prev) => (prev < images.length - 1 ? prev + 1 : 0))
+    setExpanded(prev => (prev < images.length - 1 ? prev + 1 : 0))
   }, [images.length])
 
   const goPrev = useCallback(() => {
-    setExpanded((prev) => (prev > 0 ? prev - 1 : images.length - 1))
+    setExpanded(prev => (prev > 0 ? prev - 1 : images.length - 1))
   }, [images.length])
 
   useEffect(() => {
     if (expanded === null) return
-    const handler = (e) => {
+    const handler = e => {
       if (e.key === 'Escape') setExpanded(null)
       if (e.key === 'ArrowRight') goNext()
       if (e.key === 'ArrowLeft') goPrev()
     }
-    const focusables = () => Array.from(lightboxRef.current?.querySelectorAll('button, [tabindex]:not([tabindex="-1"])') || [])
-    const tabHandler = (e) => {
+    const focusables = () =>
+      Array.from(
+        lightboxRef.current?.querySelectorAll('button, [tabindex]:not([tabindex="-1"])') || [],
+      )
+    const tabHandler = e => {
       if (e.key !== 'Tab') return
       const els = focusables()
       if (els.length === 0) return
-      const first = els[0], last = els[els.length - 1]
-      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
-      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+      const first = els[0],
+        last = els[els.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
-    const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
-    const handleTouchEnd = (e) => {
+    const handleTouchStart = e => {
+      touchStartX.current = e.touches[0].clientX
+    }
+    const handleTouchEnd = e => {
       if (touchStartX.current === null) return
       const dx = e.changedTouches[0].clientX - touchStartX.current
       touchStartX.current = null
-      if (Math.abs(dx) > 50) { dx > 0 ? goPrev() : goNext() }
+      if (Math.abs(dx) > 50) {
+        dx > 0 ? goPrev() : goNext()
+      }
     }
     window.addEventListener('keydown', handler)
     window.addEventListener('keydown', tabHandler)
@@ -215,49 +233,55 @@ export default function Gallery() {
               const hMob = `calc(${BASE_H.mobile}px * ${scale})`
               const opacity = 0.5 + scale * 0.5
               return (
-              <motion.div
-                key={img.jpg}
-                layoutId={`gallery-${img.jpg}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={sectionInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.04 * i }}
-                className="shrink-0 group cursor-pointer relative"
-                style={{
-                  scrollSnapAlign: 'start',
-                  width: wMob,
-                  height: hMob,
-                  opacity,
-                }}
-                onClick={() => setExpanded(i)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(i) } }}
-                role="button"
-                tabIndex={0}
-              >
-                <div
-                  className="relative overflow-hidden rounded-sm bg-sage-light/10"
-                  style={{ width: '100%', height: '100%' }}
+                <motion.div
+                  key={img.jpg}
+                  layoutId={`gallery-${img.jpg}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={sectionInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.04 * i }}
+                  className="shrink-0 group cursor-pointer relative"
+                  style={{
+                    scrollSnapAlign: 'start',
+                    width: wMob,
+                    height: hMob,
+                    opacity,
+                  }}
+                  onClick={() => setExpanded(i)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setExpanded(i)
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
                 >
-                  {!loadedImages[img.jpg] && <Skeleton />}
-                  <img
-                    src={img.jpg}
-                    srcSet={img.srcset}
-                    sizes="(max-width: 640px) 280px, (max-width: 1024px) 300px, 320px"
-                    alt={img.alt}
-                    draggable={false}
-                    className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
-                    loading={i < FIRST_BATCH && eagerReady ? 'eager' : 'lazy'}
-                    fetchPriority={i < FIRST_BATCH && eagerReady ? 'high' : 'low'}
-                    onLoad={() => handleImageLoad(img.jpg)}
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                      handleImageLoad(img.jpg)
-                      console.warn('Gallery image failed to load:', img.jpg)
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-              </motion.div>
-            )})}
+                  <div
+                    className="relative overflow-hidden rounded-sm bg-sage-light/10"
+                    style={{ width: '100%', height: '100%' }}
+                  >
+                    {!loadedImages[img.jpg] && <Skeleton />}
+                    <img
+                      src={img.jpg}
+                      srcSet={img.srcset}
+                      sizes="(max-width: 640px) 280px, (max-width: 1024px) 300px, 320px"
+                      alt={img.alt}
+                      draggable={false}
+                      className={`w-full h-full object-cover block transition-all duration-700 group-hover:scale-105 ${loadedImages[img.jpg] ? 'opacity-100' : 'opacity-0'}`}
+                      loading={i < FIRST_BATCH && eagerReady ? 'eager' : 'lazy'}
+                      fetchPriority={i < FIRST_BATCH && eagerReady ? 'high' : 'low'}
+                      onLoad={() => handleImageLoad(img.jpg)}
+                      onError={e => {
+                        e.target.style.display = 'none'
+                        handleImageLoad(img.jpg)
+                        console.warn('Gallery image failed to load:', img.jpg)
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
+                </motion.div>
+              )
+            })}
 
             <div ref={sentinelRef} className="shrink-0 w-4" />
           </div>
@@ -301,7 +325,12 @@ export default function Gallery() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 bg-charcoal/85 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
               onClick={() => setExpanded(null)}
-              onKeyDown={(e) => { if (e.key === 'Escape') { e.preventDefault(); setExpanded(null) } }}
+              onKeyDown={e => {
+                if (e.key === 'Escape') {
+                  e.preventDefault()
+                  setExpanded(null)
+                }
+              }}
               role="presentation"
             >
               <motion.div
@@ -311,7 +340,7 @@ export default function Gallery() {
                 exit={{ scale: 0.92, opacity: 0 }}
                 transition={{ duration: 0.25 }}
                 className="relative max-w-5xl max-h-[90vh] w-full flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               >
                 <button
                   type="button"
@@ -325,31 +354,46 @@ export default function Gallery() {
                   <>
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); goPrev() }}
+                      onClick={e => {
+                        e.stopPropagation()
+                        goPrev()
+                      }}
                       aria-label="Previous image"
                       className="absolute left-2 md:-left-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
-                      <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <svg
+                        className="w-4 h-4 md:w-5 md:h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
                         <path d="M15 18l-6-6 6-6" />
                       </svg>
                     </button>
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); goNext() }}
+                      onClick={e => {
+                        e.stopPropagation()
+                        goNext()
+                      }}
                       aria-label="Next image"
                       className="absolute right-2 md:-right-14 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-cream/10 hover:bg-cream/20 text-cream/70 hover:text-cream transition-all backdrop-blur-sm"
                     >
-                      <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <svg
+                        className="w-4 h-4 md:w-5 md:h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
                         <path d="M9 18l6-6-6-6" />
                       </svg>
                     </button>
                   </>
                 )}
 
-                <motion.div
-                  layoutId={`gallery-${images[expanded].jpg}`}
-                  className="w-full"
-                >
+                <motion.div layoutId={`gallery-${images[expanded].jpg}`} className="w-full">
                   <img
                     src={images[expanded].jpg}
                     srcSet={images[expanded].srcset}
@@ -362,10 +406,14 @@ export default function Gallery() {
                     fetchPriority="high"
                     onClick={() => {
                       const now = Date.now()
-                      if (now - lastTap.current < 300) { setZoomed(z => !z); lastTap.current = 0 }
-                      else lastTap.current = now
+                      if (now - lastTap.current < 300) {
+                        setZoomed(z => !z)
+                        lastTap.current = 0
+                      } else lastTap.current = now
                     }}
-                    onError={(e) => { e.target.style.display = 'none' }}
+                    onError={e => {
+                      e.target.style.display = 'none'
+                    }}
                   />
                 </motion.div>
 

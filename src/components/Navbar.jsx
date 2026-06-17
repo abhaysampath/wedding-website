@@ -3,9 +3,7 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { guestLabel, fullName } from '../utils/guest'
 
-const guestLinks = [
-  { href: '#gallery', label: 'Gallery' },
-]
+const guestLinks = [{ href: '#gallery', label: 'Gallery' }]
 
 const authLinks = [
   { href: '#story', label: 'Our Story' },
@@ -17,7 +15,11 @@ const authLinks = [
 
 function LogoButton({ onClick, scrolled }) {
   return (
-    <button type="button" onClick={onClick} className="relative font-heading font-semibold tracking-wide">
+    <button
+      type="button"
+      onClick={onClick}
+      className="relative font-heading font-semibold tracking-wide"
+    >
       <motion.span
         whileTap={{ scale: 0.85 }}
         transition={{ type: 'spring', stiffness: 500, damping: 14 }}
@@ -41,7 +43,7 @@ export default function Navbar() {
 
   const links = user ? authLinks : guestLinks
 
-  const handleLogoClick = (sourceRef) => {
+  const handleLogoClick = sourceRef => {
     const rect = sourceRef?.current?.getBoundingClientRect()
     if (rect) {
       window.__logoRect = { x: rect.left, y: rect.top, width: rect.width, height: rect.height }
@@ -71,8 +73,10 @@ export default function Navbar() {
     >
       {/* Desktop layout */}
       <div className="hidden md:flex max-w-6xl mx-auto px-6 items-center justify-between h-20">
-        <div className={`flex items-center gap-6 md:gap-8 ${scrolled ? 'text-charcoal-light' : 'text-cream'}`}>
-          {links.map((link) => (
+        <div
+          className={`flex items-center gap-6 md:gap-8 ${scrolled ? 'text-charcoal-light' : 'text-cream'}`}
+        >
+          {links.map(link => (
             <a
               key={link.href}
               href={link.href}
@@ -87,11 +91,15 @@ export default function Navbar() {
             <div className="flex items-center gap-2 text-right">
               <div>
                 <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
-                <p className="text-[10px] opacity-60 tracking-wider uppercase">{guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}</p>
+                <p className="text-[10px] opacity-60 tracking-wider uppercase">
+                  {guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}
+                </p>
               </div>
               <button
                 type="button"
-                onClick={() => { signOut() }}
+                onClick={() => {
+                  signOut()
+                }}
                 className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
                 title="Sign out"
               >

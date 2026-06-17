@@ -6,12 +6,15 @@ export function useScrollSpy(ids, rootMargin, threshold = [0, 0.25, 0.5]) {
   useEffect(() => {
     if (!ids.length) return
 
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0) setActive(visible[0].target.id)
-    }, { rootMargin, threshold })
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        if (visible.length > 0) setActive(visible[0].target.id)
+      },
+      { rootMargin, threshold },
+    )
 
     ids.forEach(id => {
       const el = document.getElementById(id)
@@ -30,20 +33,25 @@ export function useSectionHash(ids, rootMargin = '-80px 0px -50% 0px', threshold
   useEffect(() => {
     if (!ids.length) return
 
-    const updateHash = (id) => {
+    const updateHash = id => {
       if (id === lastId) return
       setLastId(id)
       const hash = id === 'hero' ? '' : `#${id}`
-      const url = hash ? `${window.location.pathname.replace(/\/$/, '')}${hash}` : window.location.pathname.replace(/\/$/, '') || '/'
+      const url = hash
+        ? `${window.location.pathname.replace(/\/$/, '')}${hash}`
+        : window.location.pathname.replace(/\/$/, '') || '/'
       history.replaceState(null, '', url)
     }
 
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0) updateHash(visible[0].target.id)
-    }, { rootMargin, threshold })
+    const observer = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+        if (visible.length > 0) updateHash(visible[0].target.id)
+      },
+      { rootMargin, threshold },
+    )
 
     ids.forEach(id => {
       const el = document.getElementById(id)

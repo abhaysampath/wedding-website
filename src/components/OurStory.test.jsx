@@ -3,16 +3,30 @@ import { vi, describe, it, expect } from 'vitest'
 import React from 'react'
 
 vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'useInView') return () => true
-      return ({ children, ...props }) => {
-        const { initial, animate, exit, whileHover, whileTap, variants, transition, layoutId, onAnimationComplete, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        if (prop === 'useInView') return () => true
+        return ({ children, ...props }) => {
+          const {
+            initial,
+            animate,
+            exit,
+            whileHover,
+            whileTap,
+            variants,
+            transition,
+            layoutId,
+            onAnimationComplete,
+            ...rest
+          } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
   AnimatePresence: ({ children }) => <>{children}</>,
   useInView: () => true,
 }))
@@ -28,8 +42,8 @@ vi.mock('../config', () => ({
       },
     },
   },
-  imgUrl: (path) => `https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/${path}`,
-  imgSrcSet: (path) => `${path}?w=400 400w, ${path}?w=800 800w`,
+  imgUrl: path => `https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/${path}`,
+  imgSrcSet: path => `${path}?w=400 400w, ${path}?w=800 800w`,
 }))
 
 import OurStory from './OurStory'

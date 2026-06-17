@@ -1,10 +1,11 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @font-face {
-  font-family: "Lovers in New York";
-  src: url("/fonts/Lovers in New York.woff2") format("woff2"),
-       url("/fonts/Lovers in New York.woff") format("woff"),
-       url("/fonts/Lovers in New York.ttf") format("truetype");
+  font-family: 'Lovers in New York';
+  src:
+    url('/fonts/Lovers in New York.woff2') format('woff2'),
+    url('/fonts/Lovers in New York.woff') format('woff'),
+    url('/fonts/Lovers in New York.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -13,10 +14,11 @@
 }
 
 @font-face {
-  font-family: "Lovers in New York";
-  src: url("/fonts/Lovers in New York Bold.woff2") format("woff2"),
-       url("/fonts/Lovers in New York Bold.woff") format("woff"),
-       url("/fonts/Lovers in New York Bold.ttf") format("truetype");
+  font-family: 'Lovers in New York';
+  src:
+    url('/fonts/Lovers in New York Bold.woff2') format('woff2'),
+    url('/fonts/Lovers in New York Bold.woff') format('woff'),
+    url('/fonts/Lovers in New York Bold.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -25,18 +27,18 @@
 }
 
 @theme {
-  --color-sage: #8A9A5B;
-  --color-sage-light: #A8B87E;
-  --color-sage-dark: #6B7A42;
-  --color-cream: #FEFCF3;
-  --color-cream-dark: #F5F0E0;
-  --color-gold: #C9A96E;
-  --color-gold-light: #DECCA0;
-  --color-gold-dark: #A8884A;
-  --color-charcoal: #2C2C2C;
-  --color-charcoal-light: #4A4A4A;
-  --font-heading: "Lovers in New York", serif;
-  --font-body: "DM Sans", sans-serif;
+  --color-sage: #8a9a5b;
+  --color-sage-light: #a8b87e;
+  --color-sage-dark: #6b7a42;
+  --color-cream: #fefcf3;
+  --color-cream-dark: #f5f0e0;
+  --color-gold: #c9a96e;
+  --color-gold-light: #decca0;
+  --color-gold-dark: #a8884a;
+  --color-charcoal: #2c2c2c;
+  --color-charcoal-light: #4a4a4a;
+  --font-heading: 'Lovers in New York', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
 html {
@@ -51,15 +53,19 @@ body {
 }
 
 .wedding-page {
-  transition: background-color 0.7s ease, color 0.7s ease;
+  transition:
+    background-color 0.7s ease,
+    color 0.7s ease;
 }
 
 .wedding-page section,
 .wedding-page .transition-wedding {
-  transition: background-color 0.7s ease, color 0.7s ease;
+  transition:
+    background-color 0.7s ease,
+    color 0.7s ease;
 }
 
-[data-wedding="india"] {
+[data-wedding='india'] {
   --color-cream: #fcf7ee;
   --color-cream-dark: #f3eee1;
   --color-charcoal: #3d2e1e;
@@ -67,8 +73,12 @@ body {
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 ::selection {
@@ -86,8 +96,12 @@ body {
 }
 
 @keyframes modal-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes modal-pop-in {
@@ -110,7 +124,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

@@ -4,18 +4,32 @@ import React from 'react'
 
 vi.mock('framer-motion', () => ({
   MotionConfig: ({ children }) => <>{children}</>,
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'useInView') return () => true
-      if (prop === 'useScroll') return () => ({ scrollY: { get: () => 0 } })
-      if (prop === 'useTransform') return () => ({ get: () => 0 })
-      return ({ children, ...props }) => {
-        const { initial, animate, exit, whileHover, whileTap, variants, transition, layoutId, onAnimationComplete, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        if (prop === 'useInView') return () => true
+        if (prop === 'useScroll') return () => ({ scrollY: { get: () => 0 } })
+        if (prop === 'useTransform') return () => ({ get: () => 0 })
+        return ({ children, ...props }) => {
+          const {
+            initial,
+            animate,
+            exit,
+            whileHover,
+            whileTap,
+            variants,
+            transition,
+            layoutId,
+            onAnimationComplete,
+            ...rest
+          } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
   AnimatePresence: ({ children }) => <>{children}</>,
 }))
 
@@ -33,14 +47,28 @@ vi.mock('./context/AuthProvider', () => ({
 
 vi.mock('./components/Navbar', () => ({ default: () => <nav data-testid="navbar">Nav</nav> }))
 vi.mock('./components/Hero', () => ({ default: () => <section data-testid="hero">Hero</section> }))
-vi.mock('./components/Gallery', () => ({ default: () => <section data-testid="gallery">Gallery</section> }))
-vi.mock('./components/OurStory', () => ({ default: () => <section data-testid="our-story">OurStory</section> }))
-vi.mock('./components/EventDetails', () => ({ default: () => <section data-testid="event-details">EventDetails</section> }))
-vi.mock('./components/TravelAccommodations', () => ({ default: () => <section data-testid="travel">Travel</section> }))
+vi.mock('./components/Gallery', () => ({
+  default: () => <section data-testid="gallery">Gallery</section>,
+}))
+vi.mock('./components/OurStory', () => ({
+  default: () => <section data-testid="our-story">OurStory</section>,
+}))
+vi.mock('./components/EventDetails', () => ({
+  default: () => <section data-testid="event-details">EventDetails</section>,
+}))
+vi.mock('./components/TravelAccommodations', () => ({
+  default: () => <section data-testid="travel">Travel</section>,
+}))
 vi.mock('./components/FAQ', () => ({ default: () => <section data-testid="faq">FAQ</section> }))
-vi.mock('./components/ContactSection', () => ({ default: () => <section data-testid="contact">Contact</section> }))
-vi.mock('./components/Footer', () => ({ default: () => <footer data-testid="footer">Footer</footer> }))
-vi.mock('./components/AuthModal', () => ({ default: () => <div data-testid="auth-modal">AuthModal</div> }))
+vi.mock('./components/ContactSection', () => ({
+  default: () => <section data-testid="contact">Contact</section>,
+}))
+vi.mock('./components/Footer', () => ({
+  default: () => <footer data-testid="footer">Footer</footer>,
+}))
+vi.mock('./components/AuthModal', () => ({
+  default: () => <div data-testid="auth-modal">AuthModal</div>,
+}))
 vi.mock('./components/SEO', () => ({ SEO: () => null, JSONLD: () => null }))
 vi.mock('../data/wedding-jsonld.js', () => ({ default: {} }))
 

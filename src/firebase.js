@@ -37,7 +37,10 @@ export function isTestPhone(phone) {
 
 export async function signInWithGoogle() {
   const a = init()
-  if (!a) throw new Error('Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env')
+  if (!a)
+    throw new Error(
+      'Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env',
+    )
   const provider = new GoogleAuthProvider()
   provider.setCustomParameters({ prompt: 'select_account' })
   const result = await signInWithPopup(a, provider)
@@ -95,7 +98,11 @@ let _recaptchaVerifier = null
 
 export function getRecaptchaVerifier(containerElement) {
   if (_recaptchaVerifier) {
-    try { _recaptchaVerifier.clear() } catch (err) { console.warn('Failed to clear reCAPTCHA verifier:', err) }
+    try {
+      _recaptchaVerifier.clear()
+    } catch (err) {
+      console.warn('Failed to clear reCAPTCHA verifier:', err)
+    }
     _recaptchaVerifier = null
   }
   const a = init()
@@ -103,14 +110,20 @@ export function getRecaptchaVerifier(containerElement) {
   _recaptchaVerifier = new RecaptchaVerifier(a, containerElement, {
     size: 'invisible',
     callback: () => {},
-    'expired-callback': () => { /* recaptcha expired */ }
+    'expired-callback': () => {
+      /* recaptcha expired */
+    },
   })
   return _recaptchaVerifier
 }
 
 export function clearRecaptchaVerifier() {
   if (_recaptchaVerifier) {
-    try { _recaptchaVerifier.clear() } catch (err) { console.warn('Failed to clear reCAPTCHA verifier:', err) }
+    try {
+      _recaptchaVerifier.clear()
+    } catch (err) {
+      console.warn('Failed to clear reCAPTCHA verifier:', err)
+    }
     _recaptchaVerifier = null
   }
 }

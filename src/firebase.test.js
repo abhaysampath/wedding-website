@@ -27,7 +27,9 @@ vi.mock('firebase/auth', () => {
 })
 
 vi.mock('./config', () => ({
-  default: { firebase: { apiKey: 'test-key', authDomain: 'test-domain', projectId: 'test-project' } },
+  default: {
+    firebase: { apiKey: 'test-key', authDomain: 'test-domain', projectId: 'test-project' },
+  },
 }))
 
 describe('firebase with config', () => {

@@ -15,7 +15,17 @@ vi.mock('@vercel/analytics', () => ({ track: vi.fn() }))
 
 vi.mock('../data/guests', () => ({
   default: [
-    { id: 'g001', firstName: 'Jane', lastName: 'Doe', side: 'bride', role: 'invited_guest', relationship: 'Cousin', phone: '5551234567', email: 'jane@example.com', weddings: ['us'] },
+    {
+      id: 'g001',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      side: 'bride',
+      role: 'invited_guest',
+      relationship: 'Cousin',
+      phone: '5551234567',
+      email: 'jane@example.com',
+      weddings: ['us'],
+    },
   ],
 }))
 
@@ -42,7 +52,7 @@ function renderProvider() {
   return render(
     <AuthProvider>
       <TestHarness />
-    </AuthProvider>
+    </AuthProvider>,
   )
 }
 

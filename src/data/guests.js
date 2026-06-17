@@ -23,7 +23,6 @@ const guests = [
     email: '',
     phone: '',
   },
-
 ]
 
 export default guests

@@ -15,7 +15,7 @@ export default function WeddingSwitcher() {
   const isIndia = activeWedding === 'india'
   const w = weddings[activeWedding]
 
-  const toggle = (val) => switchWedding(val)
+  const toggle = val => switchWedding(val)
 
   return (
     <div
@@ -33,10 +33,14 @@ export default function WeddingSwitcher() {
           exit={{ opacity: 0, y: 6 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          <p className={`text-xs font-heading font-medium leading-tight ${isIndia ? 'text-[#7c5c3e]' : 'text-charcoal'}`}>
+          <p
+            className={`text-xs font-heading font-medium leading-tight ${isIndia ? 'text-[#7c5c3e]' : 'text-charcoal'}`}
+          >
             {w.label}
           </p>
-          <p className={`text-[10px] leading-tight mt-0.5 ${isIndia ? 'text-[#b8956e]' : 'text-charcoal-light/60'}`}>
+          <p
+            className={`text-[10px] leading-tight mt-0.5 ${isIndia ? 'text-[#b8956e]' : 'text-charcoal-light/60'}`}
+          >
             {w.date} &middot; {w.venue}
           </p>
         </motion.div>
@@ -47,7 +51,7 @@ export default function WeddingSwitcher() {
         role="radiogroup"
         aria-label="Select wedding"
       >
-        {OPTIONS.map((opt) => {
+        {OPTIONS.map(opt => {
           const isOn = activeWedding === opt.value
           return (
             <button

@@ -27,9 +27,7 @@ describe('useAuth', () => {
       return null
     }
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    expect(() => render(<BadComponent />)).toThrow(
-      'useAuth must be used within AuthProvider',
-    )
+    expect(() => render(<BadComponent />)).toThrow('useAuth must be used within AuthProvider')
     spy.mockRestore()
   })
 })

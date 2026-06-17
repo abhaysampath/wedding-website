@@ -13,7 +13,9 @@ export function SEO({
   noIndex = false,
 } = {}) {
   const fullTitle = title.includes('|') ? title : `${title} | Rebecca & Abhay`
-  const canonicalUrl = url.startsWith('http') ? url : `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`
+  const canonicalUrl = url.startsWith('http')
+    ? url
+    : `${siteUrl}${url.startsWith('/') ? '' : '/'}${url}`
 
   return (
     <Helmet>

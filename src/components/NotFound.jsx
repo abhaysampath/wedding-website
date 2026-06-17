@@ -23,8 +23,12 @@ export default function NotFound() {
         transition={{ duration: 0.6 }}
         className="text-center max-w-md"
       >
-        <h1 className="font-heading text-6xl md:text-8xl font-light text-charcoal/10 mb-4 pt-1">404</h1>
-        <h2 className="font-heading text-3xl md:text-4xl text-charcoal mb-4 pt-1">Page Not Found</h2>
+        <h1 className="font-heading text-6xl md:text-8xl font-light text-charcoal/10 mb-4 pt-1">
+          404
+        </h1>
+        <h2 className="font-heading text-3xl md:text-4xl text-charcoal mb-4 pt-1">
+          Page Not Found
+        </h2>
         <p className="text-charcoal-light/60 mb-8">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
@@ -32,7 +36,13 @@ export default function NotFound() {
           href="/"
           className="inline-flex items-center gap-2 bg-sage hover:bg-sage-dark text-cream text-sm tracking-widest uppercase px-6 py-3 rounded-sm font-medium transition-colors"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Home

@@ -1,12 +1,20 @@
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() { return null; }
-  observe() { return null; }
-  unobserve() { return null; }
-  disconnect() { return null; }
+  constructor() {
+    return null
+  }
+  observe() {
+    return null
+  }
+  unobserve() {
+    return null
+  }
+  disconnect() {
+    return null
+  }
 }
 
-global.requestIdleCallback = (cb) => setTimeout(cb, 0)
-global.cancelIdleCallback = (id) => clearTimeout(id)
+global.requestIdleCallback = cb => setTimeout(cb, 0)
+global.cancelIdleCallback = id => clearTimeout(id)
 
 import { render, screen } from '@testing-library/react'
 import { vi } from 'vitest'
@@ -24,7 +32,10 @@ vi.mock('../config', () => ({
           { alt: 'No file property', tier: 2 },
           { file: 'home2.jpg', alt: 'Home 2', tier: 2 },
         ],
-        gallery: [{ file: 'gal1.jpg', alt: 'Gallery 1', tier: 1 }, { file: 'gal2.jpg', alt: 'Gallery 2', tier: 2 }],
+        gallery: [
+          { file: 'gal1.jpg', alt: 'Gallery 1', tier: 1 },
+          { file: 'gal2.jpg', alt: 'Gallery 2', tier: 2 },
+        ],
         vert: [{ file: 'vert1.jpg', alt: 'Vert 1', tier: 1 }],
       },
     },

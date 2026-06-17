@@ -11,6 +11,6 @@ export function eastTime() {
     hour12: false,
   })
   const parts = formatter.formatToParts(d)
-  const get = (type) => parts.find(p => p.type === type)?.value || ''
+  const get = type => parts.find(p => p.type === type)?.value || ''
   return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')} ET`
 }

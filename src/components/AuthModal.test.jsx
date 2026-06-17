@@ -17,16 +17,30 @@ globalThis.Intl.DateTimeFormat = class {
 }
 
 vi.mock('framer-motion', () => ({
-  motion: new Proxy({}, {
-    get: (target, prop) => {
-      if (prop === 'useInView') return () => true
-      return ({ children, ...props }) => {
-        const { initial, animate, exit, whileHover, whileTap, variants, transition, layoutId, onAnimationComplete, ...rest } = props
-        const tag = typeof prop === 'string' ? prop : 'div'
-        return React.createElement(tag, rest, children)
-      }
+  motion: new Proxy(
+    {},
+    {
+      get: (target, prop) => {
+        if (prop === 'useInView') return () => true
+        return ({ children, ...props }) => {
+          const {
+            initial,
+            animate,
+            exit,
+            whileHover,
+            whileTap,
+            variants,
+            transition,
+            layoutId,
+            onAnimationComplete,
+            ...rest
+          } = props
+          const tag = typeof prop === 'string' ? prop : 'div'
+          return React.createElement(tag, rest, children)
+        }
+      },
     },
-  }),
+  ),
   AnimatePresence: ({ children }) => <>{children}</>,
   useInView: () => true,
 }))
@@ -41,7 +55,7 @@ vi.mock('../firebase', () => ({
 
 vi.mock('../utils/verifyEmail', () => ({
   sendVerificationCode: vi.fn(),
-  verifyCode: vi.fn((code) => code === '123456'),
+  verifyCode: vi.fn(code => code === '123456'),
 }))
 
 vi.mock('@vercel/analytics', () => ({ track: vi.fn() }))
@@ -53,9 +67,39 @@ vi.mock('../context/useAuth', () => ({
 
 const baseContent = {
   guests: [
-    { id: 'g001', firstName: 'Jane', lastName: 'Doe', side: 'bride', role: 'invited_guest', relationship: 'Cousin', phone: '5551234567', email: 'jane@example.com', weddings: ['us'] },
-    { id: 'g002', firstName: 'John', lastName: 'Smith', side: 'groom', role: 'invited_guest', relationship: 'Friend', phone: '9876543210', email: 'john@example.com', weddings: ['us'] },
-    { id: 'g003', firstName: 'Alice', lastName: 'Brown', side: 'bride', role: 'close_family', relationship: 'Sister', phone: '5550001111', email: 'alice@example.com', weddings: ['us', 'india'] },
+    {
+      id: 'g001',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      side: 'bride',
+      role: 'invited_guest',
+      relationship: 'Cousin',
+      phone: '5551234567',
+      email: 'jane@example.com',
+      weddings: ['us'],
+    },
+    {
+      id: 'g002',
+      firstName: 'John',
+      lastName: 'Smith',
+      side: 'groom',
+      role: 'invited_guest',
+      relationship: 'Friend',
+      phone: '9876543210',
+      email: 'john@example.com',
+      weddings: ['us'],
+    },
+    {
+      id: 'g003',
+      firstName: 'Alice',
+      lastName: 'Brown',
+      side: 'bride',
+      role: 'close_family',
+      relationship: 'Sister',
+      phone: '5550001111',
+      email: 'alice@example.com',
+      weddings: ['us', 'india'],
+    },
   ],
   loaded: true,
 }
@@ -197,7 +241,14 @@ describe('AuthModal welcome screen', () => {
   })
 
   it('shows welcome message when signedIn is set', async () => {
-    const signedInUser = { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest', side: 'bride', relationship: 'Cousin' }
+    const signedInUser = {
+      id: 'g001',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      role: 'invited_guest',
+      side: 'bride',
+      relationship: 'Cousin',
+    }
     mockUseAuth.mockReturnValue({ ...baseAuth(), user: signedInUser })
     render(<AuthModal />)
     await waitFor(() => expect(screen.getByText(/Welcome.*Jane/)).toBeTruthy())
@@ -213,7 +264,17 @@ describe('AuthModal settings mode', () => {
     mockUseAuth.mockReturnValue({
       ...baseAuth(),
       authMode: 'settings',
-      user: { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest', side: 'bride', relationship: 'Cousin', phone: '5551234567', email: 'jane@example.com', weddings: ['us'] },
+      user: {
+        id: 'g001',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        role: 'invited_guest',
+        side: 'bride',
+        relationship: 'Cousin',
+        phone: '5551234567',
+        email: 'jane@example.com',
+        weddings: ['us'],
+      },
     })
     render(<AuthModal />)
     expect(screen.getByRole('status').textContent).toContain('Settings')
@@ -234,5 +295,3 @@ describe('AuthModal phone & email verification', () => {
     expect(confirmButtons.length).toBe(2)
   })
 })
-
-
