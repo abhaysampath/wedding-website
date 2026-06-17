@@ -1,17 +1,22 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const ALERT_EMAIL = process.env.ALERT_EMAIL || 'abhay@example.com'
+const API_KEY = process.env.RESEND_API_KEY
+const ALERT_EMAIL = process.env.ALERT_EMAIL
 
 export default async function handler(req, res) {
+  if (!API_KEY || !ALERT_EMAIL) {
+    return res.status(503).json({ error: 'Resend not configured. Set RESEND_API_KEY and ALERT_EMAIL.' })
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  const resend = new Resend(API_KEY)
   const { type, url, userAgent, timestamp, error } = req.body
 
   try {
-    const subject = `🚨 Wedding Site Error: ${type.toUpperCase()}`
+    const subject = `Wedding Site Error: ${(type || 'unknown').toUpperCase()}`
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
         <h2 style="color: #dc2626; margin-bottom: 16px;">Wedding Website Error Alert</h2>

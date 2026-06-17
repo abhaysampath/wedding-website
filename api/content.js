@@ -37,7 +37,7 @@ export default async function handler(req, res) {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
 
   if (!sheetId || !serviceEmail || !privateKey || privateKey.length < 200) {
-    return res.status(200).json({ source: 'sample', error: 'Missing or invalid GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, or GOOGLE_PRIVATE_KEY env vars', guests: [], faq: [] })
+    return res.status(503).json({ error: 'Sheets not configured. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY.' })
   }
 
   try {
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Sheet read failed:', err)
     const msg = err?.response?.data?.error?.message || err?.message || 'unknown error'
-    return res.status(200).json({ source: 'sample', error: msg, guests: [], faq: [] })
+    return res.status(503).json({ error: msg })
   }
 }
 

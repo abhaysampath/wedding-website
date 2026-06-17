@@ -97,9 +97,9 @@ jobs:
           path: screenshots/
           retention-days: 14
 
-      # Step 9: Deploy to Vercel production
+      # Step 9: Deploy to Vercel production (prebuilt — uses CI-built bundle with real secrets)
       - name: Deploy to Vercel
-        run: npx vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       # Step 10: Smoke test against production
       - name: E2E smoke test on production
