@@ -247,7 +247,16 @@ export default function AuthModal() {
       clearRecaptchaVerifier()
       setSendingSms(false)
     }
-  }, [guestPhone, saving, sendingSms, user, setFirebaseError, recaptchaContainerRef])
+  }, [
+    guestPhone,
+    saving,
+    sendingSms,
+    user,
+    selectedMatch,
+    recordLoginAttempt,
+    setFirebaseError,
+    recaptchaContainerRef,
+  ])
 
   const handleVerifySmsCode = useCallback(
     async code => {
@@ -452,7 +461,7 @@ export default function AuthModal() {
       setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
       setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
     }, 0)
-  }, [content.guests, content.loaded])
+  }, [content.guests, content.loaded, recordLoginAttempt])
 
   useEffect(() => {
     if (showAuthModal) {
