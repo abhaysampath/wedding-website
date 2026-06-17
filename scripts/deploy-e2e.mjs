@@ -217,7 +217,8 @@ async function main() {
       !e.includes('runtime.lastError') &&
       !e.includes('Receiving end does not exist') &&
       !e.includes('extension') &&
-      !e.startsWith('Failed to load resource')  // Tracked via requestfailed instead
+      !e.startsWith('Failed to load resource') &&
+      !e.startsWith('Global error caught')  // Tracked via pageErrors instead
     )
     assert('No app console errors', appErrors.length === 0,
       appErrors.length > 0 ? appErrors[0] : undefined)

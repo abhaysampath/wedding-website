@@ -7,14 +7,27 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 // Global error handler to prevent ugly error pages
 if (process.env.NODE_ENV === 'production') {
   window.onerror = function (message, source, lineno, colno, error) {
-    console.error('Global error caught:', { message, source, lineno, colno, error })
-    // Don't let the error bubble up to show an ugly page
+    var text =
+      typeof message === 'string'
+        ? message
+        : message && message.type
+          ? message.type
+          : 'Unknown error'
+    var detail = error && (error.stack || error.message) ? error.stack || error.message : ''
+    console.error('Global error caught:', text, source || '', lineno || '', colno || '', detail)
     return true
   }
 
   // Handle promise rejections
   window.onunhandledrejection = function (event) {
-    console.error('Unhandled promise rejection:', event.reason)
+    var reason = event && event.reason
+    var text =
+      typeof reason === 'string'
+        ? reason
+        : reason && (reason.stack || reason.message)
+          ? reason.stack || reason.message
+          : 'Promise rejected'
+    console.error('Unhandled promise rejection:', text)
     event.preventDefault()
   }
 
