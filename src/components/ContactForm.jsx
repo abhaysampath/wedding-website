@@ -190,6 +190,10 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     }, 0)
     return () => clearTimeout(id)
   }, [
+    phone,
+    email,
+    draft?.rsvpUs,
+    draft?.rsvpIndia,
     guestFromContent?.phone,
     guestFromContent?.email,
     guestFromContent?.rsvpUs,
@@ -326,6 +330,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     dietaryPreferences,
     rsvpUs,
     rsvpIndia,
+    originalRsvpUs,
+    originalRsvpIndia,
     updateContact,
     saveStatus,
     user,
@@ -349,7 +355,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
     }
-  }, [phone, email, address, dietaryPreferences, updateContact, setShowAuthModal])
+  }, [phone, email, address, dietaryPreferences, updateContact])
 
   const handleClose = useCallback(() => {
     clearDraft(user?.id)

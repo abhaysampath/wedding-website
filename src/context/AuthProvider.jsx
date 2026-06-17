@@ -228,6 +228,28 @@ export function AuthProvider({ children }) {
     }, 300)
   }, [])
 
+  useEffect(() => {
+    if (!content.loaded || !content.guests?.length) return
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    const gFromQuery = params.get('g')
+    const pathSlug = window.location.pathname.match(/^\/g\/(.+)/)?.[1]
+    const slug = gFromQuery || (pathSlug ? decodeURIComponent(pathSlug) : null)
+    if (!code || !slug) return
+
+    const guest = content.guests.find(g => getGuestSlug(g) === slug)
+    if (!guest) return
+
+    const pendingCode = sessionStorage.getItem('pending_email_code') || ''
+    if (pendingCode && code === pendingCode) {
+      setTimeout(() => signInAsGuest(guest), 0)
+      sessionStorage.removeItem('pending_email_code')
+      sessionStorage.removeItem('pending_email_addr')
+      sessionStorage.removeItem('pending_email_name')
+      window.history.replaceState({}, '', '/')
+    }
+  }, [content.loaded, content.guests, signInAsGuest])
+
   const handleFirebaseSignIn = useCallback(
     async provider => {
       setFirebaseLoading(true)

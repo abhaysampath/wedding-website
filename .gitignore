@@ -27,4 +27,7 @@ dist-ssr
 *.sw?
 .vercel
 public/guests-backup.json
+.backups/
 screenshots/
+test-results/
+playwright-report/

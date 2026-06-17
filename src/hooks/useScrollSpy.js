@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 export function useScrollSpy(ids, rootMargin, threshold = [0, 0.25, 0.5]) {
   const [active, setActive] = useState('')
+  const idsKey = ids.join('|')
+  const thresholdKey = threshold.join('|')
 
   useEffect(() => {
     if (!ids.length) return
@@ -22,19 +24,22 @@ export function useScrollSpy(ids, rootMargin, threshold = [0, 0.25, 0.5]) {
     })
 
     return () => observer.disconnect()
-  }, [ids.join(','), rootMargin, threshold.join(',')])
+  }, [idsKey, rootMargin, thresholdKey, ids, threshold])
 
   return active
 }
 
 export function useSectionHash(ids, rootMargin = '-80px 0px -50% 0px', threshold = [0, 0.25, 0.5]) {
   const [lastId, setLastId] = useState('')
+  const lastIdRef = useRef(lastId)
+  const idsKey = ids.join('|')
+  const thresholdKey = threshold.join('|')
 
   useEffect(() => {
     if (!ids.length) return
 
     const updateHash = id => {
-      if (id === lastId) return
+      if (id === lastIdRef.current) return
       setLastId(id)
       const hash = id === 'hero' ? '' : `#${id}`
       const url = hash
@@ -72,5 +77,11 @@ export function useSectionHash(ids, rootMargin = '-80px 0px -50% 0px', threshold
       observer.disconnect()
       window.removeEventListener('popstate', onPopState)
     }
-  }, [ids.join(','), rootMargin, threshold.join(',')])
+  }, [idsKey, rootMargin, thresholdKey, ids, threshold])
+
+  useEffect(() => {
+    lastIdRef.current = lastId
+  }, [lastId])
+
+  return lastId
 }

@@ -28,7 +28,12 @@ test.describe('Deployment smoke tests', () => {
       !e.includes('unrecognized in this browser') &&
       !e.includes('Failed to load resource') &&
       !e.includes('status of 404') &&
-      !e.includes('status of 502')
+      !e.includes('status of 502') &&
+      // Vercel Speed Insights / Analytics scripts are only present in production, not in `vite preview`
+      !e.includes('_vercel/speed-insights/script.js') &&
+      !e.includes('_vercel/insights/script.js') &&
+      // HTML returned where JS was expected (preview server 404s for /_vercel/*)
+      !e.includes("Unexpected token '<'")
     );
     expect(filtered).toHaveLength(0);
   });
