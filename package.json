@@ -18,7 +18,10 @@
     "test:full": "vitest run && npm run build",
     "test:local": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
@@ -49,6 +52,8 @@
     "globals": "^17.6.0",
     "jsdom": "^29.1.1",
     "nodemailer": "^9.0.0",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3",
     "vite": "^8.0.12",
     "vitest": "^4.1.9"
   },

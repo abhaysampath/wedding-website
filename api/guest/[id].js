@@ -1,8 +1,13 @@
 import SHEET_CONFIG from '../sheets-config.js'
+import { isAllowedOrigin } from '../_origin.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+
+  if (!isAllowedOrigin(req)) {
+    return res.status(403).json({ error: 'Forbidden' })
   }
 
   const sheetId = process.env.GOOGLE_SHEET_ID

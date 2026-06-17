@@ -40,11 +40,19 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      # Step 2: Unit tests
+      # Step 2: Format check
+      - name: Format check
+        run: npm run format:check
+
+      # Step 3: TypeScript check
+      - name: TypeScript check
+        run: npm run typecheck
+
+      # Step 5: Unit tests
       - name: Run unit tests
         run: npm test
 
-      # Step 2: Build (also validates env vars via verify-env.mjs)
+      # Step 6: Build (also validates env vars via verify-env.mjs)
       - name: Build production bundle
         run: npm run build
 

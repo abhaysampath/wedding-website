@@ -8,6 +8,7 @@ import { useAuth } from './context/useAuth'
 import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
 import NotFound from './components/NotFound'
 import { SEO, JSONLD, weddingJSONLD } from './components/SEO'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 const Navbar = lazy(() => import('./components/Navbar'))
 const Hero = lazy(() => import('./components/Hero'))
@@ -278,32 +279,44 @@ function PageContent() {
       </a>
       <SectionNav />
       <ScrollProgress />
-      <Suspense fallback={<NavbarSkeleton />}>
-        <Navbar />
-      </Suspense>
-      <Suspense fallback={<HeroSkeleton />}>
-        <Hero />
-      </Suspense>
+      <ErrorBoundary name="Navbar">
+        <Suspense fallback={<NavbarSkeleton />}>
+          <Navbar />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary name="Hero">
+        <Suspense fallback={<HeroSkeleton />}>
+          <Hero />
+        </Suspense>
+      </ErrorBoundary>
       <main id="main-content" role="main">
-        <Suspense fallback={<GallerySkeleton />}>
-          <Gallery />
-        </Suspense>
-        {user && (
-          <Suspense fallback={<UserSkeleton />}>
-            <OurStory />
-            <EventDetails />
-            <TravelAccommodations />
-            <FAQ />
-            <Footer />
+        <ErrorBoundary name="Gallery">
+          <Suspense fallback={<GallerySkeleton />}>
+            <Gallery />
           </Suspense>
+        </ErrorBoundary>
+        {user && (
+          <ErrorBoundary name="Content">
+            <Suspense fallback={<UserSkeleton />}>
+              <OurStory />
+              <EventDetails />
+              <TravelAccommodations />
+              <FAQ />
+              <Footer />
+            </Suspense>
+          </ErrorBoundary>
         )}
-        <Suspense fallback={null}>
-          <ContactSection />
-        </Suspense>
+        <ErrorBoundary name="Contact">
+          <Suspense fallback={null}>
+            <ContactSection />
+          </Suspense>
+        </ErrorBoundary>
       </main>
-      <Suspense fallback={<AuthModalSkeleton />}>
-        <AuthModal />
-      </Suspense>
+      <ErrorBoundary name="AuthModal">
+        <Suspense fallback={<AuthModalSkeleton />}>
+          <AuthModal />
+        </Suspense>
+      </ErrorBoundary>
       <BackToTop />
       <BottomNav />
     </div>

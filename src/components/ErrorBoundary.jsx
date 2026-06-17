@@ -37,7 +37,7 @@ class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
-      // Fallback UI
+      const sectionName = this.props.name
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-charcoal/90 backdrop-blur-md z-50 p-4 text-center">
           <div className="bg-cream-dark/80 backdrop-blur-sm p-8 rounded-xl border border-gold/20 max-w-2xl w-full">
@@ -48,7 +48,7 @@ class ErrorBoundary extends Component {
                 </svg>
               </div>
               <div>
-                <h2 className="text-xl font-heading text-gold-dark mb-2">Something went wrong</h2>
+                <h2 className="text-xl font-heading text-gold-dark mb-2">{sectionName ? `${sectionName} — ` : ''}Something went wrong</h2>
                 <p className="text-charcoal-light/70">
                   We've encountered an issue, but our team has been notified. Please try refreshing the page or come back later.
                 </p>

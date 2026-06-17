@@ -16,7 +16,7 @@ test.describe('Deployment smoke tests', () => {
   });
 
   test('no console errors', async ({ page }) => {
-    const errors = [];
+    const errors: string[] = [];
     page.on('console', msg => {
       if (msg.type() === 'error') errors.push(msg.text());
     });
