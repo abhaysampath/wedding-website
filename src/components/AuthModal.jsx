@@ -729,16 +729,24 @@ export default function AuthModal() {
                                   ref={(el) => { if (el) smsCodeRefs.current[i] = el }}
                                   type="text"
                                   inputMode="numeric"
-                                  maxLength={1}
+                                  maxLength={i === 0 ? 6 : 1}
                                   value={smsCode[i] || ''}
                                   onChange={(e) => {
-                                    const val = e.target.value.replace(/\D/g, '')
-                                    if (!val) return
+                                    const raw = e.target.value.replace(/\D/g, '')
+                                    if (!raw) return
+                                    if (raw.length > 1) {
+                                      const next = raw.split('')
+                                      while (next.length < 6) next.push('')
+                                      setSmsCode(next)
+                                      if (raw.length === 6) handleVerifySmsCode(raw)
+                                      else smsCodeRefs.current[raw.length]?.focus()
+                                      return
+                                    }
                                     const next = [...smsCode]
-                                    next[i] = val
+                                    next[i] = raw
                                     setSmsCode(next)
                                     if (i < 5) smsCodeRefs.current[i + 1]?.focus()
-                                    if (i === 5 || (val && i < 3 && !next[i + 1])) {
+                                    if (i === 5 || (raw && i < 3 && !next[i + 1])) {
                                       const full = next.join('')
                                       if (full.length === 6) handleVerifySmsCode(full)
                                     }
@@ -766,7 +774,7 @@ export default function AuthModal() {
                                     else smsCodeRefs.current[pasted.length]?.focus()
                                   }}
                                   className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                                  autoComplete="off"
+                                  autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                 />
                               ))}
                             </div>
@@ -801,16 +809,24 @@ export default function AuthModal() {
                                   ref={(el) => { if (el) emailCodeRefs.current[i] = el }}
                                   type="text"
                                   inputMode="numeric"
-                                  maxLength={1}
+                                  maxLength={i === 0 ? 6 : 1}
                                   value={emailCode[i] || ''}
                                   onChange={(e) => {
-                                    const val = e.target.value.replace(/\D/g, '')
-                                    if (!val) return
+                                    const raw = e.target.value.replace(/\D/g, '')
+                                    if (!raw) return
+                                    if (raw.length > 1) {
+                                      const next = raw.split('')
+                                      while (next.length < 6) next.push('')
+                                      setEmailCode(next)
+                                      if (raw.length === 6) handleEmailCodeComplete(raw)
+                                      else emailCodeRefs.current[raw.length]?.focus()
+                                      return
+                                    }
                                     const next = [...emailCode]
-                                    next[i] = val
+                                    next[i] = raw
                                     setEmailCode(next)
                                     if (i < 5) emailCodeRefs.current[i + 1]?.focus()
-                                    if (i === 5 || (val && i < 3 && !next[i + 1])) {
+                                    if (i === 5 || (raw && i < 3 && !next[i + 1])) {
                                       const full = next.join('')
                                       if (full.length === 6) handleEmailCodeComplete(full)
                                     }
@@ -838,7 +854,7 @@ export default function AuthModal() {
                                     else emailCodeRefs.current[pasted.length]?.focus()
                                   }}
                                   className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                                  autoComplete="off"
+                                  autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                 />
                               ))}
                             </div>
