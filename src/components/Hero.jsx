@@ -203,7 +203,7 @@ export default function Hero() {
               onClick={user ? () => openSettings() : undefined}
               variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8 } } }}
               whileTap={user ? { scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 15 } } : undefined}
-              className="font-heading text-4xl md:text-7xl lg:text-8xl font-light text-cream leading-tight text-center pt-1"
+              className="font-heading text-4xl md:text-7xl lg:text-8xl font-light text-cream leading-normal text-center py-2"
             >
               Abhay
               <span className="text-gold">&</span>
@@ -266,7 +266,7 @@ export default function Hero() {
           className="absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
         >
           <div className="text-center">
-            <p className="text-cream font-heading text-2xl">Welcome, {user.firstName}!</p>
+            <p className="text-cream font-heading text-2xl leading-normal py-1">Welcome, {user.firstName}!</p>
             <p className="text-cream/60 text-xs mt-1">{guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}</p>
           </div>
         </motion.div>
