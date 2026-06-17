@@ -97,9 +97,9 @@ jobs:
           path: screenshots/
           retention-days: 14
 
-      # Step 9: Build Vercel output (creates .vercel/output/ from dist/)
+      # Step 9: Build Vercel output for production (creates .vercel/output/ from dist/)
       - name: Build Vercel output
-        run: npx vercel build --yes --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel build --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
 
       # Step 10: Deploy to Vercel production (prebuilt — uses .vercel/output/)
       - name: Deploy to Vercel
