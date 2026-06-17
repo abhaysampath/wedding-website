@@ -7,6 +7,7 @@ class ErrorBoundary extends Component {
     this.alertSent = false;
   }
 
+  // eslint-disable-next-line no-unused-vars
   static getDerivedStateFromError(error) {
     return { hasError: true };
   }

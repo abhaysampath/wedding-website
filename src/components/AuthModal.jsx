@@ -380,17 +380,23 @@ export default function AuthModal() {
   }, [content.guests, content.loaded])
 
   useEffect(() => {
-    if (showAuthModal) resetState()
+    if (showAuthModal) {
+      const id = setTimeout(resetState, 0)
+      return () => clearTimeout(id)
+    }
   }, [showAuthModal, resetState])
 
   useEffect(() => {
-    if (user && user !== welcomeShownRef.current) {
-      welcomeShownRef.current = user
-      setSignedIn(user)
-    } else if (!user) {
-      setSignedIn(null)
-      welcomeShownRef.current = null
-    }
+    const id = setTimeout(() => {
+      if (user && user !== welcomeShownRef.current) {
+        welcomeShownRef.current = user
+        setSignedIn(user)
+      } else if (!user) {
+        setSignedIn(null)
+        welcomeShownRef.current = null
+      }
+    }, 0)
+    return () => clearTimeout(id)
   }, [user])
 
   useEffect(() => {
@@ -483,27 +489,30 @@ export default function AuthModal() {
     }
   }, [showDropdown])
 
-  const logoOffsetRef = useRef({ x: 0, y: 0 })
+  const [logoOffset, setLogoOffset] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
-    if (showAuthModal && typeof window !== 'undefined' && window.__logoRect) {
-      const r = window.__logoRect
-      const cx = window.innerWidth / 2
-      const cy = window.innerHeight / 2
-      logoOffsetRef.current = { x: r.x + r.width / 2 - cx, y: r.y + r.height / 2 - cy }
-      window.__logoRect = null
-    }
+    const id = setTimeout(() => {
+      if (showAuthModal && typeof window !== 'undefined' && window.__logoRect) {
+        const r = window.__logoRect
+        const cx = window.innerWidth / 2
+        const cy = window.innerHeight / 2
+        setLogoOffset({ x: r.x + r.width / 2 - cx, y: r.y + r.height / 2 - cy })
+        window.__logoRect = null
+      } else if (!showAuthModal) {
+        setLogoOffset({ x: 0, y: 0 })
+      }
+    }, 0)
+    return () => clearTimeout(id)
   }, [showAuthModal])
 
   const logoAnimStyle = useMemo(() => {
     if (!showAuthModal) return {}
-    const ox = logoOffsetRef.current.x * 0.5
-    const oy = logoOffsetRef.current.y * 0.5
     return {
-      '--logo-ox': `${ox}px`,
-      '--logo-oy': `${oy}px`,
+      '--logo-ox': `${logoOffset.x * 0.5}px`,
+      '--logo-oy': `${logoOffset.y * 0.5}px`,
     }
-  }, [showAuthModal])
+  }, [showAuthModal, logoOffset])
 
   return (
     <>

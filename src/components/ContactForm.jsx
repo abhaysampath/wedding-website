@@ -112,6 +112,7 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
 export default function ContactForm({ user, authMode, updateContact, sideName }) {
   const { setShowAuthModal, content, switchWedding } = useAuth()
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const guestFromContent = useMemo(() => {
     if (!user?.id || !content?.guests?.length) return null
     return content.guests.find(g => g.id === user.id) || null
@@ -125,8 +126,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const originalDietaryPreferences = user?.dietaryPreferences || guestFromContent?.dietaryPreferences || ''
   const origRsvpUs = user?.rsvpUs || guestFromContent?.rsvpUs || ''
   const origRsvpIndia = user?.rsvpIndia || guestFromContent?.rsvpIndia || ''
-  const originalRsvpUsRef = useRef(origRsvpUs)
-  const originalRsvpIndiaRef = useRef(origRsvpIndia)
+  const [originalRsvpUs, setOriginalRsvpUs] = useState(origRsvpUs)
+  const [originalRsvpIndia, setOriginalRsvpIndia] = useState(origRsvpIndia)
 
   const [phone, setPhone] = useState(() => draft?.phone ?? originalPhone)
   const [email, setEmail] = useState(() => draft?.email ?? originalEmail)
@@ -136,18 +137,21 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const [rsvpIndia, setRsvpIndia] = useState(() => draft?.rsvpIndia ?? origRsvpIndia)
 
   useEffect(() => {
-    if (!phone && guestFromContent?.phone) {
-      setPhone(stripPhone(guestFromContent.phone))
-    }
-    if (!email && guestFromContent?.email) {
-      setEmail(guestFromContent.email)
-    }
-    if (guestFromContent?.rsvpUs && !draft?.rsvpUs) {
-      setRsvpUs(guestFromContent.rsvpUs)
-    }
-    if (guestFromContent?.rsvpIndia && !draft?.rsvpIndia) {
-      setRsvpIndia(guestFromContent.rsvpIndia)
-    }
+    const id = setTimeout(() => {
+      if (!phone && guestFromContent?.phone) {
+        setPhone(stripPhone(guestFromContent.phone))
+      }
+      if (!email && guestFromContent?.email) {
+        setEmail(guestFromContent.email)
+      }
+      if (guestFromContent?.rsvpUs && !draft?.rsvpUs) {
+        setRsvpUs(guestFromContent.rsvpUs)
+      }
+      if (guestFromContent?.rsvpIndia && !draft?.rsvpIndia) {
+        setRsvpIndia(guestFromContent.rsvpIndia)
+      }
+    }, 0)
+    return () => clearTimeout(id)
   }, [guestFromContent?.phone, guestFromContent?.email, guestFromContent?.rsvpUs, guestFromContent?.rsvpIndia])
 
   const [phoneFocused, setPhoneFocused] = useState(false)
@@ -163,7 +167,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const phoneChanged = phone !== originalPhone
   const emailChanged = email !== originalEmail
   const contactChanged = phoneChanged || emailChanged || address !== originalAddress || dietaryPreferences !== originalDietaryPreferences
-  const rsvpChanged = rsvpUs !== originalRsvpUsRef.current || rsvpIndia !== originalRsvpIndiaRef.current
+  const rsvpChanged = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
   const hasChanges = contactChanged || rsvpChanged
 
   const weddingsList = useMemo(() => user?.weddings || [], [user?.weddings])
@@ -185,8 +189,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         rsvpUs,
         rsvpIndia,
       })
-      originalRsvpUsRef.current = rsvpUs
-      originalRsvpIndiaRef.current = rsvpIndia
+      setOriginalRsvpUs(rsvpUs)
+      setOriginalRsvpIndia(rsvpIndia)
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
@@ -230,7 +234,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
 
   const handleSave = useCallback(async () => {
     if (saveStatus === 'saving') return
-    const hadRsvpChange = rsvpUs !== originalRsvpUsRef.current || rsvpIndia !== originalRsvpIndiaRef.current
+    const hadRsvpChange = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
     setSaveStatus('saving')
     try {
       await updateContact({
@@ -241,8 +245,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         rsvpUs,
         rsvpIndia,
       })
-      originalRsvpUsRef.current = rsvpUs
-      originalRsvpIndiaRef.current = rsvpIndia
+      setOriginalRsvpUs(rsvpUs)
+      setOriginalRsvpIndia(rsvpIndia)
       setSaveStatus(hadRsvpChange ? 'rsvp-saved' : 'saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 4000)

@@ -6,7 +6,6 @@ import config, { imgUrl, imgSrcSet } from '../config'
 const INITIAL_LOAD = 10
 const LOAD_MORE = 4
 const FIRST_BATCH = 3
-const PRELOAD_SIZE = 7
 const TIER_SCALE = { 1: 1, 2: 0.82, 3: 0.66 }
 const BASE_W = { mobile: 280, desktop: 320 }
 const BASE_H = { mobile: 340, desktop: 380 }
@@ -138,7 +137,8 @@ export default function Gallery() {
 
   useEffect(() => {
     if (expanded >= images.length) {
-      setExpanded(images.length > 0 ? 0 : null)
+      const id = setTimeout(() => setExpanded(images.length > 0 ? 0 : null), 0)
+      return () => clearTimeout(id)
     }
   }, [expanded, images.length])
 

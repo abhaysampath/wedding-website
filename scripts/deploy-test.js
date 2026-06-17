@@ -5,23 +5,6 @@
  * by simulating user flows and checking for errors
  */
 
-const { test, expect } = require('@playwright/test');
-
-// Test configuration
-const TEST_ACCOUNT = {
-  firstName: 'Test',
-  lastName: 'User',
-  phone: '+1 5555550100',
-  email: 'test@example.com',
-  side: 'groom', // or 'bride'
-  relationship: 'Friend',
-  role: 'Guest',
-  invitedTo: 'both',
-  plusOne: false,
-  address: '123 Test St, Test City, TC 12345',
-  dietaryPreferences: 'None'
-};
-
 async function runDeploymentTests() {
   console.log('🧪 Starting deployment tests...');
   

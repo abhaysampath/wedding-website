@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
 
@@ -196,11 +196,11 @@ describe('AuthModal welcome screen', () => {
     mockUseAuth.mockReturnValue(baseAuth())
   })
 
-  it('shows welcome message when signedIn is set', () => {
+  it('shows welcome message when signedIn is set', async () => {
     const signedInUser = { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest', side: 'bride', relationship: 'Cousin' }
     mockUseAuth.mockReturnValue({ ...baseAuth(), user: signedInUser })
     render(<AuthModal />)
-    expect(screen.getByText(/Welcome.*Jane/)).toBeTruthy()
+    await waitFor(() => expect(screen.getByText(/Welcome.*Jane/)).toBeTruthy())
   })
 })
 

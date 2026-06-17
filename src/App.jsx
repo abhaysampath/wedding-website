@@ -7,7 +7,8 @@ import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
 import NotFound from './components/NotFound'
-import { SEO, JSONLD, weddingJSONLD } from './components/SEO'
+import { SEO, JSONLD } from './components/SEO'
+import weddingJSONLD from './data/wedding-jsonld.js'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 const Navbar = lazy(() => import('./components/Navbar'))
@@ -208,20 +209,6 @@ function BottomNav() {
   )
 }
 
-function AuthSkeleton() {
-  return (
-    <div className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm flex items-start justify-center md:pt-[10vh]">
-      <div className="w-full md:max-w-lg bg-cream md:rounded-sm md:shadow-2xl md:mb-8 min-h-screen md:min-h-0">
-        <div className="p-4 md:p-10 animate-pulse space-y-4">
-          <div className="h-10 bg-cream-dark rounded-sm w-full" />
-          <div className="h-10 bg-cream-dark rounded-sm w-2/3" />
-          <div className="h-32 bg-cream-dark rounded-sm w-full" />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function UserSkeleton() {
   return (
     <div className="min-h-screen bg-cream-dark flex items-center justify-center">
@@ -254,6 +241,8 @@ function PageContent() {
   const pathname = useMemo(() => window.location.pathname, [])
 
   const isValidRoute = pathname === '/' || pathname.startsWith('/g/')
+  const sectionIds = useMemo(() => filterSections(user).map(s => s.id), [user])
+  useSectionHash(isValidRoute ? sectionIds : [])
 
   if (!isValidRoute) {
     return (
@@ -263,8 +252,6 @@ function PageContent() {
       </>
     )
   }
-
-  useSectionHash(filterSections(user).map(s => s.id))
 
   return (
     <>
