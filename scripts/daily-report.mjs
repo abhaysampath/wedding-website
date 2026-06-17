@@ -15,15 +15,15 @@
  *   SITE_URL          — production URL for link validation (default: https://abhayandrebecca.com)
  */
 
-import { readdirSync, writeFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import SHEET_CONFIG from '../api/sheets-config.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = join(__dirname, '..')
 const PICS_DIR = join(ROOT, 'public', 'pics')
-const BACKUP_PATH = join(ROOT, 'public', 'guests-backup.json')
+const BACKUP_PATH = join(ROOT, '.backups', 'guests-backup.json')
 const IS_TEST = !!process.env.VITEST
 
 const TAB_RANGES = { guests: 'A:Q' }
@@ -321,6 +321,7 @@ export async function main() {
     totalGuests: total,
     guests: rows,
   }
+  mkdirSync(dirname(BACKUP_PATH), { recursive: true })
   writeFileSync(BACKUP_PATH, JSON.stringify(backupData, null, 2))
   lines.push(`<p>📦 Sheet backup saved as <code>guests-backup.json</code> (artifact available in Actions run).</p>`)
 

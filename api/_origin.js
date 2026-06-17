@@ -10,5 +10,5 @@ const ALLOWED_ORIGINS = [
 
 export function isAllowedOrigin(req) {
   const origin = req.headers.origin || req.headers.referer || ''
-  return ALLOWED_ORIGINS.some(allowed => origin.startsWith(allowed))
+  return ALLOWED_ORIGINS.some(allowed => origin === allowed)
 }

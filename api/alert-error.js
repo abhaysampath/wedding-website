@@ -1,9 +1,23 @@
 import { Resend } from 'resend'
+import { isAllowedOrigin } from './_origin.js'
 
 const API_KEY = process.env.RESEND_API_KEY
 const ALERT_EMAIL = process.env.ALERT_EMAIL
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export default async function handler(req, res) {
+  if (!isAllowedOrigin(req)) {
+    return res.status(403).json({ error: 'Forbidden' })
+  }
+
   if (!API_KEY || !ALERT_EMAIL) {
     return res.status(503).json({ error: 'Resend not configured. Set RESEND_API_KEY and ALERT_EMAIL.' })
   }
@@ -17,30 +31,35 @@ export default async function handler(req, res) {
 
   try {
     const subject = `Wedding Site Error: ${(type || 'unknown').toUpperCase()}`
+    const safeType = escapeHtml(type)
+    const safeUrl = escapeHtml(url)
+    const safeTimestamp = escapeHtml(timestamp)
+    const safeUserAgent = escapeHtml(userAgent)
+    const safeError = escapeHtml(error)
     const html = `
       <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
         <h2 style="color: #dc2626; margin-bottom: 16px;">Wedding Website Error Alert</h2>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
           <tr>
             <td style="padding: 8px 0; font-weight: 600; color: #374151;">Error Type</td>
-            <td style="padding: 8px 0; color: #1f2937;">${type}</td>
+            <td style="padding: 8px 0; color: #1f2937;">${safeType}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: 600; color: #374151;">URL</td>
-            <td style="padding: 8px 0; color: #1f2937; word-break: break-all;"><a href="${url}" style="color: #C9A96E;">${url}</a></td>
+            <td style="padding: 8px 0; color: #1f2937; word-break: break-all;"><a href="${safeUrl}" style="color: #C9A96E;">${safeUrl}</a></td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: 600; color: #374151;">Timestamp</td>
-            <td style="padding: 8px 0; color: #1f2937;">${timestamp}</td>
+            <td style="padding: 8px 0; color: #1f2937;">${safeTimestamp}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: 600; color: #374151;">User Agent</td>
-            <td style="padding: 8px 0; color: #1f2937; word-break: break-all;">${userAgent}</td>
+            <td style="padding: 8px 0; color: #1f2937; word-break: break-all;">${safeUserAgent}</td>
           </tr>
           ${error ? `
           <tr>
             <td style="padding: 8px 0; font-weight: 600; color: #374151;">Error Details</td>
-            <td style="padding: 8px 0; color: #1f2937; white-space: pre-wrap;">${error}</td>
+            <td style="padding: 8px 0; color: #1f2937; white-space: pre-wrap;">${safeError}</td>
           </tr>
           ` : ''}
         </table>
@@ -49,7 +68,7 @@ export default async function handler(req, res) {
     `
 
     await resend.emails.send({
-      from: 'Wedding Site Alerts <alerts@abhayandrebecca.com>',
+      from: 'Wedding Site Alerts <onboarding@resend.dev>',
       to: ALERT_EMAIL,
       subject,
       html,

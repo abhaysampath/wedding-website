@@ -411,7 +411,7 @@ export default function AuthModal() {
   const handleEmailCodeCompleteRef = useRef(handleEmailCodeComplete)
   useEffect(() => {
     handleEmailCodeCompleteRef.current = handleEmailCodeComplete
-  })
+  }, [handleEmailCodeComplete])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -626,6 +626,7 @@ export default function AuthModal() {
               <button
                 type="button"
                 onClick={handleDiscardAndClose}
+                aria-label="Close"
                 className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
               >
                 <svg

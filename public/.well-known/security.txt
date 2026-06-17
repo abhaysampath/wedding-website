@@ -1,3 +1,3 @@
-Contact: mailto:abhay@example.com
+Contact: mailto:sera.belize@gmail.com
 Preferred-Languages: en
 Canonical: https://abhayandrebecca.com/.well-known/security.txt

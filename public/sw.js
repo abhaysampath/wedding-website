@@ -24,6 +24,8 @@ self.addEventListener('fetch', (e) => {
 
   if (url.origin !== location.origin) return
 
+  if (request.method !== 'GET') return
+
   if (url.pathname.startsWith('/api/')) return
 
   if (request.mode === 'navigate') {

@@ -26,13 +26,21 @@ function ScrollProgress() {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
+    let rafId = null
     const onScroll = () => {
-      const h = document.documentElement
-      const p = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100
-      setProgress(Math.min(p, 100))
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        const h = document.documentElement
+        const p = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100
+        setProgress(Math.min(p, 100))
+      })
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [])
 
   return (
@@ -82,9 +90,19 @@ function BackToTop() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.6)
+    let rafId = null
+    const onScroll = () => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        setVisible(window.scrollY > window.innerHeight * 0.6)
+      })
+    }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [])
 
   if (!visible) return null

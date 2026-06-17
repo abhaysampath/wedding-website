@@ -101,7 +101,7 @@ export default function Navbar() {
                   signOut()
                 }}
                 className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
-                title="Sign out"
+                aria-label="Sign out"
               >
                 ✕
               </button>

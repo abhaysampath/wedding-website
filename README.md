@@ -66,6 +66,7 @@ Unauthenticated visitors see `public` events only. Guest roles are assigned per-
 | **GitHub Actions** | Automated testing and deployment | [GitHub Actions](https://github.com/abhaysampath/wedding-website/actions) |
 | **GitHub Secrets** | Encrypted storage for all API keys | [Repo Secrets](https://github.com/abhaysampath/wedding-website/settings/secrets/actions) |
 | **Nodemailer (Gmail SMTP)** | Emails screenshots and contact form submissions | [Gmail App Passwords](https://myaccount.google.com/apppasswords) |
+| **Resend** | Error-alert emails (server-side) | [Resend Dashboard](https://resend.com) |
 
 ---
 
@@ -174,6 +175,18 @@ Every push to `main` automatically:
 9. If anything fails, the deploy is blocked and an error is logged
 
 Additionally, a daily report of guest activity is emailed each morning, and an hourly health check monitors the production URL.
+
+---
+
+## 📚 Additional documentation
+
+- [`AGENTS.md`](./AGENTS.md) — Instructions for AI coding agents and humans working on the repo.
+- [`CONFIG.md`](./CONFIG.md) — `src/config.js` reference.
+- [`CHANGELOG.md`](./CHANGELOG.md) — Release history.
+- [`SECURITY.md`](./SECURITY.md) — Vulnerability disclosure policy.
+- [`docs/ci-cd-setup.md`](./docs/ci-cd-setup.md) — Pipeline details.
+- [`docs/test-account.md`](./docs/test-account.md) — Test credentials.
+- [`docs/v1-suggestions.md`](./docs/v1-suggestions.md) — Queued v1.x improvements ranked by criticality.
 
 ---
 
