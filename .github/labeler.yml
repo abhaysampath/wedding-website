@@ -19,7 +19,7 @@ scripts/**:
 api/**:
   - api
 
-*.md:
+'*.md':
   - docs
 
 package.json:
