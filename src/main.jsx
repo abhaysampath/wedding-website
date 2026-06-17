@@ -12,12 +12,34 @@ if (process.env.NODE_ENV === 'production') {
     return true; 
   };
   
-  // Handle promise rejections
+    // Handle promise rejections
   window.onunhandledrejection = function(event) {
     console.error('Unhandled promise rejection:', event.reason);
-    // Prevent default browser behavior
     event.preventDefault();
   };
+
+  // Register Service Worker for offline support and faster reload
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const installing = reg.installing
+          if (installing) {
+            installing.addEventListener('statechange', () => {
+              if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New version available. Reload to update.')
+              }
+            })
+          }
+        })
+      })
+      .catch(() => {
+        // SW registration failed — app works fine without it
+      })
+
+    // On every page load, check for SW updates
+    navigator.serviceWorker.ready.then(reg => reg.update())
+  }
 }
 
 createRoot(document.getElementById('root')).render(

@@ -11,6 +11,7 @@ function imgSrcSet(path) {
 
 const config = {
   site: {
+    url: 'https://abhayandrebecca.com',
     siteTitle: 'Rebecca & Abhay',
     coupleNames: {
       bride: 'Rebecca',
@@ -54,6 +55,10 @@ const config = {
         { path: 'pics/home/save-the-date.JPEG', alt: 'Save the Date' },
         { path: 'pics/home/scooby-doo2.jpeg', alt: 'Scooby Doo 2' },
       ],
+      personalized: {
+        groom: { path: 'pics/home/gala4.JPG', alt: 'Welcome Abhay!' },
+        bride: { path: 'pics/home/save-the-date.JPEG', alt: 'Welcome Rebecca!' },
+      },
       interval: 10000,
       contact: {
         reasons: [

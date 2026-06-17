@@ -1,7 +1,7 @@
 import { Helmet } from 'react-helmet-async'
 import config from '../config'
 
-const siteUrl = config.site.url || 'https://abhayandrebecca.com'
+const siteUrl = config.site.url
 const defaultImage = `${siteUrl}/ar-logo.png`
 
 export function SEO({

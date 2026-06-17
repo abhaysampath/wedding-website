@@ -1,27 +1,44 @@
-const CACHE = 'wedding-v1'
+const VERSION = '__SW_VERSION__'
+const CACHE = 'wedding-static-' + VERSION
+const SHELL_CACHE = 'wedding-shell-' + VERSION
 
-self.addEventListener('install', (e) => {
+self.addEventListener('install', () => {
   self.skipWaiting()
-  e.waitUntil(
-    caches.open(CACHE).then((cache) =>
-      cache.addAll(['/', '/index.html'])
-    )
-  )
 })
 
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)))
-    )
+      Promise.all(
+        keys
+          .filter((k) => k !== CACHE && k !== SHELL_CACHE)
+          .map((k) => caches.delete(k))
+      )
+    ).then(() => self.clients.claim())
   )
-  self.clients.claim()
 })
 
 self.addEventListener('fetch', (e) => {
   const { request } = e
   const url = new URL(request.url)
+
   if (url.origin !== location.origin) return
+
+  if (url.pathname.startsWith('/api/')) return
+
+  if (request.mode === 'navigate') {
+    e.respondWith(
+      fetch(request)
+        .then((res) => {
+          const clone = res.clone()
+          caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone))
+          return res
+        })
+        .catch(() => caches.match(request))
+    )
+    return
+  }
+
   e.respondWith(
     caches.match(request).then(
       (cached) =>
