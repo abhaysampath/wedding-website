@@ -41,7 +41,7 @@ vi.mock('./components/FAQ', () => ({ default: () => <section data-testid="faq">F
 vi.mock('./components/ContactSection', () => ({ default: () => <section data-testid="contact">Contact</section> }))
 vi.mock('./components/Footer', () => ({ default: () => <footer data-testid="footer">Footer</footer> }))
 vi.mock('./components/AuthModal', () => ({ default: () => <div data-testid="auth-modal">AuthModal</div> }))
-vi.mock('./components/SEO', () => ({ SEO: () => null, weddingJSONLD: () => null, weddingJSONLD: {} }))
+vi.mock('./components/SEO', () => ({ SEO: () => null, JSONLD: () => null, weddingJSONLD: {} }))
 
 const originalScrollTo = window.scrollTo
 

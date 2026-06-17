@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
 import NotFound from './components/NotFound'
-import { SEO, weddingJSONLD } from './components/SEO'
+import { SEO, JSONLD, weddingJSONLD } from './components/SEO'
 
 const Navbar = lazy(() => import('./components/Navbar'))
 const Hero = lazy(() => import('./components/Hero'))
@@ -268,7 +268,7 @@ function PageContent() {
   return (
     <>
       <SEO />
-      <weddingJSONLD data={weddingJSONLD} />
+      <JSONLD data={weddingJSONLD} />
       <div data-wedding={activeWedding} className="wedding-page min-h-screen pb-14 md:pb-0">
       <a
         href="#main-content"

@@ -484,13 +484,16 @@ export default function AuthModal() {
   }, [showDropdown])
 
   const logoOffsetRef = useRef({ x: 0, y: 0 })
-  if (showAuthModal && typeof window !== 'undefined' && window.__logoRect) {
-    const r = window.__logoRect
-    const cx = window.innerWidth / 2
-    const cy = window.innerHeight / 2
-    logoOffsetRef.current = { x: r.x + r.width / 2 - cx, y: r.y + r.height / 2 - cy }
-    window.__logoRect = null
-  }
+
+  useEffect(() => {
+    if (showAuthModal && typeof window !== 'undefined' && window.__logoRect) {
+      const r = window.__logoRect
+      const cx = window.innerWidth / 2
+      const cy = window.innerHeight / 2
+      logoOffsetRef.current = { x: r.x + r.width / 2 - cx, y: r.y + r.height / 2 - cy }
+      window.__logoRect = null
+    }
+  }, [showAuthModal])
 
   const logoAnimStyle = useMemo(() => {
     if (!showAuthModal) return {}

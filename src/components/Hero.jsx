@@ -88,12 +88,19 @@ export default function Hero() {
     }
   }, [allSlides.length])
 
+  const manualTimeoutRef = useRef(null)
+
   const goTo = useCallback((i, fast = false) => {
     setTransitionDuration(fast ? 0.8 : 3)
     setCurrentIndex(i)
     setManual(true)
-    setTimeout(() => setManual(false), heroConfig.interval)
+    if (manualTimeoutRef.current) clearTimeout(manualTimeoutRef.current)
+    manualTimeoutRef.current = setTimeout(() => setManual(false), heroConfig.interval)
   }, [heroConfig.interval])
+
+  useEffect(() => {
+    return () => { if (manualTimeoutRef.current) clearTimeout(manualTimeoutRef.current) }
+  }, [])
 
   const goNext = useCallback((fast = false) => {
     goTo((currentIndex + 1) % allSlides.length, fast)

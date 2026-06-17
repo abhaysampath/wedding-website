@@ -180,8 +180,8 @@ export default function Gallery() {
     return () => {
       window.removeEventListener('keydown', handler)
       window.removeEventListener('keydown', tabHandler)
-      window.removeEventListener('touchstart', handleTouchStart)
-      window.removeEventListener('touchend', handleTouchEnd)
+      window.removeEventListener('touchstart', handleTouchStart, { passive: true })
+      window.removeEventListener('touchend', handleTouchEnd, { passive: true })
     }
   }, [expanded, goNext, goPrev])
 

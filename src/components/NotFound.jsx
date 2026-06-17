@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 export default function NotFound() {
@@ -29,15 +28,15 @@ export default function NotFound() {
         <p className="text-charcoal-light/60 mb-8">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <Link
-          to="/"
+        <a
+          href="/"
           className="inline-flex items-center gap-2 bg-sage hover:bg-sage-dark text-cream text-sm tracking-widest uppercase px-6 py-3 rounded-sm font-medium transition-colors"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
           Back to Home
-        </Link>
+        </a>
       </motion.div>
     </section>
   )
