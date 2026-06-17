@@ -82,7 +82,7 @@ describe('Hero', () => {
     })
     render(<Hero />)
     expect(screen.getByText('Welcome, Jane!')).toBeTruthy()
-    expect(screen.getByText('Invited Guest')).toBeTruthy()
+    expect(screen.getByText('invited guest')).toBeTruthy()
   })
 
   it('renders slide navigation buttons matching slide count', () => {

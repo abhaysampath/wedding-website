@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-import { roleLabels } from '../utils/guest'
+import { guestLabel } from '../utils/guest'
 import config, { imgUrl, imgSrcSet } from '../config'
 
 function HeroImage({ src, srcSet, alt, isFirst, onError }) {
@@ -267,7 +267,7 @@ export default function Hero() {
         >
           <div className="text-center">
             <p className="text-cream font-heading text-2xl">Welcome, {user.firstName}!</p>
-            <p className="text-cream/60 text-xs mt-1">{roleLabels[user.role] || 'Guest'}</p>
+            <p className="text-cream/60 text-xs mt-1">{guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}</p>
           </div>
         </motion.div>
       )}
