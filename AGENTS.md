@@ -21,7 +21,7 @@ Always run before declaring work done:
 npm run lint          # ESLint (0 errors required)
 npm run format:check  # Prettier (all files clean)
 npm run typecheck     # tsc (no errors)
-npm test              # vitest (219 tests in 25 files, must all pass)
+npm test              # vitest (239 tests in 27 files, must all pass)
 npm run build         # vite build (produces dist/)
 ```
 
