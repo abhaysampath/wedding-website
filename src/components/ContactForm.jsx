@@ -549,7 +549,14 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center"
           aria-live="polite"
         >
-          Failed to save. Please try again.
+          <p>Failed to save. Please try again.</p>
+          <button
+            type="button"
+            onClick={() => handleSave()}
+            className="mt-2 text-[10px] tracking-widest uppercase underline underline-offset-2 hover:text-red/80"
+          >
+            Retry
+          </button>
         </motion.div>
       )}
 

@@ -269,9 +269,17 @@ export default function ContactSlide() {
           </div>
 
           {status === 'error' && (
-            <p className="text-xs text-red-400 text-center" aria-live="polite">
-              Failed to send. Please try again later.
-            </p>
+            <div className="text-center" aria-live="polite">
+              <p className="text-xs text-red-400">Failed to send. Please try again.</p>
+              <button
+                type="button"
+                onClick={() => handleSubmit({ preventDefault: () => {} })}
+                disabled={sending}
+                className="mt-2 text-[10px] tracking-widest uppercase text-cream/60 hover:text-cream underline underline-offset-2 disabled:opacity-50"
+              >
+                Retry
+              </button>
+            </div>
           )}
 
           <button
