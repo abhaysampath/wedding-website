@@ -246,7 +246,6 @@ export default function Gallery() {
                 <motion.button
                   type="button"
                   key={img.jpg}
-                  layoutId={`gallery-${img.jpg}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={sectionInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.4, delay: 0.04 * i }}
@@ -397,7 +396,7 @@ export default function Gallery() {
                   </>
                 )}
 
-                <motion.div layoutId={`gallery-${images[expanded].jpg}`} className="w-full">
+                <motion.div className="w-full">
                   <img
                     src={images[expanded].jpg}
                     srcSet={images[expanded].srcset}
