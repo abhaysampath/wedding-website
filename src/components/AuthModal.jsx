@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useMemo, useRef, Suspense, lazy } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 
 import { track } from '@vercel/analytics'
@@ -312,25 +313,29 @@ export default function AuthModal() {
     ],
   )
 
-  const handleCancel = useCallback(() => {
-    if (user && (authMode === 'settings' || authMode === 'contact')) {
-      setShowAuthModal(false)
-    } else if (user) {
-      recordLogin()
-      setShowAuthModal(false)
-      setAuthMode('signin')
-      resetState()
-      clearRecaptchaVerifier()
-    } else {
-      resetState()
-      clearRecaptchaVerifier()
-      setShowAuthModal(false)
-      setTimeout(() => {
-        const el = document.getElementById('hero')
-        if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
-    }
-  }, [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode])
+  const handleCancel = useCallback(
+    e => {
+      if (e && e.target !== e.currentTarget) return
+      if (user && (authMode === 'settings' || authMode === 'contact')) {
+        setShowAuthModal(false)
+      } else if (user) {
+        recordLogin()
+        setShowAuthModal(false)
+        setAuthMode('signin')
+        resetState()
+        clearRecaptchaVerifier()
+      } else {
+        resetState()
+        clearRecaptchaVerifier()
+        setShowAuthModal(false)
+        setTimeout(() => {
+          const el = document.getElementById('hero')
+          if (el) el.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+      }
+    },
+    [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode],
+  )
 
   const handleDiscardAndClose = useCallback(() => {
     try {
@@ -730,41 +735,46 @@ export default function AuthModal() {
                       placeholder="Start typing your name"
                       autoComplete="off"
                     />
-                    {showDropdown && matches.length > 0 && dropdownPos && (
-                      <div
-                        id="name-dropdown"
-                        role="listbox"
-                        style={{
-                          position: 'fixed',
-                          top: dropdownPos.top,
-                          left: dropdownPos.left,
-                          width: dropdownPos.width,
-                        }}
-                        className="mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
-                      >
-                        {matches.map((g, i) => (
-                          <button
-                            type="button"
-                            key={g.id}
-                            role="option"
-                            aria-selected={i === highlightedIndex}
-                            data-index={i}
-                            onMouseEnter={() => setHighlightedIndex(i)}
-                            onClick={() => handleSelectMatch(g)}
-                            className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gold/5 last:border-b-0 ${
-                              i === highlightedIndex
-                                ? 'bg-gold/10 text-charcoal'
-                                : 'text-charcoal hover:bg-cream-dark'
-                            }`}
-                          >
-                            <span className="font-medium">{fullName(g)}</span>
-                            <span className="text-charcoal-light/50 ml-2">
-                              {guestLabel(g, sideName)}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {showDropdown &&
+                      matches.length > 0 &&
+                      dropdownPos &&
+                      createPortal(
+                        <div
+                          id="name-dropdown"
+                          role="listbox"
+                          style={{
+                            position: 'fixed',
+                            top: dropdownPos.top,
+                            left: dropdownPos.left,
+                            width: dropdownPos.width,
+                          }}
+                          className="mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          {matches.map((g, i) => (
+                            <button
+                              type="button"
+                              key={g.id}
+                              role="option"
+                              aria-selected={i === highlightedIndex}
+                              data-index={i}
+                              onMouseEnter={() => setHighlightedIndex(i)}
+                              onClick={() => handleSelectMatch(g)}
+                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors border-b border-gold/5 last:border-b-0 ${
+                                i === highlightedIndex
+                                  ? 'bg-gold/10 text-charcoal'
+                                  : 'text-charcoal hover:bg-cream-dark'
+                              }`}
+                            >
+                              <span className="font-medium">{fullName(g)}</span>
+                              <span className="text-charcoal-light/50 ml-2">
+                                {guestLabel(g, sideName)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>,
+                        document.body,
+                      )}
                   </div>
 
                   {firebaseError && (
