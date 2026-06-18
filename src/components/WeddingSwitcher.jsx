@@ -21,8 +21,8 @@ export default function WeddingSwitcher() {
     <div
       className={`inline-flex flex-col rounded-sm border transition-all duration-700 px-3 py-2 min-w-[180px] ${
         isIndia
-          ? 'bg-[#fdf6ee] border-amber-200/40 shadow-[0_2px_8px_rgba(217,119,6,0.08)]'
-          : 'bg-cream-dark border-gold/15 shadow-[0_2px_8px_rgba(0,0,0,0.04)]'
+          ? 'bg-india-pill-bg border-amber-200/40 shadow-amber-soft'
+          : 'bg-cream-dark border-gold/15 shadow-soft-sm'
       }`}
     >
       <AnimatePresence mode="wait">
@@ -34,12 +34,12 @@ export default function WeddingSwitcher() {
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
           <p
-            className={`text-xs font-heading font-medium leading-tight ${isIndia ? 'text-[#7c5c3e]' : 'text-charcoal'}`}
+            className={`text-xs font-heading font-medium leading-tight ${isIndia ? 'text-india-text' : 'text-charcoal'}`}
           >
             {w.label}
           </p>
           <p
-            className={`text-[10px] leading-tight mt-0.5 ${isIndia ? 'text-[#b8956e]' : 'text-charcoal-light/60'}`}
+            className={`text-[10px] leading-tight mt-0.5 ${isIndia ? 'text-india-text-muted' : 'text-charcoal-light/60'}`}
           >
             {w.date} &middot; {w.venue}
           </p>
@@ -64,10 +64,10 @@ export default function WeddingSwitcher() {
               className={`relative flex-1 text-[11px] tracking-widest uppercase rounded-sm py-2 transition-all duration-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
                 isOn
                   ? isIndia
-                    ? 'text-[#7c5c3e] font-medium'
+                    ? 'text-india-text font-medium'
                     : 'text-cream font-medium'
                   : isIndia
-                    ? 'text-[#b8956e]/50 hover:text-[#7c5c3e]'
+                    ? 'text-india-text-muted/50 hover:text-india-text'
                     : 'text-charcoal-light/50 hover:text-charcoal'
               }`}
             >
@@ -75,7 +75,7 @@ export default function WeddingSwitcher() {
                 <motion.div
                   layoutId="wedding-pill"
                   className={`absolute inset-0 rounded-sm transition-colors duration-700 ${
-                    isIndia ? 'bg-[#e8d5b8]' : 'bg-sage'
+                    isIndia ? 'bg-india-pill-active' : 'bg-sage'
                   }`}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />

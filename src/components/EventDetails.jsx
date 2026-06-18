@@ -269,7 +269,7 @@ export default function EventDetails() {
                     <motion.div
                       animate={{
                         scale: isExpanded ? 1.15 : 1,
-                        borderColor: isExpanded ? 'rgb(201, 169, 110)' : 'rgba(201, 169, 110, 0.5)',
+                        borderColor: isExpanded ? 'var(--color-gold)' : 'var(--color-gold-faded)',
                       }}
                       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                       className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-11 h-11 rounded-full border-2 border-gold/50 bg-cream flex items-center justify-center z-10 cursor-pointer shadow-sm hover:shadow-md transition-shadow"

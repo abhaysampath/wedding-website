@@ -23,7 +23,7 @@ function LogoButton({ onClick, scrolled }) {
       <motion.span
         whileTap={{ scale: 0.85 }}
         transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-        className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-gold/15 hover:[box-shadow:0_4px_12px_rgba(0,0,0,0.35)]"
+        className="inline-flex items-center justify-center rounded-[8px] overflow-hidden transition-all duration-300 hover:bg-gold/15 hover:shadow-medium"
       >
         <img
           src="/ar-logo.png"
@@ -66,9 +66,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-cream/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.06)]'
-          : 'bg-transparent'
+        scrolled ? 'bg-cream/95 backdrop-blur-md shadow-soft' : 'bg-transparent'
       }`}
     >
       {/* Desktop layout */}
