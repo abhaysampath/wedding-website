@@ -12,8 +12,18 @@ const ALLOWED_ORIGINS = [
   ...VERCEL_PREVIEW_ORIGINS,
 ].filter(Boolean)
 
+function normalizeOrigin(value) {
+  if (!value) return ''
+  try {
+    return new URL(value).origin
+  } catch {
+    return ''
+  }
+}
+
 export function isAllowedOrigin(req) {
-  const origin = req.headers.origin || req.headers.referer || ''
+  const raw = req.headers.origin || req.headers.referer || ''
+  const origin = normalizeOrigin(raw)
   if (!origin) return false
 
   if (VERCEL_ENV === 'production') {
