@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthProvider'
 import { useAuth } from './context/useAuth'
 import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
 import NotFound from './components/NotFound'
+import OfflineBanner from './components/OfflineBanner'
 import { SEO, JSONLD } from './components/SEO'
 import weddingJSONLD from './data/wedding-jsonld.js'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -387,6 +388,7 @@ function PageContent() {
             </Suspense>
           </ErrorBoundary>
         </main>
+        <OfflineBanner />
         <ErrorBoundary name="AuthModal">
           <Suspense fallback={<AuthModalSkeleton />}>
             <AuthModal />
