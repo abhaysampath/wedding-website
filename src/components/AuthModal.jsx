@@ -123,7 +123,6 @@ export default function AuthModal() {
     setShowDropdown(false)
     setFirebaseError(null)
     setAwaitingSmsCode(false)
-    setAwaitingEmailLink(false)
     setEmailCode(Array(6).fill(''))
     emailCodeRefs.current = []
     setSmsCode(Array(6).fill(''))
@@ -138,7 +137,6 @@ export default function AuthModal() {
     setSmsResendable(true)
     setEmailResendable(true)
     sessionStorage.removeItem('awaiting_sms')
-    sessionStorage.removeItem('awaiting_email')
     sessionStorage.removeItem('sms_sent_at')
     sessionStorage.removeItem('email_sent_at')
     sessionStorage.removeItem('pending_guest_id')
