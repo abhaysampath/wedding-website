@@ -2,7 +2,7 @@ import SHEET_CONFIG from './sheets-config.js'
 import { isAllowedOrigin } from './_origin.js'
 
 const TAB_RANGES = {
-  guests: 'A:Q',
+  guests: 'A:R',
   faq: 'A:C',
 }
 

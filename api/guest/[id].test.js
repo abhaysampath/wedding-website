@@ -97,10 +97,10 @@ const GUESTS_HEADERS = [
   'Dietary Preferences',
   'LastLogin',
   'LastUpdated',
+  'FirebaseUID',
   'LoginFailed',
   'US-RSVP',
   'India-RSVP',
-  'FirebaseUID',
 ]
 
 const colIdx = name => GUESTS_HEADERS.findIndex(h => h === name)
@@ -281,7 +281,7 @@ describe('PATCH /api/guest/:id', () => {
     const data = arg.requestBody.data
     const uidUpdate = data.find(d => d.values[0][0] === 'uid-newuser')
     expect(uidUpdate).toBeDefined()
-    expect(uidUpdate.range).toMatch(/R5$/)
+    expect(uidUpdate.range).toMatch(/O5$/)
   })
 
   it('does not rewrite FirebaseUID if it already matches', async () => {
