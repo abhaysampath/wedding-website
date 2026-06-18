@@ -121,7 +121,12 @@ export function AuthProvider({ children }) {
     if (stored) {
       updateUrlSlug(getGuestSlug(stored))
     } else if (hasSlug) {
-      updateUrlSlug('')
+      const code = new URLSearchParams(window.location.search).get('code')
+      if (code) {
+        window.history.replaceState({}, '', `/?code=${code}`)
+      } else {
+        updateUrlSlug('')
+      }
     }
   }, [])
 

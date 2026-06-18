@@ -119,12 +119,16 @@ export default function PlusOneEditor({ user, guests }) {
 
   const groupMembers = useMemo(() => {
     if (!user || !guests || user.plusOne !== 'Allowed+1') return []
-    const userRowIndex = parseInt(String(user.id).replace(/[^\d]/g, ''), 10)
+    const rowOf = g => parseInt(String(g.id).replace(/[^\d]/g, ''), 10)
+    const userRowIndex = rowOf(user)
     if (isNaN(userRowIndex) || userRowIndex < 1) return []
+    const sorted = [...guests].sort((a, b) => rowOf(a) - rowOf(b))
     const members = []
-    for (let i = userRowIndex; i < guests.length; i++) {
-      if (guests[i].plusOne === 'Is+1') {
-        members.push(guests[i])
+    for (const g of sorted) {
+      const r = rowOf(g)
+      if (r <= userRowIndex) continue
+      if (g.plusOne === 'Is+1') {
+        members.push(g)
       } else {
         break
       }

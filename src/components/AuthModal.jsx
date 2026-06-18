@@ -84,6 +84,7 @@ export default function AuthModal() {
   const modalRef = useRef(null)
   const inputContainerRef = useRef(null)
   const prevFocusRef = useRef(null)
+  const backdropPointerDownRef = useRef(null)
   const [dropdownPos, setDropdownPos] = useState(null)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const [signedIn, setSignedIn] = useState(null)
@@ -316,6 +317,7 @@ export default function AuthModal() {
   const handleCancel = useCallback(
     e => {
       if (e && e.target !== e.currentTarget) return
+      if (backdropPointerDownRef.current !== e.currentTarget) return
       if (user && (authMode === 'settings' || authMode === 'contact')) {
         setShowAuthModal(false)
       } else if (user) {
@@ -633,6 +635,9 @@ export default function AuthModal() {
           className="fixed inset-0 z-50 bg-charcoal/60 backdrop-blur-sm overflow-y-auto md:flex md:items-start md:justify-center md:pt-[10vh] overscroll-contain animate-modal-fade-in"
           ref={modalRef}
           onClick={handleCancel}
+          onPointerDown={e => {
+            backdropPointerDownRef.current = e.target === e.currentTarget ? e.currentTarget : null
+          }}
           style={{ overscrollBehavior: 'contain' }}
         >
           <div
