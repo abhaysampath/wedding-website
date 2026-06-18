@@ -31,14 +31,12 @@ self.addEventListener('fetch', (e) => {
   if (request.mode === 'navigate') {
     e.respondWith(
       fetch(request)
-        .then(res => {
+        .then((res) => {
           const clone = res.clone()
-          caches.open(SHELL_CACHE).then(cache => cache.put(request, clone))
+          caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone))
           return res
         })
-        .catch(() =>
-          caches.match(request).then(cached => cached || caches.match('/'))
-        )
+        .catch(() => caches.match(request).then((cached) => cached || Response.error()))
     )
     return
   }
@@ -47,15 +45,14 @@ self.addEventListener('fetch', (e) => {
     caches
       .match(request)
       .then(
-        cached =>
+        (cached) =>
           cached ||
-          fetch(request).then(res => {
+          fetch(request).then((res) => {
             const clone = res.clone()
-            caches.open(CACHE).then(cache => cache.put(request, clone))
+            caches.open(CACHE).then((cache) => cache.put(request, clone))
             return res
           })
       )
-      .catch(() => caches.match('/'))
+      .catch(() => Response.error())
   )
 })
-
