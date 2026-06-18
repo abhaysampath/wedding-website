@@ -168,7 +168,14 @@ export default function ContactSlide() {
         className="flex flex-col items-center justify-center text-center px-6 py-16"
       >
         <div className="w-16 h-16 mb-4">
-          <img src="/ar-logo.png" alt="AR" className="w-full h-full object-contain opacity-70" />
+          <img
+            src="/ar-logo.png"
+            alt="AR"
+            width={64}
+            height={64}
+            loading="lazy"
+            className="w-full h-full object-contain opacity-70"
+          />
         </div>
         <p className="text-cream/90 font-heading text-xl mb-2">Thank You!</p>
         <p className="text-cream/60 text-sm max-w-xs">

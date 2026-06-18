@@ -1099,6 +1099,9 @@ export default function AuthModal() {
                     <img
                       src="/ar-logo.png"
                       alt="Welcome"
+                      width={64}
+                      height={64}
+                      loading="lazy"
                       className="w-full h-full object-contain scale-150"
                     />
                   </div>
