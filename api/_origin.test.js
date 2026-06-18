@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { isAllowedOrigin } from './_origin.js'
 
 describe('isAllowedOrigin', () => {
@@ -42,9 +42,7 @@ describe('isAllowedOrigin', () => {
     })
 
     it('allows production origin from Referer (with path)', () => {
-      expect(
-        isAllowedOrigin(makeReq({ referer: 'https://abhayandrebecca.com/g/jane-doe' })),
-      ).toBe(true)
+      expect(isAllowedOrigin(makeReq({ referer: 'https://abhayandrebecca.com/g/jane-doe' }))).toBe(true)
     })
 
     it('rejects unknown origin', () => {
@@ -52,9 +50,7 @@ describe('isAllowedOrigin', () => {
     })
 
     it('rejects attacker.com prefixed as production', () => {
-      expect(
-        isAllowedOrigin(makeReq({ origin: 'https://abhayandrebecca.com.attacker.com' })),
-      ).toBe(false)
+      expect(isAllowedOrigin(makeReq({ origin: 'https://abhayandrebecca.com.attacker.com' }))).toBe(false)
     })
 
     it('rejects empty headers', () => {
@@ -64,13 +60,7 @@ describe('isAllowedOrigin', () => {
 
   describe('preview/development', () => {
     it('allows any *.vercel.app subdomain in preview', () => {
-      expect(
-        isAllowedOrigin(
-          makeReq({
-            origin: 'https://wedding-website-5cb1y13ud-serabelize-7635s-projects.vercel.app',
-          }),
-        ),
-      ).toBe(true)
+      expect(isAllowedOrigin(makeReq({ origin: 'https://wedding-website-5cb1y13ud-serabelize-7635s-projects.vercel.app' }))).toBe(true)
     })
 
     it('allows localhost in dev', () => {
@@ -88,9 +78,7 @@ describe('isAllowedOrigin', () => {
     })
 
     it('strips path from Referer', () => {
-      expect(
-        isAllowedOrigin(makeReq({ referer: 'https://abhayandrebecca.com/some/path?query=1' })),
-      ).toBe(true)
+      expect(isAllowedOrigin(makeReq({ referer: 'https://abhayandrebecca.com/some/path?query=1' }))).toBe(true)
     })
 
     it('handles malformed referer gracefully', () => {
