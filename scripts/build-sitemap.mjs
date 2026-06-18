@@ -57,7 +57,7 @@ async function fetchFromSheet() {
         lastName: row[3] || '',
         title: row[0] || '',
       }))
-      .filter(g => g.title !== 'KIDS' && (g.firstName || g.lastName))
+      .filter(g => g.title !== 'KIDS' && g.title !== 'TEST' && (g.firstName || g.lastName))
       .map(g => ({ ...g, id: `g${String(i + 1).padStart(3, '0')}` }))
   } catch (err) {
     console.warn('Sitemap: sheet fetch failed, using fallback:', err.message)

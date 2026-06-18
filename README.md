@@ -119,9 +119,14 @@ npm run dev
 
 ```
 ├── api/                  # Vercel serverless functions
-│   ├── [contact.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/contact.mjs)       #   Contact form handler (Nodemailer)
-│   ├── [faq.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/faq.mjs)           #   FAQ from Google Sheets
-│   └── [guests.mjs](https://github.com/abhaysampath/wedding-website/blob/main/api/guests.mjs)        #   Guest list from Google Sheets
+│   ├── [content.js](https://github.com/abhaysampath/wedding-website/blob/main/api/content.js)       #   Serves guests + FAQ from Google Sheets (GET)
+│   ├── [contact.js](https://github.com/abhaysampath/wedding-website/blob/main/api/contact.js)       #   Contact form handler (Nodemailer)
+│   ├── guest/[id].js     #   Guest RSVP/contact update (PATCH)
+│   ├── auth/session.js   #   Session cookie minting
+│   ├── [_session.js](https://github.com/abhaysampath/wedding-website/blob/main/api/_session.js)     #   Firebase token + session cookie verification
+│   ├── [_origin.js](https://github.com/abhaysampath/wedding-website/blob/main/api/_origin.js)       #   CORS origin allowlist
+│   ├── [_rate-limit.js](https://github.com/abhaysampath/wedding-website/blob/main/api/_rate-limit.js)  #   In-memory token-bucket rate limiter
+│   └── [_cache.js](https://github.com/abhaysampath/wedding-website/blob/main/api/_cache.js)         #   60s TTL content cache
 ├── [scripts/](https://github.com/abhaysampath/wedding-website/tree/main/scripts)              # Build, deploy, test, utility scripts
 │   ├── [deploy-e2e.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/deploy-e2e.mjs)    #   Browser-based E2E smoke tests (Puppeteer)
 │   ├── [preview-check.mjs](https://github.com/abhaysampath/wedding-website/blob/main/scripts/preview-check.mjs) #   Pre-deploy mobile screenshots via email

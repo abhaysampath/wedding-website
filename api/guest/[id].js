@@ -148,6 +148,8 @@ const ALLOWED_PATCH_FIELDS = [
   'rsvpIndia',
 ]
 
+const PLUS_ONE_GROUP_FIELDS = ['rsvpUs', 'rsvpIndia', 'dietaryPreferences']
+
 export default async function handler(req, res) {
   if (req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -200,6 +202,7 @@ export default async function handler(req, res) {
     }
 
     let authorized = false
+    let viaPlusOne = false
     if (session.kind === 'firebase') {
       const targetEmail = String(targetRow[colMap.email] || '')
         .trim()
@@ -237,7 +240,7 @@ export default async function handler(req, res) {
             authorized = true
           } else {
             const groupRows = findPlusOneGroup(rows, colMap, userRowIndex)
-            if (groupRows.includes(rowIndex)) authorized = true
+            if (groupRows.includes(rowIndex)) { authorized = true; viaPlusOne = true }
           }
         }
       }
@@ -250,7 +253,7 @@ export default async function handler(req, res) {
       } else if (!isNaN(cookieRowIndex)) {
         const rows = await readAllRows(sheets, sheetId, tabName, colMap)
         const groupRows = findPlusOneGroup(rows, colMap, cookieRowIndex)
-        if (groupRows.includes(rowIndex)) authorized = true
+        if (groupRows.includes(rowIndex)) { authorized = true; viaPlusOne = true }
       }
     }
 
@@ -260,7 +263,8 @@ export default async function handler(req, res) {
 
     const sheetRow = rowIndex + 1
     const updates = []
-    for (const field of ALLOWED_PATCH_FIELDS) {
+    const allowedFields = viaPlusOne ? PLUS_ONE_GROUP_FIELDS : ALLOWED_PATCH_FIELDS
+    for (const field of allowedFields) {
       if (data[field] === undefined) continue
       const idx = colMap[field]
       if (idx === undefined) continue
@@ -305,6 +309,7 @@ const RAW_ROLE_TO_NORMALIZED = {
   'br-friends': 'invited_guest',
   'gr-friends': 'invited_guest',
   'gr-family': 'invited_guest',
+  vendor: 'vendor',
   'n/a': 'invited_guest',
 }
 

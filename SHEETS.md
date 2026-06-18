@@ -24,7 +24,7 @@ Controls row classification and optional name prefix. Affects visibility, search
 | Value | Behavior |
 |---|---|
 | _(empty)_ | Normal guest row. Visible in search, reports, and sitemap. |
-| `Dr` | Prepended to the guest's full name in the UI (e.g. "Dr Jane Doe"). Currently the only title value that acts as a name prefix. |
+| `Dr` | Prepended to the guest's full name in the UI (e.g. "Dr. Jane Doe"). Both `Dr` and `Dr.` in the sheet produce `Dr.` prefix in the UI. Currently the only title value that acts as a name prefix. |
 | `KIDS` | Row is **never sent** to the client — filtered server-side. Use for children to keep nav and sitemap clean. |
 | `TEST` | Appears in search **only** if the search term contains "TEST" (case-sensitive). Excluded from daily-report totals and sitemap. |
 | `#...` | Any value starting with `#` is treated as a comment — blanked at read time. Useful for notes or temporarily disabled rows. |
@@ -56,6 +56,7 @@ Controls event visibility. Raw sheet values are mapped to internal roles:
 | `CloseFamily` | `close_family` | Pre-ceremony + public events |
 | `Br-Family`, `Br-Friends` | `invited_guest` | Public events only |
 | `Gr-Family`, `Gr-Friends` | `invited_guest` | Public events only |
+| `Vendor` | `vendor` | Events tagged `vendor` only |
 | _(anything else)_ | `invited_guest` | Public events only (safe default) |
 
 Unauthenticated visitors see `public` events only.
@@ -189,7 +190,7 @@ If the `WhichWedding` column header is missing from the sheet entirely, **all** 
 1. **Email match** — the authenticated Firebase user's email matches the sheet row's email
 2. **UID match** — the authenticated user's `uid` matches the stored `FirebaseUID`
 3. **Name bootstrap** — if `FirebaseUID` is empty and no strict match, name similarity ≥0.4 is checked; on success, the uid is auto-written to the sheet
-4. **Admin override** — internal `X-Admin-Key` header bypasses all checks
+4. **Admin override** — if the authenticated user's role resolves to `bride`, `groom`, or `close_family`, they are authorized to update any row
 
 **Rate limits** (per client IP, in-memory token bucket):
 

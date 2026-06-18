@@ -130,6 +130,7 @@ export function AuthProvider({ children }) {
     const now = eastTime()
     const payload = {
       id: guest.id,
+      title: guest.title || '',
       firstName: guest.firstName,
       lastName: guest.lastName,
       side: guest.side,
@@ -165,6 +166,7 @@ export function AuthProvider({ children }) {
     const now = eastTime()
     const payload = {
       id: guest.id,
+      title: guest.title || '',
       firstName: guest.firstName,
       lastName: guest.lastName,
       side: guest.side,

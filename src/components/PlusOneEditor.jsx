@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { writeToSheet } from '../utils/sheet-write'
+import { fullName } from '../utils/guest'
 
 function PlusOneRowEditor({ guest, onSaved }) {
   const [rsvpUs, setRsvpUs] = useState(guest.rsvpUs || '')
@@ -31,9 +32,7 @@ function PlusOneRowEditor({ guest, onSaved }) {
 
   return (
     <div className="border border-gold/20 rounded-sm p-4 bg-cream/50">
-      <p className="font-heading text-base text-charcoal mb-1">
-        {guest.firstName} {guest.lastName}
-      </p>
+      <p className="font-heading text-base text-charcoal mb-1">{fullName(guest)}</p>
       <p className="text-[10px] text-charcoal-light/60 mb-3 tracking-wider uppercase">
         {guest.title || 'Guest'} · ID {guest.id}
       </p>

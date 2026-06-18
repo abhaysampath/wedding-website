@@ -18,6 +18,7 @@ const ROLE_MAP = {
   'Br-Friends': 'invited_guest',
   'Gr-Friends': 'invited_guest',
   'Gr-Family': 'invited_guest',
+  Vendor: 'vendor',
 }
 const PLUSONE_VALUES = ['+1NOTALLOWED', 'N/A', 'Allowed+1', 'Is+1']
 
