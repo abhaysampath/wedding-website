@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEFCF3"/>
+      <stop offset="100%" stop-color="#F5F0E0"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C9A96E" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#C9A96E"/>
+      <stop offset="100%" stop-color="#C9A96E" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="200" y="240" width="800" height="2" fill="url(#gold)"/>
+  <text x="600" y="180" text-anchor="middle" font-family="serif" font-size="28" letter-spacing="6" fill="#8A9A5B" font-weight="500">WE&apos;RE GETTING MARRIED</text>
+  <text x="600" y="340" text-anchor="middle" font-family="serif" font-size="110" fill="#2C2C2C" font-weight="400">Rebecca</text>
+  <text x="600" y="430" text-anchor="middle" font-family="serif" font-size="60" fill="#C9A96E" font-style="italic">&amp;</text>
+  <text x="600" y="520" text-anchor="middle" font-family="serif" font-size="110" fill="#2C2C2C" font-weight="400">Abhay</text>
+  <rect x="200" y="560" width="800" height="2" fill="url(#gold)"/>
+  <text x="600" y="600" text-anchor="middle" font-family="sans-serif" font-size="22" letter-spacing="4" fill="#4A4A4A">MAY 30, 2027 · BRONX, NY</text>
+</svg>
