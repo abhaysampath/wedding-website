@@ -81,6 +81,7 @@ export default function AuthModal() {
   const urlSlugRef = useRef(null)
   const modalRef = useRef(null)
   const inputContainerRef = useRef(null)
+  const prevFocusRef = useRef(null)
   const [dropdownPos, setDropdownPos] = useState(null)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const [signedIn, setSignedIn] = useState(null)
@@ -100,6 +101,15 @@ export default function AuthModal() {
       })
       .slice(0, 8)
   }, [nameInput, content.guests])
+
+  useEffect(() => {
+    if (showAuthModal) {
+      prevFocusRef.current = document.activeElement
+    } else if (prevFocusRef.current && typeof prevFocusRef.current.focus === 'function') {
+      prevFocusRef.current.focus()
+      prevFocusRef.current = null
+    }
+  }, [showAuthModal])
 
   const resetState = useCallback(() => {
     setNameInput('')

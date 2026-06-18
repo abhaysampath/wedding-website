@@ -72,6 +72,16 @@ export default function Gallery() {
   const touchStartX = useRef(null)
   const [zoomed, setZoomed] = useState(false)
   const lastTap = useRef(0)
+  const prevFocusRef = useRef(null)
+
+  useEffect(() => {
+    if (expanded !== null) {
+      prevFocusRef.current = document.activeElement
+    } else if (prevFocusRef.current && typeof prevFocusRef.current.focus === 'function') {
+      prevFocusRef.current.focus()
+      prevFocusRef.current = null
+    }
+  }, [expanded])
 
   function preload(images) {
     ;(images || []).forEach(img => {
