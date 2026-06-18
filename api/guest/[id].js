@@ -150,6 +150,56 @@ const ALLOWED_PATCH_FIELDS = [
 
 const PLUS_ONE_GROUP_FIELDS = ['rsvpUs', 'rsvpIndia', 'dietaryPreferences']
 
+const UNAUTH_AUDIT_FIELDS = ['lastLogin', 'lastUpdated', 'loginFailed']
+
+async function handleUnauthAudit(req, res, data) {
+  const sheetId = process.env.GOOGLE_SHEET_ID
+  const serviceEmail = process.env.GOOGLE_SERVICE_EMAIL
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY
+  if (!sheetId || !serviceEmail || !privateKey || privateKey.length < 200) {
+    return res.status(503).json({ error: 'Sheet not configured' })
+  }
+  const id = req.query?.id || req.url.split('/').pop()
+  const rowIndex = parseInt(String(id).replace(/[^\d]/g, ''), 10)
+  if (isNaN(rowIndex) || rowIndex < 1) {
+    return res.status(400).json({ error: 'Invalid row index' })
+  }
+  try {
+    const { google } = await import('googleapis')
+    const auth = new google.auth.JWT({
+      email: serviceEmail,
+      key: privateKey.replace(/\\n/g, '\n'),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    })
+    const sheets = google.sheets({ version: 'v4', auth })
+    const tabName = process.env.GOOGLE_SHEET_TAB || SHEET_CONFIG.guests.tab
+    const colMap = await getColumnMap(sheets, sheetId, tabName)
+    const sheetRow = rowIndex + 1
+    const updates = []
+    for (const field of UNAUTH_AUDIT_FIELDS) {
+      if (data[field] === undefined) continue
+      const idx = colMap[field]
+      if (idx === undefined) continue
+      updates.push({
+        range: `${tabName}!${colLetter(idx)}${sheetRow}`,
+        values: [[data[field]]],
+      })
+    }
+    if (updates.length === 0) {
+      return res.status(200).json({ updated: 0 })
+    }
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: sheetId,
+      requestBody: { valueInputOption: 'USER_ENTERED', data: updates },
+    })
+    cacheInvalidate(`content:${sheetId}`)
+    return res.json({ updated: updates.length })
+  } catch (err) {
+    console.error('Unauth audit update failed:', err)
+    return res.status(502).json({ error: err?.response?.data?.error?.message || err.message })
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'PATCH') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -176,14 +226,21 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Server auth not configured' })
   }
 
+  const data = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}')
+  const requestedFields = Object.keys(data || {}).filter(k => data[k] !== undefined)
+  const onlyAuditFields =
+    requestedFields.length > 0 &&
+    requestedFields.every(f => UNAUTH_AUDIT_FIELDS.includes(f))
+  if (onlyAuditFields) {
+    return await handleUnauthAudit(req, res, data)
+  }
+
   try {
     const id = req.query?.id || req.url.split('/').pop()
     const rowIndex = parseInt(String(id).replace(/[^\d]/g, ''), 10)
     if (isNaN(rowIndex) || rowIndex < 1) {
       return res.status(400).json({ error: 'Invalid row index' })
     }
-
-    const data = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}')
 
     const { google } = await import('googleapis')
     const auth = new google.auth.JWT({

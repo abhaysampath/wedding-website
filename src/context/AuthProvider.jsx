@@ -120,13 +120,17 @@ export function AuthProvider({ children }) {
     const hasSlug = window.location.pathname.startsWith('/g/')
     if (stored) {
       updateUrlSlug(getGuestSlug(stored))
-    } else if (hasSlug) {
-      const code = new URLSearchParams(window.location.search).get('code')
-      if (code) {
-        window.history.replaceState({}, '', `/?code=${code}`)
-      } else {
-        updateUrlSlug('')
-      }
+      return
+    }
+    if (!hasSlug) return
+    const code = new URLSearchParams(window.location.search).get('code')
+    const pathSlug = window.location.pathname.match(/^\/g\/(.+)/)?.[1]
+    if (code && pathSlug) {
+      window.history.replaceState({}, '', `/g/${pathSlug}?code=${code}`)
+    } else if (code) {
+      window.history.replaceState({}, '', `/?code=${code}`)
+    } else {
+      updateUrlSlug('')
     }
   }, [])
 
@@ -191,8 +195,8 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
     mintServerSession(guest.id)
+    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
