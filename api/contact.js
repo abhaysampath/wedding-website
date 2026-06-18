@@ -1,4 +1,5 @@
 import { isAllowedOrigin } from './_origin.js'
+import { applyLimit } from './_rate-limit.js'
 
 export default async function handler(req, res) {
   if (!isAllowedOrigin(req)) {
@@ -8,6 +9,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
+  const limited = applyLimit(req, res, 'contact')
+  if (limited) return limited
 
   const RECAPTCHA_SECRET = process.env.RECAPTCHA_SECRET_KEY
   if (!RECAPTCHA_SECRET) {

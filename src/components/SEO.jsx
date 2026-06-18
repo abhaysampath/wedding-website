@@ -2,7 +2,7 @@ import { Helmet } from 'react-helmet-async'
 import config from '../config'
 
 const siteUrl = config.site.url
-const defaultImage = `${siteUrl}/ar-logo.png`
+const defaultImage = `${siteUrl}/og-image.svg`
 
 export function SEO({
   title = 'Rebecca & Abhay | Wedding',

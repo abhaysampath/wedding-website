@@ -1,6 +1,8 @@
 import SHEET_CONFIG from '../sheets-config.js'
 import { isAllowedOrigin } from '../_origin.js'
 import { getSession, isAdminRole } from '../_session.js'
+import { applyLimit } from '../_rate-limit.js'
+import { cacheInvalidate } from '../_cache.js'
 
 let _colMapCache = null
 
@@ -154,6 +156,9 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' })
   }
 
+  const limited = applyLimit(req, res, 'guest')
+  if (limited) return limited
+
   const sheetId = process.env.GOOGLE_SHEET_ID
   const serviceEmail = process.env.GOOGLE_SERVICE_EMAIL
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
@@ -284,6 +289,7 @@ export default async function handler(req, res) {
       requestBody: { valueInputOption: 'USER_ENTERED', data: updates },
     })
 
+    cacheInvalidate(`content:${sheetId}`)
     return res.json({ updated: updates.length })
   } catch (err) {
     console.error('Guest update failed:', err)

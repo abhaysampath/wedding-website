@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { isAllowedOrigin } from './_origin.js'
+import { applyLimit } from './_rate-limit.js'
 
 const API_KEY = process.env.RESEND_API_KEY
 const ALERT_EMAIL = process.env.ALERT_EMAIL
@@ -25,6 +26,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
+  const limited = applyLimit(req, res, 'alert-error')
+  if (limited) return limited
 
   const resend = new Resend(API_KEY)
   const { type, url, userAgent, timestamp, error } = req.body

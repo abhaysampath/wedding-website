@@ -1,10 +1,14 @@
 import SHEET_CONFIG from './sheets-config.js'
 import { isAllowedOrigin } from './_origin.js'
+import { applyLimit } from './_rate-limit.js'
+import { cacheGet, cacheSet } from './_cache.js'
 
 const TAB_RANGES = {
   guests: 'A:R',
   faq: 'A:C',
 }
+
+const CONTENT_CACHE_TTL_MS = 60 * 1000
 
 const ROLE_MAP = {
   Bride: 'bride',
@@ -50,6 +54,9 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' })
   }
 
+  const limited = applyLimit(req, res, 'content')
+  if (limited) return limited
+
   const sheetId = process.env.GOOGLE_SHEET_ID
   const serviceEmail = process.env.GOOGLE_SERVICE_EMAIL
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
@@ -62,6 +69,14 @@ export default async function handler(req, res) {
           'Sheets not configured. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY.',
       })
   }
+
+  const cacheKey = `content:${sheetId}`
+  const cached = cacheGet(cacheKey)
+  if (cached) {
+    res.setHeader('X-Cache', 'HIT')
+    return res.json(cached)
+  }
+  res.setHeader('X-Cache', 'MISS')
 
   try {
     const { google } = await import('googleapis')
@@ -143,6 +158,9 @@ export default async function handler(req, res) {
       faqHeaderRow: faqHeaders,
     }
     if (sheetErrors.length > 0) body.error = sheetErrors.join('; ')
+    if (sheetErrors.length === 0) {
+      cacheSet(cacheKey, body, CONTENT_CACHE_TTL_MS)
+    }
     return res.json(body)
   } catch (err) {
     console.error('Sheet read failed:', err)
