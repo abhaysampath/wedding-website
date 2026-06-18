@@ -590,11 +590,14 @@ export default function AuthModal() {
       }
     }
     updatePos()
+    const scrollEl = modalRef.current
     window.addEventListener('scroll', updatePos, { passive: true })
     window.addEventListener('resize', updatePos, { passive: true })
+    if (scrollEl) scrollEl.addEventListener('scroll', updatePos, { passive: true })
     return () => {
       window.removeEventListener('scroll', updatePos)
       window.removeEventListener('resize', updatePos)
+      if (scrollEl) scrollEl.removeEventListener('scroll', updatePos)
     }
   }, [showDropdown])
 

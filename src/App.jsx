@@ -193,7 +193,7 @@ function BottomNav() {
   return (
     <nav
       aria-label="Bottom navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-cream/95 backdrop-blur-md border-t border-gold/10"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-cream/95 backdrop-blur-md border-t border-gold/10"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       <div className="flex items-center justify-around h-14 px-2">
