@@ -26,10 +26,12 @@ const PICS_DIR = join(ROOT, 'public', 'pics')
 const BACKUP_PATH = join(ROOT, '.backups', 'guests-backup.json')
 const IS_TEST = !!process.env.VITEST
 
-const TAB_RANGES = { guests: 'A:Q' }
+const TAB_RANGES = { guests: 'A:R' }
 const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif'])
 const PIC_DIRS = ['home', 'vert', 'gallery']
-const CDN_BASE = process.env.CDN_BASE || 'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/pics'
+const CDN_BASE =
+  process.env.CDN_BASE ||
+  'https://cdn.jsdelivr.net/gh/abhaysampath/wedding-website@main/public/pics'
 
 export function e(tag, content) {
   return `<${tag}>${content}</${tag}>`
@@ -45,12 +47,10 @@ export function parseSheet(values, columnConfig) {
   const [headerRow, ...dataRows] = values
   const indexMap = {}
   for (const [fieldName, headerLabel] of Object.entries(columnConfig)) {
-    const idx = headerRow.findIndex(
-      (h) => h.trim().toLowerCase() === headerLabel.toLowerCase()
-    )
+    const idx = headerRow.findIndex(h => h.trim().toLowerCase() === headerLabel.toLowerCase())
     if (idx !== -1) indexMap[fieldName] = idx
   }
-  return dataRows.map((row) => {
+  return dataRows.map(row => {
     const obj = {}
     for (const [fieldName, idx] of Object.entries(indexMap)) {
       obj[fieldName] = sanitizeCell(row[idx])
@@ -140,56 +140,73 @@ export async function main() {
   })
 
   const rows = parseSheet(res.data.values, SHEET_CONFIG.guests.columns)
-  const total = rows.length
+  const realRows = rows.filter(r => r.title !== 'TEST')
+  const total = realRows.length
   const dayThreshold = parseFloat(DAYS_BETWEEN) || 1
   const recentDays = `(last ${dayThreshold}d)`
 
   // ── Guest Summary Stats ──────────────────────────────────
+  // Note: TEST users are excluded from all totals (realRows = non-TEST)
 
-  const hasLogin = rows.filter((r) => r.lastLogin)
-  const noLogin = rows.filter((r) => !r.lastLogin)
-  const loginFailed = rows.filter((r) => r.loginFailed && r.loginFailed.toUpperCase() !== 'SUCCESS')
-  const recentFailed = loginFailed.filter((r) => daysAgo(r.lastUpdated || r.lastLogin) <= dayThreshold)
-  const recentLogins = hasLogin.filter((r) => daysAgo(r.lastLogin) <= dayThreshold)
-  const noEmail = rows.filter((r) => !r.email)
-  const noPhone = rows.filter((r) => !r.phone)
-  const rsvpUsYes = rows.filter((r) => r.rsvpUs && r.rsvpUs.toUpperCase() === 'YES').length
-  const rsvpUsNo = rows.filter((r) => r.rsvpUs && r.rsvpUs.toUpperCase() === 'NO').length
-  const rsvpUsPending = rows.filter((r) => !r.rsvpUs).length
-  const rsvpIndiaYes = rows.filter((r) => r.rsvpIndia && r.rsvpIndia.toUpperCase() === 'YES').length
-  const rsvpIndiaNo = rows.filter((r) => r.rsvpIndia && r.rsvpIndia.toUpperCase() === 'NO').length
-  const rsvpIndiaPending = rows.filter((r) => !r.rsvpIndia).length
+  const hasLogin = realRows.filter(r => r.lastLogin)
+  const noLogin = realRows.filter(r => !r.lastLogin)
+  const loginFailed = realRows.filter(
+    r => r.loginFailed && r.loginFailed.toUpperCase() !== 'SUCCESS',
+  )
+  const recentFailed = loginFailed.filter(
+    r => daysAgo(r.lastUpdated || r.lastLogin) <= dayThreshold,
+  )
+  const recentLogins = hasLogin.filter(r => daysAgo(r.lastLogin) <= dayThreshold)
+  const noEmail = realRows.filter(r => !r.email)
+  const noPhone = realRows.filter(r => !r.phone)
+  const rsvpUsYes = realRows.filter(r => r.rsvpUs && r.rsvpUs.toUpperCase() === 'YES').length
+  const rsvpUsNo = realRows.filter(r => r.rsvpUs && r.rsvpUs.toUpperCase() === 'NO').length
+  const rsvpUsPending = realRows.filter(r => !r.rsvpUs).length
+  const rsvpIndiaYes = realRows.filter(
+    r => r.rsvpIndia && r.rsvpIndia.toUpperCase() === 'YES',
+  ).length
+  const rsvpIndiaNo = realRows.filter(r => r.rsvpIndia && r.rsvpIndia.toUpperCase() === 'NO').length
+  const rsvpIndiaPending = realRows.filter(r => !r.rsvpIndia).length
 
   // ── Image Dead Link Check ────────────────────────────────
 
   console.log('Checking images...')
   const images = collectImageFiles(PICS_DIR)
   const brokenImages = []
-  await chunkedSettle(images, async (img) => {
-    try {
-      const resp = await fetch(img.url, { method: 'HEAD' })
-      if (!resp.ok) brokenImages.push({ ...img, status: resp.status })
-    } catch {
-      brokenImages.push({ ...img, status: 'FETCH_ERROR' })
-    }
-  }, 10)
+  await chunkedSettle(
+    images,
+    async img => {
+      try {
+        const resp = await fetch(img.url, { method: 'HEAD' })
+        if (!resp.ok) brokenImages.push({ ...img, status: resp.status })
+      } catch {
+        brokenImages.push({ ...img, status: 'FETCH_ERROR' })
+      }
+    },
+    10,
+  )
 
   // ── Guest Link Validation ────────────────────────────────
 
   console.log('Validating guest links...')
   const brokenLinks = []
-  await chunkedSettle(rows, async (g) => {
-    const name = nameStr(g)
-    if (!name) return
-    const slug = name.toLowerCase().replace(/\s+/g, '-')
-    const url = `${SITE_URL}/g/${encodeURIComponent(slug)}`
-    try {
-      const resp = await fetch(url)
-      if (resp.status === 404) brokenLinks.push({ name, url, status: resp.status })
-    } catch {
-      brokenLinks.push({ name, url, status: 'FETCH_ERROR' })
-    }
-  }, 10)
+  await chunkedSettle(
+    realRows,
+    async g => {
+      const name = nameStr(g)
+      if (!name) return
+      if (g.title === 'KIDS') return
+      const slug = name.toLowerCase().replace(/\s+/g, '-')
+      const url = `${SITE_URL}/g/${encodeURIComponent(slug)}`
+      try {
+        const resp = await fetch(url)
+        if (resp.status === 404) brokenLinks.push({ name, url, status: resp.status })
+      } catch {
+        brokenLinks.push({ name, url, status: 'FETCH_ERROR' })
+      }
+    },
+    10,
+  )
 
   // ── Duplicate Contact Detector ───────────────────────────
 
@@ -208,8 +225,8 @@ export async function main() {
       emailMap[email].push(g)
     }
   }
-  const dupPhones = Object.values(phoneMap).filter((a) => a.length > 1)
-  const dupEmails = Object.values(emailMap).filter((a) => a.length > 1)
+  const dupPhones = Object.values(phoneMap).filter(a => a.length > 1)
+  const dupEmails = Object.values(emailMap).filter(a => a.length > 1)
 
   // ── Build Report ─────────────────────────────────────────
 
@@ -249,7 +266,9 @@ export async function main() {
 
   if (recentLogins.length > 0) {
     lines.push(e('h3', `Recent Logins ${recentDays}`))
-    lines.push('<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">')
+    lines.push(
+      '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">',
+    )
     lines.push('<tr><th>Name</th><th>Last Login</th></tr>')
     for (const g of recentLogins) {
       lines.push(`<tr><td>${nameStr(g)}</td><td>${g.lastLogin || ''}</td></tr>`)
@@ -259,22 +278,32 @@ export async function main() {
 
   const failuresToShow = recentFailed.length > 0 ? recentFailed : loginFailed.slice(0, 20)
   if (failuresToShow.length > 0) {
-    lines.push(e('h3', `Unresolved Login Failures ${recentFailed.length > 0 ? recentDays : '(all time)'}`))
-    lines.push('<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">')
+    lines.push(
+      e('h3', `Unresolved Login Failures ${recentFailed.length > 0 ? recentDays : '(all time)'}`),
+    )
+    lines.push(
+      '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">',
+    )
     lines.push('<tr><th>Name</th><th>Status</th><th>Last Updated</th></tr>')
     for (const g of failuresToShow) {
-      lines.push(`<tr><td>${nameStr(g)}</td><td>${g.loginFailed}</td><td>${g.lastUpdated || g.lastLogin || ''}</td></tr>`)
+      lines.push(
+        `<tr><td>${nameStr(g)}</td><td>${g.loginFailed}</td><td>${g.lastUpdated || g.lastLogin || ''}</td></tr>`,
+      )
     }
     lines.push('</table>')
   }
 
-  const missingContact = rows.filter((r) => !r.email || !r.phone)
+  const missingContact = realRows.filter(r => !r.email || !r.phone)
   if (missingContact.length > 0) {
     lines.push(e('h3', 'Guests Missing Contact Info'))
-    lines.push('<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">')
+    lines.push(
+      '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse">',
+    )
     lines.push('<tr><th>Name</th><th>Has Email</th><th>Has Phone</th><th>Has Address</th></tr>')
     for (const g of missingContact) {
-      lines.push(`<tr><td>${nameStr(g)}</td><td>${g.email ? '✅' : '❌'}</td><td>${g.phone ? '✅' : '❌'}</td><td>${g.address ? '✅' : '❌'}</td></tr>`)
+      lines.push(
+        `<tr><td>${nameStr(g)}</td><td>${g.email ? '✅' : '❌'}</td><td>${g.phone ? '✅' : '❌'}</td><td>${g.address ? '✅' : '❌'}</td></tr>`,
+      )
     }
     lines.push('</table>')
   }
@@ -284,10 +313,14 @@ export async function main() {
   if (dupPhones.length > 0 || dupEmails.length > 0) {
     lines.push(e('h3', 'Duplicate Contacts'))
     for (const group of dupPhones) {
-      lines.push(`<p><strong>⚠️ Phone:</strong> ${group[0].phone} shared by: ${group.map((g) => nameStr(g)).join(', ')}</p>`)
+      lines.push(
+        `<p><strong>⚠️ Phone:</strong> ${group[0].phone} shared by: ${group.map(g => nameStr(g)).join(', ')}</p>`,
+      )
     }
     for (const group of dupEmails) {
-      lines.push(`<p><strong>⚠️ Email:</strong> ${group[0].email} shared by: ${group.map((g) => nameStr(g)).join(', ')}</p>`)
+      lines.push(
+        `<p><strong>⚠️ Email:</strong> ${group[0].email} shared by: ${group.map(g => nameStr(g)).join(', ')}</p>`,
+      )
     }
   }
 
@@ -310,7 +343,7 @@ export async function main() {
       lines.push(`<p>❌ ${link.name} — <code>${link.url}</code> — HTTP ${link.status}</p>`)
     }
   } else {
-    lines.push(`<p>✅ All ${rows.length} guest links resolved.</p>`)
+    lines.push(`<p>✅ All ${realRows.length} guest links resolved.</p>`)
   }
 
   // ── Section: Sheet Backup ────────────────────────────────
@@ -323,7 +356,9 @@ export async function main() {
   }
   mkdirSync(dirname(BACKUP_PATH), { recursive: true })
   writeFileSync(BACKUP_PATH, JSON.stringify(backupData, null, 2))
-  lines.push(`<p>📦 Sheet backup saved as <code>guests-backup.json</code> (artifact available in Actions run).</p>`)
+  lines.push(
+    `<p>📦 Sheet backup saved as <code>guests-backup.json</code> (artifact available in Actions run).</p>`,
+  )
 
   // ── Send Email ───────────────────────────────────────────
 
@@ -342,8 +377,12 @@ export async function main() {
     `\nRSVP — US Wedding: Yes ${rsvpUsYes} / No ${rsvpUsNo} / Pending ${rsvpUsPending}\n` +
     `RSVP — India Wedding: Yes ${rsvpIndiaYes} / No ${rsvpIndiaNo} / Pending ${rsvpIndiaPending}\n\n` +
     (brokenImages.length > 0 ? `Broken images: ${brokenImages.length}\n` : 'All images OK.\n') +
-    (brokenLinks.length > 0 ? `Broken guest links: ${brokenLinks.length}\n` : 'All guest links OK.\n') +
-    (dupPhones.length > 0 || dupEmails.length > 0 ? `Duplicate contacts found.\n` : 'No duplicate contacts.\n')
+    (brokenLinks.length > 0
+      ? `Broken guest links: ${brokenLinks.length}\n`
+      : 'All guest links OK.\n') +
+    (dupPhones.length > 0 || dupEmails.length > 0
+      ? `Duplicate contacts found.\n`
+      : 'No duplicate contacts.\n')
 
   console.log('Sending report...')
   const nodemailer = await import('nodemailer')
@@ -363,12 +402,12 @@ export async function main() {
 
   console.log('Report sent to', REPORT_RECIPIENT)
   console.log(`Images checked: ${images.length}, broken: ${brokenImages.length}`)
-  console.log(`Links checked: ${rows.length}, broken: ${brokenLinks.length}`)
+  console.log(`Links checked: ${realRows.length}, broken: ${brokenLinks.length}`)
   console.log(`Backup written to: ${BACKUP_PATH}`)
 }
 
 if (!IS_TEST) {
-  main().catch((err) => {
+  main().catch(err => {
     console.error('Report failed:', err)
     process.exit(1)
   })

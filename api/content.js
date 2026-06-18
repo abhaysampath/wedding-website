@@ -6,8 +6,21 @@ const TAB_RANGES = {
   faq: 'A:C',
 }
 
-const ROLE_MAP = { 'Bride': 'bride', 'Groom': 'groom', 'CloseFamily': 'close_family', 'Br-Family': 'invited_guest', 'Br-Friends': 'invited_guest', 'Gr-Friends': 'invited_guest', 'Gr-Family': 'invited_guest' }
-const PLUSONE_MAP = { 'N/A': false, 'Allowed+1': true, '+1NOTALLOWED': false }
+const ROLE_MAP = {
+  Bride: 'bride',
+  Groom: 'groom',
+  CloseFamily: 'close_family',
+  'Br-Family': 'invited_guest',
+  'Br-Friends': 'invited_guest',
+  'Gr-Friends': 'invited_guest',
+  'Gr-Family': 'invited_guest',
+}
+const PLUSONE_VALUES = ['+1NOTALLOWED', 'N/A', 'Allowed+1', 'Is+1']
+
+function normalizePlusOne(raw) {
+  const v = String(raw || '').trim()
+  return PLUSONE_VALUES.includes(v) ? v : 'N/A'
+}
 
 function inferSide(firstName, lastName, relationship, role) {
   const full = `${firstName} ${lastName}`.toLowerCase()
@@ -42,7 +55,12 @@ export default async function handler(req, res) {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
 
   if (!sheetId || !serviceEmail || !privateKey || privateKey.length < 200) {
-    return res.status(503).json({ error: 'Sheets not configured. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY.' })
+    return res
+      .status(503)
+      .json({
+        error:
+          'Sheets not configured. Set GOOGLE_SHEET_ID, GOOGLE_SERVICE_EMAIL, GOOGLE_PRIVATE_KEY.',
+      })
   }
 
   try {
@@ -56,8 +74,9 @@ export default async function handler(req, res) {
 
     const sheetErrors = []
     const read = (tab, range) =>
-      sheets.spreadsheets.values.get({ spreadsheetId: sheetId, range: `${tab}!${range}` })
-        .catch((e) => {
+      sheets.spreadsheets.values
+        .get({ spreadsheetId: sheetId, range: `${tab}!${range}` })
+        .catch(e => {
           sheetErrors.push(`${tab}: ${e?.response?.data?.error?.message || e.message}`)
           return { data: { values: null } }
         })
@@ -73,16 +92,17 @@ export default async function handler(req, res) {
       const relationship = row.relationship || ''
       const roleRaw = row.role || ''
       const plusOneRaw = row.plusOne || ''
+      const title = row.title || ''
       return {
         id: `g${String(i + 1).padStart(3, '0')}`,
         firstName,
         lastName,
         side: inferSide(firstName, lastName, relationship, roleRaw),
-        title: row.title || '',
+        title,
         relationship,
         role: ROLE_MAP[roleRaw] || 'invited_guest',
         weddings: parseWeddings(row.invitedTo),
-        plusOne: PLUSONE_MAP[plusOneRaw] ?? false,
+        plusOne: normalizePlusOne(plusOneRaw),
         email: row.email || '',
         phone: row.phone || '',
         address: row.address || '',
@@ -96,7 +116,9 @@ export default async function handler(req, res) {
     const faqWeddingLabel = SHEET_CONFIG.faq.columns.wedding.toLowerCase()
     const faqWeddingColFound = faqHeaders.some(h => h.trim().toLowerCase() === faqWeddingLabel)
     if (!faqWeddingColFound && faqHeaders.length > 0) {
-      console.warn(`FAQ sheet is missing a column with header "${SHEET_CONFIG.faq.columns.wedding}" — FAQ filtering by wedding will not work until you add it`)
+      console.warn(
+        `FAQ sheet is missing a column with header "${SHEET_CONFIG.faq.columns.wedding}" — FAQ filtering by wedding will not work until you add it`,
+      )
     }
     function parseFaqWedding(val) {
       const v = (val || '').trim().toLowerCase()
@@ -106,13 +128,20 @@ export default async function handler(req, res) {
       if (v.includes('us')) return 'us'
       return 'both'
     }
-    const faq = parseSheet(faqRes.data.values, SHEET_CONFIG.faq.columns, (row) => ({
+    const faq = parseSheet(faqRes.data.values, SHEET_CONFIG.faq.columns, row => ({
       q: row.question || '',
       a: row.answer || '',
       wedding: parseFaqWedding(row.wedding),
     }))
 
-    const body = { source: 'sheet', guests, faq, faqWeddingColFound, faqHeaderRow: faqHeaders }
+    const visibleGuests = guests.filter(g => g.title !== 'KIDS')
+    const body = {
+      source: 'sheet',
+      guests: visibleGuests,
+      faq,
+      faqWeddingColFound,
+      faqHeaderRow: faqHeaders,
+    }
     if (sheetErrors.length > 0) body.error = sheetErrors.join('; ')
     return res.json(body)
   } catch (err) {
@@ -133,9 +162,7 @@ function parseSheet(values, columnConfig, mapper) {
 
   const indexMap = {}
   for (const [fieldName, headerLabel] of Object.entries(columnConfig)) {
-    const idx = headerRow.findIndex(
-      (h) => h.trim().toLowerCase() === headerLabel.toLowerCase()
-    )
+    const idx = headerRow.findIndex(h => h.trim().toLowerCase() === headerLabel.toLowerCase())
     if (idx !== -1) indexMap[fieldName] = idx
   }
 

@@ -75,6 +75,44 @@ function findRowIndexByField(rows, colMap, field, value) {
   return -1
 }
 
+function findRowIndexByName(rows, colMap, name) {
+  const firstIdx = colMap.firstName
+  const lastIdx = colMap.lastName
+  if (firstIdx === undefined) return -1
+  let best = -1
+  let bestScore = 0
+  for (let i = 0; i < rows.length; i++) {
+    const full = `${rows[i][firstIdx] || ''} ${rows[i][lastIdx] || ''}`.trim()
+    const score = nameSimilarity(name, full)
+    if (score > bestScore && score >= NAME_MATCH_THRESHOLD) {
+      bestScore = score
+      best = i + 1
+    }
+  }
+  return best
+}
+
+const PLUS_ONE_ALLOWED = 'Allowed+1'
+const PLUS_ONE_IS = 'Is+1'
+
+function findPlusOneGroup(rows, colMap, userRowIndex) {
+  if (userRowIndex < 1 || userRowIndex > rows.length) return []
+  const plusOneIdx = colMap.plusOne
+  if (plusOneIdx === undefined) return []
+  const userPlusOne = String(rows[userRowIndex - 1][plusOneIdx] || '').trim()
+  if (userPlusOne !== PLUS_ONE_ALLOWED) return []
+  const group = [userRowIndex]
+  for (let i = userRowIndex; i < rows.length; i++) {
+    const nextPlusOne = String(rows[i][plusOneIdx] || '').trim()
+    if (nextPlusOne === PLUS_ONE_IS) {
+      group.push(i + 1)
+    } else {
+      break
+    }
+  }
+  return group
+}
+
 function normalizeName(str) {
   return String(str || '')
     .trim()
@@ -176,12 +214,26 @@ export default async function handler(req, res) {
           authorized = true
         }
       }
-      if (!authorized && session.email) {
+      if (!authorized) {
         const rows = await readAllRows(sheets, sheetId, tabName, colMap)
-        const userRowIndex = findRowIndexByField(rows, colMap, 'email', session.email)
+        let userRowIndex = -1
+        if (session.email) {
+          userRowIndex = findRowIndexByField(rows, colMap, 'email', session.email)
+        }
+        if (userRowIndex < 0 && session.uid) {
+          userRowIndex = findRowIndexByField(rows, colMap, 'firebaseUid', session.uid)
+        }
+        if (userRowIndex < 0 && session.name) {
+          userRowIndex = findRowIndexByName(rows, colMap, session.name)
+        }
         if (userRowIndex > 0) {
           const userRole = String(rows[userRowIndex - 1][colMap.role] || '').trim()
-          if (isAdminRole(normalizeRole(userRole))) authorized = true
+          if (isAdminRole(normalizeRole(userRole))) {
+            authorized = true
+          } else {
+            const groupRows = findPlusOneGroup(rows, colMap, userRowIndex)
+            if (groupRows.includes(rowIndex)) authorized = true
+          }
         }
       }
     } else if (session.kind === 'cookie') {
@@ -190,6 +242,10 @@ export default async function handler(req, res) {
         authorized = true
       } else if (isAdminRole(session.role)) {
         authorized = true
+      } else if (!isNaN(cookieRowIndex)) {
+        const rows = await readAllRows(sheets, sheetId, tabName, colMap)
+        const groupRows = findPlusOneGroup(rows, colMap, cookieRowIndex)
+        if (groupRows.includes(rowIndex)) authorized = true
       }
     }
 

@@ -182,6 +182,7 @@ describe('PATCH /api/guest/:id', () => {
     mockValuesGet
       .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
       .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [[]] } })
     const res = makeRes()
     await handler(makeReq({ id: '5', body: { phone: 'x' } }), res)
     expect(res.statusCode).toBe(403)
@@ -436,5 +437,49 @@ describe('PATCH /api/guest/:id', () => {
     await handler(makeReq({ id: '2', body: { phone: '2' } }), res2)
     const headerReads = mockValuesGet.mock.calls.filter(([arg]) => arg.range?.endsWith('A1:Z1'))
     expect(headerReads.length).toBe(1)
+  })
+
+  it('allows Allowed+1 user to edit their own plus-one group members', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-allowed',
+      email: 'allowed@example.com',
+      emailVerified: true,
+    })
+    const allowedRow = makeGuestRow({ email: 'allowed@example.com', role: 'invited_guest' })
+    const plusOneRow = makeGuestRow({ email: 'allowed@example.com', role: 'invited_guest' })
+    allowedRow[colIdx('Plus One')] = 'Allowed+1'
+    plusOneRow[colIdx('Plus One')] = 'Is+1'
+    const targetRow = makeGuestRow({ email: 'other@example.com', role: 'invited_guest' })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [allowedRow, plusOneRow] } })
+    mockBatchUpdate.mockResolvedValueOnce({})
+    const res = makeRes()
+    await handler(makeReq({ id: '2', body: { rsvpUs: 'YES' } }), res)
+    expect(res.statusCode).toBe(200)
+  })
+
+  it('forbids non-Allowed+1 user from editing another guest in their group', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-notallowed',
+      email: 'notallowed@example.com',
+      emailVerified: true,
+    })
+    const userRow = makeGuestRow({ email: 'notallowed@example.com', role: 'invited_guest' })
+    const plusOneRow = makeGuestRow({ email: 'notallowed@example.com', role: 'invited_guest' })
+    userRow[colIdx('Plus One')] = 'N/A'
+    plusOneRow[colIdx('Plus One')] = 'Is+1'
+    const targetRow = makeGuestRow({ email: 'other@example.com', role: 'invited_guest' })
+    targetRow[colIdx('Plus One')] = 'Is+1'
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [userRow, plusOneRow] } })
+    const res = makeRes()
+    await handler(makeReq({ id: '2', body: { rsvpUs: 'YES' } }), res)
+    expect(res.statusCode).toBe(403)
   })
 })
