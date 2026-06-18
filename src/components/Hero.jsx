@@ -238,7 +238,7 @@ export default function Hero() {
               hidden: { opacity: 0, y: 30 },
               visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
             }}
-            className="font-['Cormorant_Garamond',_serif] font-bold text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4 -mt-2 md:-mt-4"
+            className="font-cormorant font-bold text-cream text-base md:text-xl lg:text-2xl tracking-[0.3em] uppercase mb-3 md:mb-4 -mt-2 md:-mt-4"
           >
             We're getting married
           </motion.p>
