@@ -1,4 +1,5 @@
 import { isAllowedOrigin } from '../_origin.js'
+import { applyLimit } from '../_rate-limit.js'
 import {
   mintSessionToken,
   getSessionCookieHeader,
@@ -60,6 +61,9 @@ export default async function handler(req, res) {
   if (!isAllowedOrigin(req)) {
     return res.status(403).json({ error: 'Forbidden' })
   }
+
+  const limited = applyLimit(req, res, 'auth-session')
+  if (limited) return limited
 
   if (req.method === 'DELETE') {
     res.setHeader('Set-Cookie', getClearCookieHeader())

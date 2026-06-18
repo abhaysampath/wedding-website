@@ -1,5 +1,6 @@
 import SHEET_CONFIG from './sheets-config.js'
 import { isAllowedOrigin } from './_origin.js'
+import { applyLimit } from './_rate-limit.js'
 
 const TAB_RANGES = {
   guests: 'A:R',
@@ -49,6 +50,9 @@ export default async function handler(req, res) {
   if (!isAllowedOrigin(req)) {
     return res.status(403).json({ error: 'Forbidden' })
   }
+
+  const limited = applyLimit(req, res, 'content')
+  if (limited) return limited
 
   const sheetId = process.env.GOOGLE_SHEET_ID
   const serviceEmail = process.env.GOOGLE_SERVICE_EMAIL
