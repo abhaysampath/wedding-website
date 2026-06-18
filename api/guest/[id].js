@@ -75,6 +75,27 @@ function findRowIndexByField(rows, colMap, field, value) {
   return -1
 }
 
+function normalizeName(str) {
+  return String(str || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+}
+
+function nameSimilarity(a, b) {
+  const aa = normalizeName(a)
+  const bb = normalizeName(b)
+  if (!aa || !bb) return 0
+  if (aa === bb) return 1
+  if (aa.includes(bb) || bb.includes(aa)) return 0.8
+  const aParts = aa.split(' ')
+  const bParts = bb.split(' ')
+  const matches = aParts.filter(p => bParts.includes(p)).length
+  return matches / Math.max(aParts.length, bParts.length)
+}
+
+const NAME_MATCH_THRESHOLD = 0.4
+
 const ALLOWED_PATCH_FIELDS = [
   'phone',
   'email',
@@ -140,19 +161,27 @@ export default async function handler(req, res) {
       const targetEmail = String(targetRow[colMap.email] || '')
         .trim()
         .toLowerCase()
+      const targetUid = String(targetRow[colMap.firebaseUid] || '').trim()
       if (session.email && targetEmail && session.email === targetEmail) {
         authorized = true
-      } else {
-        const targetUid = String(targetRow[colMap.firebaseUid] || '').trim()
-        if (session.uid && targetUid && session.uid === targetUid) {
+      } else if (session.uid && targetUid && session.uid === targetUid) {
+        authorized = true
+      } else if (!targetUid && session.name) {
+        const targetFullName =
+          `${targetRow[colMap.firstName] || ''} ${targetRow[colMap.lastName] || ''}`.trim()
+        if (
+          targetFullName &&
+          nameSimilarity(session.name, targetFullName) >= NAME_MATCH_THRESHOLD
+        ) {
           authorized = true
-        } else if (session.email) {
-          const rows = await readAllRows(sheets, sheetId, tabName, colMap)
-          const userRowIndex = findRowIndexByField(rows, colMap, 'email', session.email)
-          if (userRowIndex > 0) {
-            const userRole = String(rows[userRowIndex - 1][colMap.role] || '').trim()
-            if (isAdminRole(normalizeRole(userRole))) authorized = true
-          }
+        }
+      }
+      if (!authorized && session.email) {
+        const rows = await readAllRows(sheets, sheetId, tabName, colMap)
+        const userRowIndex = findRowIndexByField(rows, colMap, 'email', session.email)
+        if (userRowIndex > 0) {
+          const userRole = String(rows[userRowIndex - 1][colMap.role] || '').trim()
+          if (isAdminRole(normalizeRole(userRole))) authorized = true
         }
       }
     } else if (session.kind === 'cookie') {

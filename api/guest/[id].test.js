@@ -105,8 +105,17 @@ const GUESTS_HEADERS = [
 
 const colIdx = name => GUESTS_HEADERS.findIndex(h => h === name)
 
-function makeGuestRow({ email = '', role = 'invited_guest', uid = '', phone = '' } = {}) {
+function makeGuestRow({
+  email = '',
+  role = 'invited_guest',
+  uid = '',
+  phone = '',
+  firstName = 'Abhay',
+  lastName = 'Sampath',
+} = {}) {
   const row = new Array(GUESTS_HEADERS.length).fill('')
+  row[colIdx('First Name')] = firstName
+  row[colIdx('Last Name')] = lastName
   row[colIdx('Email Address')] = email
   row[colIdx('Phone Number')] = phone
   row[colIdx('Role')] = role
@@ -306,6 +315,80 @@ describe('PATCH /api/guest/:id', () => {
     const arg = mockBatchUpdate.mock.calls[0][0]
     const ranges = arg.requestBody.data.map(d => d.range)
     expect(ranges.some(r => r.includes('FirebaseUID'))).toBe(false)
+  })
+
+  it('allows first-time sign-in via name match when email and uid do not match (bootstrap)', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-new',
+      email: 'different@gmail.com',
+      name: 'Abhay Sampath',
+      emailVerified: true,
+    })
+    const targetRow = makeGuestRow({
+      email: 'original@example.com',
+      firstName: 'Abhay',
+      lastName: 'Sampath',
+      role: 'invited_guest',
+    })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+    mockBatchUpdate.mockResolvedValueOnce({})
+    const res = makeRes()
+    await handler(makeReq({ id: '2', body: { phone: '555' } }), res)
+    expect(res.statusCode).toBe(200)
+    const arg = mockBatchUpdate.mock.calls[0][0]
+    const uidWrite = arg.requestBody.data.find(d => d.values[0][0] === 'uid-new')
+    expect(uidWrite).toBeDefined()
+  })
+
+  it('forbids name match when target row already has a uid (no name squatting)', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-attacker',
+      email: 'attacker@gmail.com',
+      name: 'Abhay Sampath',
+      emailVerified: true,
+    })
+    const targetRow = makeGuestRow({
+      email: 'original@example.com',
+      firstName: 'Abhay',
+      lastName: 'Sampath',
+      role: 'invited_guest',
+      uid: 'uid-real-owner',
+    })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [[]] } })
+    const res = makeRes()
+    await handler(makeReq({ id: '2', body: { phone: '555' } }), res)
+    expect(res.statusCode).toBe(403)
+    expect(mockBatchUpdate).not.toHaveBeenCalled()
+  })
+
+  it('forbids name match when similarity is below threshold', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-stranger',
+      email: 'stranger@gmail.com',
+      name: 'Zelda Williams',
+      emailVerified: true,
+    })
+    const targetRow = makeGuestRow({
+      email: 'original@example.com',
+      firstName: 'Abhay',
+      lastName: 'Sampath',
+      role: 'invited_guest',
+    })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [[]] } })
+    const res = makeRes()
+    await handler(makeReq({ id: '2', body: { phone: '555' } }), res)
+    expect(res.statusCode).toBe(403)
   })
 
   it('ignores unknown / disallowed fields in the body', async () => {

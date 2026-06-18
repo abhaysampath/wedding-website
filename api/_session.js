@@ -156,6 +156,7 @@ export async function getSession(req) {
           kind: 'firebase',
           uid: decoded.uid,
           email: (decoded.email || '').toLowerCase(),
+          name: (decoded.name || decoded['name'] || '').toString(),
           emailVerified: !!decoded.email_verified,
         }
       } catch {
