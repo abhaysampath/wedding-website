@@ -37,6 +37,16 @@ if (images.status !== 0) {
   process.exit(images.status)
 }
 
+console.log('\n🗺  Generating sitemap...\n')
+const sitemap = spawnSync('node', [resolve(import.meta.dirname, 'build-sitemap.mjs')], {
+  stdio: 'inherit',
+  env: process.env,
+})
+if (sitemap.status !== 0) {
+  console.error('❌ Sitemap build failed.\n')
+  process.exit(sitemap.status)
+}
+
 console.log('\n🔨 Running vite build...\n')
 spawnSync('vite', ['build'], { stdio: 'inherit', env: process.env })
 
