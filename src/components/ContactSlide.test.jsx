@@ -168,7 +168,7 @@ describe('ContactSlide', () => {
     fireEvent.change(screen.getByPlaceholderText('Your message...'), { target: { value: 'Test' } })
     screen.getByRole('button', { name: 'Send' }).click()
     await waitFor(() => {
-      expect(screen.getByText('Failed to send. Please try again later.')).toBeTruthy()
+      expect(screen.getByText(/Failed to send/i)).toBeTruthy()
     })
     consoleSpy.mockRestore()
   })

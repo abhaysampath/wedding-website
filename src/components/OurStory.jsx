@@ -71,6 +71,10 @@ export default function OurStory() {
                 srcSet={slides[currentIndex]?.srcset}
                 sizes="(max-width: 768px) 100vw, 50vw"
                 alt={slides[currentIndex]?.alt}
+                width={800}
+                height={1000}
+                loading={currentIndex === 0 ? 'eager' : 'lazy'}
+                fetchPriority={currentIndex === 0 ? 'high' : 'auto'}
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}

@@ -5,6 +5,7 @@ import { track } from '@vercel/analytics'
 import { useAuth } from '../context/useAuth'
 
 const ContactForm = lazy(() => import('./ContactForm'))
+const PlusOneEditor = lazy(() => import('./PlusOneEditor'))
 import {
   createAnonymousSession,
   sendPhoneCode,
@@ -81,6 +82,7 @@ export default function AuthModal() {
   const urlSlugRef = useRef(null)
   const modalRef = useRef(null)
   const inputContainerRef = useRef(null)
+  const prevFocusRef = useRef(null)
   const [dropdownPos, setDropdownPos] = useState(null)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
   const [signedIn, setSignedIn] = useState(null)
@@ -91,8 +93,10 @@ export default function AuthModal() {
   const matches = useMemo(() => {
     const t = normalize(nameInput)
     if (t.length < 3) return []
+    const includeTest = nameInput.includes('TEST')
     return content.guests
       .filter(g => {
+        if (g.title === 'TEST' && !includeTest) return false
         const full = normalize(`${g.firstName} ${g.lastName}`)
         const first = normalize(g.firstName)
         const last = normalize(g.lastName)
@@ -100,6 +104,15 @@ export default function AuthModal() {
       })
       .slice(0, 8)
   }, [nameInput, content.guests])
+
+  useEffect(() => {
+    if (showAuthModal) {
+      prevFocusRef.current = document.activeElement
+    } else if (prevFocusRef.current && typeof prevFocusRef.current.focus === 'function') {
+      prevFocusRef.current.focus()
+      prevFocusRef.current = null
+    }
+  }, [showAuthModal])
 
   const resetState = useCallback(() => {
     setNameInput('')
@@ -1089,6 +1102,9 @@ export default function AuthModal() {
                     <img
                       src="/ar-logo.png"
                       alt="Welcome"
+                      width={64}
+                      height={64}
+                      loading="lazy"
                       className="w-full h-full object-contain scale-150"
                     />
                   </div>
@@ -1125,6 +1141,9 @@ export default function AuthModal() {
                     updateContact={updateContact}
                     sideName={config.site.coupleNames}
                   />
+                  {authMode === 'settings' && user?.plusOne === 'Allowed+1' && (
+                    <PlusOneEditor user={user} guests={content.guests} />
+                  )}
                 </Suspense>
               )}
             </div>

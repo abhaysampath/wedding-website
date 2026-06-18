@@ -168,17 +168,14 @@ export default function EventDetails() {
                       i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
                     } ${isVendor ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-gold/20' : ''}`}
                   >
-                    <div
+                    <button
+                      type="button"
                       className={`flex-1 pl-16 md:pl-0 cursor-pointer ${
                         i % 2 === 0 ? 'md:text-right md:pr-16' : 'md:text-left md:pl-16'
                       }`}
                       onClick={() => toggleEvent(i)}
-                      role="button"
-                      tabIndex={0}
                       aria-expanded={isExpanded}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') toggleEvent(i)
-                      }}
+                      aria-label={`Toggle ${event.title}`}
                     >
                       <div
                         className={`inline-block w-full ${i % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}
@@ -253,42 +250,30 @@ export default function EventDetails() {
                         )}
                       </AnimatePresence>
 
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation()
-                          toggleEvent(i)
-                        }}
-                        className="mt-3 inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-gold-dark/60 hover:text-gold-dark transition-colors py-1"
-                      >
+                      <span className="mt-3 inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-gold-dark/60 transition-colors py-1">
                         {isExpanded ? 'Show Less' : 'More Details'}
                         <ChevronIcon open={isExpanded} />
-                      </button>
-                    </div>
+                      </span>
+                    </button>
 
                     <motion.div
                       animate={{
                         scale: isExpanded ? 1.15 : 1,
-                        borderColor: isExpanded ? 'rgb(201, 169, 110)' : 'rgba(201, 169, 110, 0.5)',
+                        borderColor: isExpanded ? 'var(--color-gold)' : 'var(--color-gold-faded)',
                       }}
                       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                      className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-11 h-11 rounded-full border-2 border-gold/50 bg-cream flex items-center justify-center z-10 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
-                      onClick={() => toggleEvent(i)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          toggleEvent(i)
-                        }
-                      }}
-                      role="button"
-                      tabIndex={0}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
+                      className="absolute left-0 md:left-1/2 md:-translate-x-1/2 w-11 h-11 rounded-full border-2 border-gold/50 bg-cream flex items-center justify-center z-10 cursor-pointer shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <motion.div
+                      <motion.button
+                        type="button"
+                        onClick={() => toggleEvent(i)}
+                        aria-expanded={isExpanded}
+                        aria-label={`Toggle ${event.title}`}
                         animate={{ scale: isExpanded ? 1.4 : 1 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="w-3.5 h-3.5 rounded-full bg-gold"
+                        className="w-3.5 h-3.5 rounded-full bg-gold cursor-pointer"
                       />
                     </motion.div>
 

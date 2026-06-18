@@ -5,6 +5,7 @@ import config from '../config'
 import { signInWithGoogle } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
+import { writeToSheet, mintServerSession, clearServerSession } from '../utils/sheet-write'
 
 const { sheets } = config
 
@@ -72,36 +73,6 @@ function updateUrlSlug(slug) {
     window.history.replaceState({}, '', '/')
   } else {
     window.history.replaceState({}, '', `/g/${encodeURIComponent(slug)}`)
-  }
-}
-
-async function writeToSheet(guestId, data) {
-  if (!guestId) return true
-  try {
-    const res = await fetch(`/api/guest/${guestId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-    if (!res.ok) {
-      console.error(
-        'Sheet write failed:',
-        guestId,
-        data,
-        res.status,
-        await res.text().catch(err => {
-          console.error('Failed to read error response text:', err)
-          return ''
-        }),
-      )
-      return false
-    }
-    const body = await res.json()
-    if (!body.updated) console.warn('Sheet write returned 0 updates:', guestId, data)
-    return body.updated > 0
-  } catch (err) {
-    console.error('Sheet write error:', guestId, data, err)
-    return false
   }
 }
 
@@ -214,6 +185,7 @@ export function AuthProvider({ children }) {
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
     writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    mintServerSession(guest.id)
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
@@ -331,6 +303,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     setActiveWedding('us')
     localStorage.removeItem('wedding_user')
+    clearServerSession()
     updateUrlSlug('')
   }, [])
 

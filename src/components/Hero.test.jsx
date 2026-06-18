@@ -123,7 +123,7 @@ describe('Hero', () => {
       firebaseLoading: false,
     })
     render(<Hero />)
-    const searchButton = screen.getByText('Sign in to find your invite').closest('div')
+    const searchButton = screen.getByText('Sign in to find your invite').closest('button')
     fireEvent.click(searchButton)
     expect(setShowAuthModal).toHaveBeenCalledWith(true)
   })

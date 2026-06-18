@@ -168,7 +168,14 @@ export default function ContactSlide() {
         className="flex flex-col items-center justify-center text-center px-6 py-16"
       >
         <div className="w-16 h-16 mb-4">
-          <img src="/ar-logo.png" alt="AR" className="w-full h-full object-contain opacity-70" />
+          <img
+            src="/ar-logo.png"
+            alt="AR"
+            width={64}
+            height={64}
+            loading="lazy"
+            className="w-full h-full object-contain opacity-70"
+          />
         </div>
         <p className="text-cream/90 font-heading text-xl mb-2">Thank You!</p>
         <p className="text-cream/60 text-sm max-w-xs">
@@ -262,9 +269,17 @@ export default function ContactSlide() {
           </div>
 
           {status === 'error' && (
-            <p className="text-xs text-red-400 text-center" aria-live="polite">
-              Failed to send. Please try again later.
-            </p>
+            <div className="text-center" aria-live="polite">
+              <p className="text-xs text-red-400">Failed to send. Please try again.</p>
+              <button
+                type="button"
+                onClick={() => handleSubmit({ preventDefault: () => {} })}
+                disabled={sending}
+                className="mt-2 text-[10px] tracking-widest uppercase text-cream/60 hover:text-cream underline underline-offset-2 disabled:opacity-50"
+              >
+                Retry
+              </button>
+            </div>
           )}
 
           <button

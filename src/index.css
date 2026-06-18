@@ -35,10 +35,20 @@
   --color-gold: #c9a96e;
   --color-gold-light: #decca0;
   --color-gold-dark: #a8884a;
+  --color-gold-faded: rgba(201, 169, 110, 0.5);
   --color-charcoal: #2c2c2c;
   --color-charcoal-light: #4a4a4a;
+  --color-india-pill-bg: #fdf6ee;
+  --color-india-pill-active: #e8d5b8;
+  --color-india-text: #7c5c3e;
+  --color-india-text-muted: #b8956e;
   --font-heading: 'Lovers in New York', serif;
   --font-body: 'DM Sans', sans-serif;
+  --font-cormorant: 'Cormorant Garamond', serif;
+  --shadow-soft: 0 1px 8px rgba(0, 0, 0, 0.06);
+  --shadow-soft-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-amber-soft: 0 2px 8px rgba(217, 119, 6, 0.08);
 }
 
 html {

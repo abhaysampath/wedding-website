@@ -47,6 +47,19 @@ export async function signInWithGoogle() {
   return result
 }
 
+export async function getIdToken(forceRefresh = false) {
+  const a = init()
+  if (!a) return null
+  const user = a.currentUser
+  if (!user) return null
+  try {
+    return await user.getIdToken(forceRefresh)
+  } catch (err) {
+    console.error('getIdToken failed:', err)
+    return null
+  }
+}
+
 export async function createAnonymousSession() {
   const a = init()
   if (!a) return null

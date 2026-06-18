@@ -25,6 +25,10 @@ const OPTIONAL_VARS = [
   { var: 'VITE_EMAILJS_CONTACT_TEMPLATE_ID', label: 'EmailJS Contact Template ID' },
   { var: 'VITE_RECAPTCHA_SITE_KEY', label: 'reCAPTCHA Site Key' },
   { var: 'RECAPTCHA_SECRET_KEY', label: 'reCAPTCHA Secret Key' },
+  { var: 'FIREBASE_PROJECT_ID', label: 'Firebase Admin Project ID' },
+  { var: 'FIREBASE_CLIENT_EMAIL', label: 'Firebase Admin Client Email' },
+  { var: 'FIREBASE_PRIVATE_KEY', label: 'Firebase Admin Private Key' },
+  { var: 'SESSION_SECRET', label: 'Session cookie HMAC secret' },
 ]
 
 const missing = []

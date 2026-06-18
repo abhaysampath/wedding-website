@@ -16,6 +16,7 @@ const SHEET_CONFIG = {
       dietaryPreferences: 'Dietary Preferences',
       lastLogin: 'LastLogin',
       lastUpdated: 'LastUpdated',
+      firebaseUid: 'FirebaseUID',
       loginFailed: 'LoginFailed',
       rsvpUs: 'US-RSVP',
       rsvpIndia: 'India-RSVP',
