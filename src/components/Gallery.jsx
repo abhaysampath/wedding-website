@@ -233,7 +233,8 @@ export default function Gallery() {
               const hMob = `calc(${BASE_H.mobile}px * ${scale})`
               const opacity = 0.5 + scale * 0.5
               return (
-                <motion.div
+                <motion.button
+                  type="button"
                   key={img.jpg}
                   layoutId={`gallery-${img.jpg}`}
                   initial={{ opacity: 0, y: 20 }}
@@ -247,14 +248,7 @@ export default function Gallery() {
                     opacity,
                   }}
                   onClick={() => setExpanded(i)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setExpanded(i)
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
+                  aria-label={`Open ${img.alt}`}
                 >
                   <div
                     className="relative overflow-hidden rounded-sm bg-sage-light/10"
@@ -279,7 +273,7 @@ export default function Gallery() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </div>
-                </motion.div>
+                </motion.button>
               )
             })}
 

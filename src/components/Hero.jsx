@@ -282,16 +282,9 @@ export default function Hero() {
             className="bg-cream/10 backdrop-blur-md rounded-sm border border-cream/20 p-4"
           >
             <div className="flex items-center gap-3">
-              <motion.div
+              <motion.button
+                type="button"
                 onClick={() => setShowAuthModal(true)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    setShowAuthModal(true)
-                  }
-                }}
-                role="button"
-                tabIndex={0}
                 whileTap={{
                   scale: 0.95,
                   transition: { type: 'spring', stiffness: 500, damping: 12 },
@@ -310,7 +303,7 @@ export default function Hero() {
                 <span className="text-cream/70 text-sm tracking-wide">
                   Sign in to find your invite
                 </span>
-              </motion.div>
+              </motion.button>
               <span className="flex items-center gap-2">
                 <motion.button
                   type="button"
