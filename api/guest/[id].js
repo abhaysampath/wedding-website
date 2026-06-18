@@ -2,6 +2,7 @@ import SHEET_CONFIG from '../sheets-config.js'
 import { isAllowedOrigin } from '../_origin.js'
 import { getSession, isAdminRole } from '../_session.js'
 import { applyLimit } from '../_rate-limit.js'
+import { cacheInvalidate } from '../_cache.js'
 
 let _colMapCache = null
 
@@ -288,6 +289,7 @@ export default async function handler(req, res) {
       requestBody: { valueInputOption: 'USER_ENTERED', data: updates },
     })
 
+    cacheInvalidate(`content:${sheetId}`)
     return res.json({ updated: updates.length })
   } catch (err) {
     console.error('Guest update failed:', err)
