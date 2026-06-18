@@ -218,14 +218,6 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Sheet not configured' })
   }
 
-  const session = await getSession(req)
-  if (!session) {
-    return res.status(401).json({ error: 'Authentication required' })
-  }
-  if (session.kind === 'unconfigured') {
-    return res.status(503).json({ error: 'Server auth not configured' })
-  }
-
   const data = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}')
   const requestedFields = Object.keys(data || {}).filter(k => data[k] !== undefined)
   const onlyAuditFields =
@@ -233,6 +225,14 @@ export default async function handler(req, res) {
     requestedFields.every(f => UNAUTH_AUDIT_FIELDS.includes(f))
   if (onlyAuditFields) {
     return await handleUnauthAudit(req, res, data)
+  }
+
+  const session = await getSession(req)
+  if (!session) {
+    return res.status(401).json({ error: 'Authentication required' })
+  }
+  if (session.kind === 'unconfigured') {
+    return res.status(503).json({ error: 'Server auth not configured' })
   }
 
   try {

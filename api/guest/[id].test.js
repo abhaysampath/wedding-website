@@ -482,4 +482,28 @@ describe('PATCH /api/guest/:id', () => {
     await handler(makeReq({ id: '2', body: { rsvpUs: 'YES' } }), res)
     expect(res.statusCode).toBe(403)
   })
+
+  it('allows unauthenticated PATCH for audit fields (loginFailed, lastLogin, lastUpdated)', async () => {
+    mockGetSession.mockResolvedValue(null)
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+    mockBatchUpdate.mockResolvedValueOnce({})
+    const res = makeRes()
+    await handler(
+      makeReq({ id: '6', body: { loginFailed: '2026-06-18T20:00:00Z' } }),
+      res,
+    )
+    expect(res.statusCode).toBe(200)
+    expect(mockBatchUpdate).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects unauthenticated PATCH that mixes audit and non-audit fields', async () => {
+    mockGetSession.mockResolvedValue(null)
+    const res = makeRes()
+    await handler(
+      makeReq({ id: '6', body: { loginFailed: '2026-06-18T20:00:00Z', phone: '5551234567' } }),
+      res,
+    )
+    expect(res.statusCode).toBe(401)
+  })
 })
