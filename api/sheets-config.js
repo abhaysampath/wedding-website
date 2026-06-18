@@ -19,6 +19,7 @@ const SHEET_CONFIG = {
       loginFailed: 'LoginFailed',
       rsvpUs: 'US-RSVP',
       rsvpIndia: 'India-RSVP',
+      firebaseUid: 'FirebaseUID',
     },
   },
   faq: {

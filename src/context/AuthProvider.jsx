@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { track } from '@vercel/analytics'
 import { AuthContext } from './AuthContext'
 import config from '../config'
-import { signInWithGoogle } from '../firebase'
+import { signInWithGoogle, getIdToken } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
 
@@ -75,12 +75,43 @@ function updateUrlSlug(slug) {
   }
 }
 
+async function mintServerSession(guestId) {
+  if (!guestId) return false
+  try {
+    const res = await fetch('/api/auth/session', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ guestId }),
+    })
+    return res.ok
+  } catch (err) {
+    console.error('mintServerSession failed:', guestId, err)
+    return false
+  }
+}
+
+async function clearServerSession() {
+  try {
+    await fetch('/api/auth/session', {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+  } catch (err) {
+    console.warn('clearServerSession failed:', err)
+  }
+}
+
 async function writeToSheet(guestId, data) {
   if (!guestId) return true
   try {
+    const headers = { 'Content-Type': 'application/json' }
+    const token = await getIdToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
     const res = await fetch(`/api/guest/${guestId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      headers,
       body: JSON.stringify(data),
     })
     if (!res.ok) {
@@ -214,6 +245,7 @@ export function AuthProvider({ children }) {
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
     writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    mintServerSession(guest.id)
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
@@ -331,6 +363,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     setActiveWedding('us')
     localStorage.removeItem('wedding_user')
+    clearServerSession()
     updateUrlSlug('')
   }, [])
 
