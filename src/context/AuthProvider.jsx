@@ -170,7 +170,7 @@ export function AuthProvider({ children }) {
     }, 300)
   }, [])
 
-  const signInAsGuest = useCallback((guest, overrides = {}) => {
+  const signInAsGuest = useCallback(async (guest, overrides = {}) => {
     setFirebaseError(null)
     const now = eastTime()
     const payload = {
@@ -195,7 +195,7 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    mintServerSession(guest.id)
+    await mintServerSession(guest.id)
     writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
     updateUrlSlug(getGuestSlug(guest))
 
