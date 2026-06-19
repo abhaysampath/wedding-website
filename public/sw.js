@@ -36,7 +36,7 @@ self.addEventListener('fetch', (e) => {
           caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone))
           return res
         })
-        .catch(() => caches.match(request).then((cached) => cached || Response.error()))
+        .catch(() => caches.match(request).then((cached) => cached || fetch('/')))
     )
     return
   }
@@ -53,6 +53,6 @@ self.addEventListener('fetch', (e) => {
             return res
           })
       )
-      .catch(() => Response.error())
+      .catch(() => fetch('/'))
   )
 })
