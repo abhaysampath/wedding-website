@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { stripPhone, guestLabel, fullName } from '../utils/guest'
 import weddings from '../data/weddings.json'
+import PlusOneEditor from './PlusOneEditor'
 
 function getDraftKey(userId) {
   return `contact_draft_${userId}`
@@ -401,6 +402,10 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             />
           )}
         </div>
+      )}
+
+      {authMode === 'settings' && user?.plusOne === 'Allowed+1' && (
+        <PlusOneEditor user={user} guests={content?.guests || []} />
       )}
 
       <p className="text-sm text-charcoal-light/70 leading-relaxed">

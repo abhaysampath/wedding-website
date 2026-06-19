@@ -148,7 +148,16 @@ const ALLOWED_PATCH_FIELDS = [
   'rsvpIndia',
 ]
 
-const PLUS_ONE_GROUP_FIELDS = ['rsvpUs', 'rsvpIndia', 'dietaryPreferences']
+const PLUS_ONE_GROUP_FIELDS = [
+  'firstName',
+  'lastName',
+  'phone',
+  'email',
+  'address',
+  'dietaryPreferences',
+  'rsvpUs',
+  'rsvpIndia',
+]
 
 const UNAUTH_AUDIT_FIELDS = ['lastLogin', 'lastUpdated', 'loginFailed']
 

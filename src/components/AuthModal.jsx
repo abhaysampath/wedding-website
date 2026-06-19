@@ -6,7 +6,6 @@ import { track } from '@vercel/analytics'
 import { useAuth } from '../context/useAuth'
 
 const ContactForm = lazy(() => import('./ContactForm'))
-const PlusOneEditor = lazy(() => import('./PlusOneEditor'))
 import {
   createAnonymousSession,
   sendPhoneCode,
@@ -1157,9 +1156,6 @@ export default function AuthModal() {
                     updateContact={updateContact}
                     sideName={config.site.coupleNames}
                   />
-                  {authMode === 'settings' && user?.plusOne === 'Allowed+1' && (
-                    <PlusOneEditor user={user} guests={content.guests} />
-                  )}
                 </Suspense>
               )}
             </div>
