@@ -338,25 +338,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     user,
   ])
 
-  const handleMessageClick = useCallback(async () => {
-    setSaveStatus('saving')
-    try {
-      await updateContact({
-        phone: stripPhone(phone),
-        email: email.trim(),
-        address,
-        dietaryPreferences,
-      })
-      const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
-      window.dispatchEvent(
-        new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }),
-      )
-    } catch (err) {
-      console.error('Message save failed:', err)
-      setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
-    }
-  }, [phone, email, address, dietaryPreferences, updateContact])
+  const handleMessageClick = useCallback(() => {
+    const msg = `Hi Abhay and Rebecca, FYI, here is my updated RSVP info:\n\nPostal Address:\n${address || '(not provided)'}\n\nDietary Preferences:\n${dietaryPreferences || '(not provided)'}`
+    window.dispatchEvent(
+      new CustomEvent('pending-contact-msg', { detail: { message: msg, reason: 'rsvp' } }),
+    )
+  }, [address, dietaryPreferences])
 
   const handleClose = useCallback(() => {
     clearDraft(user?.id)
