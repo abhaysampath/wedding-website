@@ -206,6 +206,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
   const inactivityRef = useRef(null)
+  const plusOneSaveAllRef = useRef(null)
 
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   const validEmail = EMAIL_RE.test(email.trim())
@@ -314,6 +315,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         rsvpUs,
         rsvpIndia,
       })
+      if (plusOneSaveAllRef.current) {
+        await plusOneSaveAllRef.current()
+      }
       setOriginalRsvpUs(rsvpUs)
       setOriginalRsvpIndia(rsvpIndia)
       setSaveStatus(hadRsvpChange ? 'rsvp-saved' : 'saved')
@@ -392,7 +396,13 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       )}
 
       {authMode === 'settings' && user?.plusOne === 'Allowed+1' && (
-        <PlusOneEditor user={user} guests={content?.guests || []} />
+        <PlusOneEditor
+          user={user}
+          guests={content?.guests || []}
+          onSaveAll={fn => {
+            plusOneSaveAllRef.current = fn
+          }}
+        />
       )}
 
       <p className="text-sm text-charcoal-light/70 leading-relaxed">

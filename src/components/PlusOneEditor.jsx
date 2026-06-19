@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { writeToSheet } from '../utils/sheet-write'
@@ -9,6 +9,12 @@ const WEDDING_LABELS = {
   india: { short: 'India Wedding — Chennai' },
 }
 
+function normalizeRsvpValue(value) {
+  if (value === 'YES') return 'Yes'
+  if (value === 'NO') return 'No'
+  return value || ''
+}
+
 function RsvpStatusBadge({ weddingKey, value }) {
   const label = WEDDING_LABELS[weddingKey]?.short || weddingKey
   const isYes = value === 'Yes'
@@ -16,20 +22,32 @@ function RsvpStatusBadge({ weddingKey, value }) {
   return (
     <span
       aria-label={`${label}: ${value || 'not set'}`}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase ${
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium ${
         isYes
-          ? 'bg-gold/15 text-gold-dark'
+          ? 'bg-gold/20 text-gold-dark border border-gold/30'
           : isNo
-            ? 'bg-cream-dark/60 text-charcoal-light/60'
-            : 'bg-cream-dark/30 text-charcoal-light/40'
+            ? 'bg-charcoal-light/10 text-charcoal-light/70 border border-charcoal-light/20'
+            : 'bg-cream-dark/30 text-charcoal-light/40 border border-charcoal-light/10'
       }`}
     >
       <span
-        className={`w-2.5 h-2.5 rounded-sm border ${
-          isYes ? 'bg-gold border-gold' : 'border-charcoal-light/30'
+        className={`w-2.5 h-2.5 rounded-sm border flex items-center justify-center ${
+          isYes ? 'bg-gold border-gold text-cream' : 'border-charcoal-light/30'
         }`}
-      />
-      {weddingKey === 'us' ? 'US' : 'India'}
+      >
+        {isYes && (
+          <svg
+            viewBox="0 0 24 24"
+            className="w-2 h-2"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={4}
+          >
+            <path d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </span>
+      {value || '—'}
     </span>
   )
 }
@@ -65,86 +83,45 @@ function RsvpToggle({ weddingKey, value, onChange }) {
         {isYes && '✓'}
       </span>
       <span className="font-medium">{weddingKey === 'us' ? 'US Wedding' : 'India Wedding'}</span>
-      <span className="ml-auto text-[10px] tracking-widest uppercase text-charcoal-light/50">
+      <span
+        className={`ml-auto text-[10px] tracking-widest uppercase font-medium ${
+          isYes ? 'text-gold-dark' : isNo ? 'text-charcoal-light/70' : 'text-charcoal-light/40'
+        }`}
+      >
         {value || '—'}
       </span>
     </button>
   )
 }
 
-function PlusOneExpandedEditor({ guest, onSaved }) {
-  const { content } = useAuth()
-  const guestFromContent = useMemo(
-    () => content?.guests?.find(g => g.id === guest.id) || null,
-    [content?.guests, guest.id],
+function buildPayload(state) {
+  return {
+    firstName: state.firstName,
+    lastName: state.lastName,
+    phone: state.phone,
+    email: state.email,
+    address: state.address,
+    rsvpUs: state.rsvpUs,
+    rsvpIndia: state.rsvpIndia,
+    dietaryPreferences: state.dietary,
+  }
+}
+
+function fieldsEqual(a, b) {
+  return (
+    a.firstName === b.firstName &&
+    a.lastName === b.lastName &&
+    a.phone === b.phone &&
+    a.email === b.email &&
+    a.address === b.address &&
+    a.rsvpUs === b.rsvpUs &&
+    a.rsvpIndia === b.rsvpIndia &&
+    a.dietary === b.dietary
   )
-  const originalFirstName = guestFromContent?.firstName || ''
-  const originalLastName = guestFromContent?.lastName || ''
-  const originalPhone = stripPhone(guestFromContent?.phone || '')
-  const originalEmail = guestFromContent?.email || ''
-  const originalAddress = guestFromContent?.address || ''
-  const originalRsvpUs = guestFromContent?.rsvpUs || ''
-  const originalRsvpIndia = guestFromContent?.rsvpIndia || ''
-  const originalDietary = guestFromContent?.dietaryPreferences || ''
+}
 
-  const [firstName, setFirstName] = useState(originalFirstName)
-  const [lastName, setLastName] = useState(originalLastName)
-  const [phone, setPhone] = useState(originalPhone)
-  const [email, setEmail] = useState(originalEmail)
-  const [address, setAddress] = useState(originalAddress)
-  const [rsvpUs, setRsvpUs] = useState(originalRsvpUs)
-  const [rsvpIndia, setRsvpIndia] = useState(originalRsvpIndia)
-  const [dietary, setDietary] = useState(originalDietary)
-  const [saving, setSaving] = useState(false)
-  const [status, setStatus] = useState(null)
-  const [error, setError] = useState(null)
-
-  const hasChanges =
-    firstName !== originalFirstName ||
-    lastName !== originalLastName ||
-    phone !== originalPhone ||
-    email !== originalEmail ||
-    address !== originalAddress ||
-    rsvpUs !== originalRsvpUs ||
-    rsvpIndia !== originalRsvpIndia ||
-    dietary !== originalDietary
-
-  const handleSave = useCallback(async () => {
-    if (saving) return
-    setSaving(true)
-    setStatus(null)
-    setError(null)
-    const ok = await writeToSheet(guest.id, {
-      firstName,
-      lastName,
-      phone,
-      email,
-      address,
-      rsvpUs,
-      rsvpIndia,
-      dietaryPreferences: dietary,
-    })
-    setSaving(false)
-    if (ok) {
-      setStatus('saved')
-      onSaved?.()
-      setTimeout(() => setStatus(null), 2500)
-    } else {
-      setError('Save failed. Please try again.')
-    }
-  }, [
-    guest.id,
-    firstName,
-    lastName,
-    phone,
-    email,
-    address,
-    rsvpUs,
-    rsvpIndia,
-    dietary,
-    saving,
-    onSaved,
-  ])
+function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, error, onSave }) {
+  const update = useCallback(patch => onStateChange({ ...state, ...patch }), [state, onStateChange])
 
   return (
     <div className="bg-charcoal-light/10 border-t border-gold/15 p-4 space-y-3">
@@ -155,8 +132,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
           </label>
           <input
             type="text"
-            value={firstName}
-            onChange={e => setFirstName(e.target.value)}
+            value={state.firstName}
+            onChange={e => update({ firstName: e.target.value })}
             placeholder="First name"
             className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
           />
@@ -167,8 +144,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
           </label>
           <input
             type="text"
-            value={lastName}
-            onChange={e => setLastName(e.target.value)}
+            value={state.lastName}
+            onChange={e => update({ lastName: e.target.value })}
             placeholder="Last name"
             className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
           />
@@ -180,8 +157,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
         </label>
         <input
           type="tel"
-          value={phone}
-          onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+          value={state.phone}
+          onChange={e => update({ phone: e.target.value.replace(/\D/g, '') })}
           placeholder="5551234567"
           className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
@@ -192,8 +169,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
         </label>
         <input
           type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
+          value={state.email}
+          onChange={e => update({ email: e.target.value })}
           placeholder="email@example.com"
           className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
@@ -203,8 +180,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
           Mailing Address
         </label>
         <textarea
-          value={address}
-          onChange={e => setAddress(e.target.value)}
+          value={state.address}
+          onChange={e => update({ address: e.target.value })}
           rows={2}
           maxLength={500}
           className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 resize-none"
@@ -213,10 +190,14 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
       </div>
       <div className="space-y-2">
         {guest.weddings?.includes('us') && (
-          <RsvpToggle weddingKey="us" value={rsvpUs} onChange={setRsvpUs} />
+          <RsvpToggle weddingKey="us" value={state.rsvpUs} onChange={v => update({ rsvpUs: v })} />
         )}
         {guest.weddings?.includes('india') && (
-          <RsvpToggle weddingKey="india" value={rsvpIndia} onChange={setRsvpIndia} />
+          <RsvpToggle
+            weddingKey="india"
+            value={state.rsvpIndia}
+            onChange={v => update({ rsvpIndia: v })}
+          />
         )}
       </div>
       <div>
@@ -225,8 +206,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
         </label>
         <input
           type="text"
-          value={dietary}
-          onChange={e => setDietary(e.target.value)}
+          value={state.dietary}
+          onChange={e => update({ dietary: e.target.value })}
           placeholder="e.g. vegetarian, nut allergy"
           className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
@@ -234,8 +215,8 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
+          onClick={onSave}
+          disabled={saving}
           className="text-[11px] tracking-widest uppercase bg-gold/15 text-gold-dark px-4 py-2 rounded-sm hover:bg-gold/25 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? 'Saving…' : 'Save'}
@@ -251,14 +232,14 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
               Saved
             </motion.span>
           )}
-          {error && (
+          {status === 'error' && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="text-[11px] text-red"
             >
-              {error}
+              {error || 'Save failed'}
             </motion.span>
           )}
         </AnimatePresence>
@@ -267,8 +248,62 @@ function PlusOneExpandedEditor({ guest, onSaved }) {
   )
 }
 
-function PlusOneRow({ guest }) {
+function PlusOneRow({ guest, registerSave }) {
+  const { content } = useAuth()
+  const guestFromContent = useMemo(
+    () => content?.guests?.find(g => g.id === guest.id) || null,
+    [content?.guests, guest.id],
+  )
+  const initialOriginal = useMemo(
+    () => ({
+      firstName: guestFromContent?.firstName || '',
+      lastName: guestFromContent?.lastName || '',
+      phone: stripPhone(guestFromContent?.phone || ''),
+      email: guestFromContent?.email || '',
+      address: guestFromContent?.address || '',
+      rsvpUs: normalizeRsvpValue(guestFromContent?.rsvpUs || ''),
+      rsvpIndia: normalizeRsvpValue(guestFromContent?.rsvpIndia || ''),
+      dietary: guestFromContent?.dietaryPreferences || '',
+    }),
+    [guestFromContent],
+  )
+
   const [open, setOpen] = useState(false)
+  const [state, setState] = useState(initialOriginal)
+  const [original, setOriginal] = useState(initialOriginal)
+  const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState(null)
+  const [saveError, setSaveError] = useState(null)
+
+  const hasChanges = !fieldsEqual(state, original)
+
+  const doSave = useCallback(async () => {
+    if (saving) return false
+    setSaving(true)
+    setSaveStatus(null)
+    setSaveError(null)
+    const ok = await writeToSheet(guest.id, buildPayload(state))
+    setSaving(false)
+    if (ok) {
+      setOriginal(state)
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus(null), 2500)
+      return true
+    }
+    setSaveStatus('error')
+    setSaveError('Save failed. Please try again.')
+    return false
+  }, [guest.id, state, saving])
+
+  useEffect(() => {
+    if (!registerSave) return
+    registerSave(guest.id, async () => {
+      if (!hasChanges) return true
+      return doSave()
+    })
+    return () => registerSave(guest.id, null)
+  }, [registerSave, guest.id, doSave, hasChanges])
+
   return (
     <div className="border-b border-gold/10 last:border-b-0">
       <button
@@ -283,10 +318,10 @@ function PlusOneRow({ guest }) {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {guest.weddings?.includes('us') && (
-            <RsvpStatusBadge weddingKey="us" value={guest.rsvpUs || ''} />
+            <RsvpStatusBadge weddingKey="us" value={state.rsvpUs} />
           )}
           {guest.weddings?.includes('india') && (
-            <RsvpStatusBadge weddingKey="india" value={guest.rsvpIndia || ''} />
+            <RsvpStatusBadge weddingKey="india" value={state.rsvpIndia} />
           )}
         </div>
         <span
@@ -315,7 +350,15 @@ function PlusOneRow({ guest }) {
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <PlusOneExpandedEditor guest={guest} onSaved={() => setOpen(false)} />
+            <PlusOneExpandedEditor
+              guest={guest}
+              state={state}
+              onStateChange={setState}
+              saving={saving}
+              status={saveStatus}
+              error={saveError}
+              onSave={doSave}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -323,7 +366,7 @@ function PlusOneRow({ guest }) {
   )
 }
 
-export default function PlusOneEditor({ user, guests }) {
+export default function PlusOneEditor({ user, guests, onSaveAll }) {
   const groupMembers = useMemo(() => {
     if (!user || !guests || user.plusOne !== 'Allowed+1') return []
     const rowOf = g => parseInt(String(g.id).replace(/[^\d]/g, ''), 10)
@@ -343,6 +386,25 @@ export default function PlusOneEditor({ user, guests }) {
     return members
   }, [user, guests])
 
+  const saveHandlersRef = useRef(new Map())
+  const registerSave = useCallback((id, handler) => {
+    if (handler) saveHandlersRef.current.set(id, handler)
+    else saveHandlersRef.current.delete(id)
+  }, [])
+
+  const saveAll = useCallback(async () => {
+    const results = await Promise.all(
+      Array.from(saveHandlersRef.current.values()).map(fn => fn().catch(() => false)),
+    )
+    return results.every(Boolean)
+  }, [])
+
+  useEffect(() => {
+    if (!onSaveAll) return
+    onSaveAll(saveAll)
+    return () => onSaveAll(null)
+  }, [onSaveAll, saveAll])
+
   if (groupMembers.length === 0) return null
 
   return (
@@ -352,7 +414,7 @@ export default function PlusOneEditor({ user, guests }) {
       </h3>
       <div className="border border-gold/15 rounded-sm overflow-hidden">
         {groupMembers.map(g => (
-          <PlusOneRow key={g.id} guest={g} />
+          <PlusOneRow key={g.id} guest={g} registerSave={registerSave} />
         ))}
       </div>
     </div>
