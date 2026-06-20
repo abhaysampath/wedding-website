@@ -98,7 +98,7 @@ jobs:
         env:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          SCREENSHOT_RECIPIENT: ${{ vars.NOTIFICATION_EMAIL }}
+          SCREENSHOT_RECIPIENT: ${{ secrets.NOTIFICATION_EMAIL }}
         run: |
           npx playwright install chromium
           node scripts/preview-check.mjs http://localhost:3002

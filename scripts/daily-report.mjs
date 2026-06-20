@@ -108,10 +108,10 @@ export async function main() {
     GOOGLE_PRIVATE_KEY,
     SMTP_USER,
     SMTP_PASS,
-    REPORT_RECIPIENT = 'sera.belize@gmail.com',
     DAYS_BETWEEN = '1',
     SITE_URL = 'https://abhayandrebecca.com',
   } = process.env
+  const REPORT_RECIPIENT = process.env.REPORT_RECIPIENT?.trim() || 'sera.belize@gmail.com'
 
   const missing = []
   if (!GOOGLE_SHEET_ID) missing.push('GOOGLE_SHEET_ID')

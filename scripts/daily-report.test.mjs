@@ -355,6 +355,31 @@ describe('main', () => {
     consoleLog.mockRestore()
   })
 
+  it('falls back to default REPORT_RECIPIENT when env var is empty string', async () => {
+    setRequiredEnv()
+    process.env.REPORT_RECIPIENT = ''
+
+    mockGet.mockResolvedValue({
+      data: {
+        values: [
+          ALL_COLUMNS,
+          mkGuest({ firstName: 'Alice', role: 'bride',
+            lastLogin: '2026-06-10', loginFailed: 'SUCCESS' }),
+        ],
+      },
+    })
+    mockFetch = vi.fn().mockResolvedValue({ ok: true })
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {})
+    await main()
+
+    expect(mockSendMail).toHaveBeenCalledOnce()
+    const mailCall = mockSendMail.mock.calls[0][0]
+    expect(mailCall.to).toBe('sera.belize@gmail.com')
+    expect(consoleLog).toHaveBeenCalledWith('Report sent to', 'sera.belize@gmail.com')
+    consoleLog.mockRestore()
+  })
+
   it('reports broken images', async () => {
     setRequiredEnv()
 
