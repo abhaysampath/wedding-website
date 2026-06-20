@@ -976,7 +976,21 @@ export default function AuthModal() {
 
                   {/* Email link — check inbox */}
                   {awaitingEmailLink && (
-                    <div className="text-center py-2 space-y-2">
+                    <div className="text-center py-2 space-y-3">
+                      <div className="bg-gold/10 border border-gold/25 rounded-sm p-3 text-left space-y-1.5">
+                        <p className="text-[10px] tracking-widest uppercase text-gold-dark font-medium">
+                          Check your spam folder
+                        </p>
+                        <p className="text-[11px] text-charcoal-light/80 leading-relaxed">
+                          The magic link email is sent from{' '}
+                          <code className="font-mono text-[10px] bg-cream px-1 py-0.5 rounded-sm border border-gold/20 break-all">
+                            noreply@ar-weddingsite.firebaseapp.com
+                          </code>
+                          . It often lands in <strong>Spam</strong>, <strong>Junk</strong>, or{' '}
+                          <strong>Promotions</strong>. Mark it as &quot;Not spam&quot; so future
+                          links arrive in your inbox.
+                        </p>
+                      </div>
                       <p className="text-xs text-charcoal-light/70 leading-relaxed">
                         We sent a sign-in link to:
                       </p>
@@ -985,11 +999,7 @@ export default function AuthModal() {
                         Click the link in that email on this device to finish signing in. Link
                         expires in 1 hour.
                       </p>
-                      <p className="text-[10px] text-charcoal-light/40 leading-relaxed">
-                        Don&apos;t see it? Check your spam, junk, or promotions folder. The sender
-                        is noreply@ar-weddingsite.firebaseapp.com.
-                      </p>
-                      <div className="mt-3 flex items-center justify-center gap-3">
+                      <div className="mt-1 flex items-center justify-center gap-3">
                         {emailResendable ? (
                           <button
                             type="button"
