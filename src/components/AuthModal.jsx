@@ -96,6 +96,7 @@ export default function AuthModal() {
     return content.guests
       .filter(g => {
         if (g.title === 'TEST' && !includeTest) return false
+        if (g.isKids || g.title === 'KIDS') return false
         const full = normalize(`${g.firstName} ${g.lastName}`)
         const first = normalize(g.firstName)
         const last = normalize(g.lastName)

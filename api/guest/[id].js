@@ -101,12 +101,14 @@ function findPlusOneGroup(rows, colMap, userRowIndex) {
   if (userRowIndex < 1 || userRowIndex > rows.length) return []
   const plusOneIdx = colMap.plusOne
   if (plusOneIdx === undefined) return []
+  const titleIdx = colMap.title
   const userPlusOne = String(rows[userRowIndex - 1][plusOneIdx] || '').trim()
   if (userPlusOne !== PLUS_ONE_ALLOWED) return []
   const group = [userRowIndex]
   for (let i = userRowIndex; i < rows.length; i++) {
     const nextPlusOne = String(rows[i][plusOneIdx] || '').trim()
-    if (nextPlusOne === PLUS_ONE_IS) {
+    const nextTitle = titleIdx !== undefined ? String(rows[i][titleIdx] || '').trim() : ''
+    if (nextPlusOne === PLUS_ONE_IS || nextTitle === 'KIDS') {
       group.push(i + 1)
     } else {
       break
