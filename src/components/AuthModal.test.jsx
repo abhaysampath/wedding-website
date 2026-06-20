@@ -51,11 +51,9 @@ vi.mock('../firebase', () => ({
   linkPhoneCredential: vi.fn(),
   getRecaptchaVerifier: vi.fn(() => ({})),
   clearRecaptchaVerifier: vi.fn(),
-}))
-
-vi.mock('../utils/verifyEmail', () => ({
-  sendVerificationCode: vi.fn(),
-  verifyCode: vi.fn(code => code === '123456'),
+  sendEmailSignInLink: vi.fn(),
+  isEmailSignInLink: vi.fn(() => false),
+  completeEmailLinkSignIn: vi.fn(),
 }))
 
 vi.mock('@vercel/analytics', () => ({ track: vi.fn() }))

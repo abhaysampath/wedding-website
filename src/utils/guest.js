@@ -27,3 +27,8 @@ export function guestLabel(guest, sideName) {
   const prefix = sideName[guest?.side] ? `${sideName[guest.side]}'s ` : ''
   return `${prefix}${(roleLabels[guest.role] || '').toLowerCase()}`
 }
+
+export function getGuestSlug(guest) {
+  if (!guest) return ''
+  return `${guest.firstName} ${guest.lastName}`.trim().toLowerCase().replace(/\s+/g, '-')
+}
