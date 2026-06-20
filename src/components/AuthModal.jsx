@@ -994,7 +994,9 @@ export default function AuthModal() {
                       <p className="text-xs text-charcoal-light/70 leading-relaxed">
                         We sent a sign-in link to:
                       </p>
-                      <p className="text-sm font-mono text-charcoal break-all">{guestEmail}</p>
+                      <p className="text-sm font-mono text-charcoal break-all">
+                        {maskEmail(guestEmail)}
+                      </p>
                       <p className="text-[10px] text-charcoal-light/50 leading-relaxed">
                         Click the link in that email on this device to finish signing in. Link
                         expires in 1 hour.
