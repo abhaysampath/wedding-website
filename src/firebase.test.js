@@ -21,11 +21,6 @@ vi.mock('firebase/auth', () => {
     signInWithCredential: vi.fn(),
     signInWithPhoneNumber: vi.fn(() => Promise.resolve({ verificationId: 'verId' })),
     RecaptchaVerifier: vi.fn(),
-    sendSignInLinkToEmail: vi.fn(() => Promise.resolve()),
-    isSignInWithEmailLink: vi.fn(() => false),
-    signInWithEmailLink: vi.fn(() =>
-      Promise.resolve({ user: { uid: 'fb-uid', email: 'test@example.com' } }),
-    ),
     browserLocalPersistence: 'local',
     setPersistence: vi.fn(),
   }
@@ -64,44 +59,6 @@ describe('firebase with config', () => {
     firebaseAuth.getAuth().currentUser = { uid: 'test-uid' }
     const result = await linkPhoneCredential('verId', '123456')
     expect(firebaseAuth.linkWithCredential).toHaveBeenCalled()
-  })
-
-  it('sendEmailSignInLink calls sendSignInLinkToEmail with actionCodeSettings', async () => {
-    const firebaseAuth = await import('firebase/auth')
-    const { sendEmailSignInLink } = await import('./firebase')
-    await sendEmailSignInLink('test@example.com', 'https://example.com/g/jane')
-    expect(firebaseAuth.sendSignInLinkToEmail).toHaveBeenCalledWith(
-      expect.anything(),
-      'test@example.com',
-      expect.objectContaining({
-        url: 'https://example.com/g/jane',
-        handleCodeInApp: true,
-      }),
-    )
-  })
-
-  it('isEmailSignInLink returns the firebase check result', async () => {
-    const firebaseAuth = await import('firebase/auth')
-    const { isEmailSignInLink } = await import('./firebase')
-    firebaseAuth.isSignInWithEmailLink.mockReturnValueOnce(true)
-    expect(isEmailSignInLink('https://example.com/?oobCode=xxx')).toBe(true)
-    firebaseAuth.isSignInWithEmailLink.mockReturnValueOnce(false)
-    expect(isEmailSignInLink('https://example.com/other')).toBe(false)
-  })
-
-  it('completeEmailLinkSignIn calls signInWithEmailLink and returns the result', async () => {
-    const firebaseAuth = await import('firebase/auth')
-    const { completeEmailLinkSignIn } = await import('./firebase')
-    const result = await completeEmailLinkSignIn(
-      'https://example.com/?oobCode=xxx',
-      'test@example.com',
-    )
-    expect(firebaseAuth.signInWithEmailLink).toHaveBeenCalledWith(
-      expect.anything(),
-      'test@example.com',
-      'https://example.com/?oobCode=xxx',
-    )
-    expect(result.user.email).toBe('test@example.com')
   })
 })
 
