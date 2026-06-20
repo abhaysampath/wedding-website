@@ -150,10 +150,10 @@ export default async function handler(req, res) {
       wedding: parseFaqWedding(row.wedding),
     }))
 
-    const visibleGuests = guests.filter(g => g.title !== 'KIDS')
+    const guestsWithKidsFlag = guests.map(g => ({ ...g, isKids: g.title === 'KIDS' }))
     const body = {
       source: 'sheet',
-      guests: visibleGuests,
+      guests: guestsWithKidsFlag,
       faq,
       faqWeddingColFound,
       faqHeaderRow: faqHeaders,

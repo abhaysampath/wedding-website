@@ -377,7 +377,7 @@ export default function PlusOneEditor({ user, guests, onSaveAll }) {
     for (const g of sorted) {
       const r = rowOf(g)
       if (r <= userRowIndex) continue
-      if (g.plusOne === 'Is+1') {
+      if (g.plusOne === 'Is+1' || g.isKids || g.title === 'KIDS') {
         members.push(g)
       } else {
         break
