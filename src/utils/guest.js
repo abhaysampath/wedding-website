@@ -13,7 +13,7 @@ export function stripPhone(raw) {
 export function fullName(guest) {
   if (!guest) return ''
   const trimmed = (guest.title || '').trim().toLowerCase()
-  const prefix = trimmed === 'dr' || trimmed === 'dr.' ? 'Dr. ' : ''
+  const prefix = trimmed === 'dr' || trimmed === 'dr.' ? 'Dr ' : ''
   return `${prefix}${guest.firstName} ${guest.lastName}`.trim()
 }
 

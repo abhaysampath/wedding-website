@@ -24,7 +24,7 @@ Controls row classification and optional name prefix. Affects visibility, search
 | Value | Behavior |
 |---|---|
 | _(empty)_ | Normal guest row. Visible in search, reports, and sitemap. |
-| `Dr` | Prepended to the guest's full name in the UI (e.g. "Dr. Jane Doe"). Both `Dr` and `Dr.` in the sheet produce `Dr.` prefix in the UI. Currently the only title value that acts as a name prefix. |
+| `Dr` | Prepended to the guest's full name in the UI (e.g. "Dr Jane Doe"). Both `Dr` and `Dr.` in the sheet produce `Dr ` prefix (no period) in the UI. Currently the only title value that acts as a name prefix. |
 | `KIDS` | Row is **never sent** to the client — filtered server-side. Use for children to keep nav and sitemap clean. |
 | `TEST` | Appears in search **only** if the search term contains "TEST" (case-sensitive). Excluded from daily-report totals and sitemap. |
 | `#...` | Any value starting with `#` is treated as a comment — blanked at read time. Useful for notes or temporarily disabled rows. |
