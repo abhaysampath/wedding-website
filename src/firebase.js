@@ -61,6 +61,9 @@ export async function sendEmailSignInLink(email, continueUrl) {
     handleCodeInApp: true,
   }
   await sendSignInLinkToEmail(a, email, actionCodeSettings)
+  if (typeof console !== 'undefined') {
+    console.info(`[auth] Magic link sent to ${email} (return URL: ${continueUrl})`)
+  }
   try {
     window.localStorage.setItem('emailForSignIn', email)
   } catch (err) {

@@ -162,13 +162,18 @@ export default function AuthModal() {
       sessionStorage.setItem('awaiting_email', '1')
       sessionStorage.setItem('email_sent_at', String(Date.now()))
     } catch (err) {
-      setFirebaseError(err.message || 'Failed to send sign-in link')
+      const code = err?.code || 'unknown'
+      setFirebaseError(
+        `Failed to send sign-in link (${code}). Check the browser console for details.`,
+      )
       track('signin_failed', {
         method: 'email',
-        reason: err.message,
+        reason: code,
+        message: err.message,
         guest: selectedMatch?.firstName,
         guestId: selectedMatch?.id,
       })
+      console.error('[auth] sendEmailSignInLink failed:', code, err)
     } finally {
       setSaving(false)
     }
@@ -971,13 +976,18 @@ export default function AuthModal() {
 
                   {/* Email link — check inbox */}
                   {awaitingEmailLink && (
-                    <div className="text-center py-2">
+                    <div className="text-center py-2 space-y-2">
                       <p className="text-xs text-charcoal-light/70 leading-relaxed">
-                        We sent a sign-in link to your email. Click it on this device to finish
-                        signing in.
+                        We sent a sign-in link to:
                       </p>
-                      <p className="text-[10px] text-charcoal-light/40 mt-2">
-                        Link expires in 1 hour. Check your spam folder if you don&apos;t see it.
+                      <p className="text-sm font-mono text-charcoal break-all">{guestEmail}</p>
+                      <p className="text-[10px] text-charcoal-light/50 leading-relaxed">
+                        Click the link in that email on this device to finish signing in. Link
+                        expires in 1 hour.
+                      </p>
+                      <p className="text-[10px] text-charcoal-light/40 leading-relaxed">
+                        Don&apos;t see it? Check your spam, junk, or promotions folder. The sender
+                        is noreply@ar-weddingsite.firebaseapp.com.
                       </p>
                       <div className="mt-3 flex items-center justify-center gap-3">
                         {emailResendable ? (
