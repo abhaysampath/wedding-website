@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
 import { stripPhone, guestLabel, fullName } from '../utils/guest'
+import { sendRsvpConfirmation } from '../utils/rsvp-confirmation'
 import weddings from '../data/weddings.json'
 import PlusOneEditor from './PlusOneEditor'
 
@@ -231,6 +232,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
 
   const autoSave = useCallback(async () => {
     if (!hasChanges || saving) return
+    const rsvpChanged = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
     setSaveStatus('saving')
     try {
       await updateContact({
@@ -246,6 +248,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus('saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 2500)
+      if (rsvpChanged && user?.email) {
+        sendRsvpConfirmation()
+      }
     } catch (err) {
       console.error('Auto-save failed:', err)
       setSaveStatus('error')
@@ -258,6 +263,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     dietaryPreferences,
     rsvpUs,
     rsvpIndia,
+    originalRsvpUs,
+    originalRsvpIndia,
     hasChanges,
     saving,
     updateContact,
@@ -323,6 +330,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveStatus(hadRsvpChange ? 'rsvp-saved' : 'saved')
       clearDraft(user?.id)
       setTimeout(() => setSaveStatus(null), 4000)
+      if (hadRsvpChange && user?.email) {
+        sendRsvpConfirmation()
+      }
     } catch (err) {
       console.error('Save failed:', err)
       setSaveStatus('error')
