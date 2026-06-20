@@ -9,9 +9,6 @@ import {
   signInWithCredential,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
   browserLocalPersistence,
   setPersistence,
 } from 'firebase/auth'
@@ -48,48 +45,6 @@ export async function signInWithGoogle() {
   provider.setCustomParameters({ prompt: 'select_account' })
   const result = await signInWithPopup(a, provider)
   return result
-}
-
-export async function sendEmailSignInLink(email, continueUrl) {
-  const a = init()
-  if (!a)
-    throw new Error(
-      'Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env',
-    )
-  const actionCodeSettings = {
-    url: continueUrl,
-    handleCodeInApp: true,
-  }
-  await sendSignInLinkToEmail(a, email, actionCodeSettings)
-  if (typeof console !== 'undefined') {
-    console.info(`[auth] Magic link sent to ${email} (return URL: ${continueUrl})`)
-  }
-  try {
-    window.localStorage.setItem('emailForSignIn', email)
-  } catch (err) {
-    console.warn('Could not persist email for sign-in:', err)
-  }
-}
-
-export async function completeEmailLinkSignIn(link, email) {
-  const a = init()
-  if (!a)
-    throw new Error(
-      'Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env',
-    )
-  const result = await signInWithEmailLink(a, email, link)
-  try {
-    window.localStorage.removeItem('emailForSignIn')
-  } catch (err) {
-    console.warn('Could not clear email for sign-in:', err)
-  }
-  return result
-}
-
-export function isEmailSignInLink(link) {
-  const a = init()
-  if (!a) return false
-  return isSignInWithEmailLink(a, link)
 }
 
 export async function getIdToken(forceRefresh = false) {

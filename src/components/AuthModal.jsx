@@ -12,12 +12,10 @@ import {
   linkPhoneCredential,
   getRecaptchaVerifier,
   clearRecaptchaVerifier,
-  sendEmailSignInLink,
-  isEmailSignInLink,
-  completeEmailLinkSignIn,
 } from '../firebase'
+import { sendVerificationCode, verifyCode } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
-import { stripPhone, guestLabel, fullName, getGuestSlug } from '../utils/guest'
+import { stripPhone, guestLabel, fullName } from '../utils/guest'
 
 function isUsNumber(raw) {
   const digits = stripPhone(raw)
@@ -69,6 +67,8 @@ export default function AuthModal() {
   )
   const [smsCode, setSmsCode] = useState(Array(6).fill(''))
   const smsCodeRefs = useRef([])
+  const [emailCode, setEmailCode] = useState(Array(6).fill(''))
+  const emailCodeRefs = useRef([])
   const [verificationId, setVerificationId] = useState('')
   const [sendingSms, setSendingSms] = useState(false)
   const [verifyingCode, setVerifyingCode] = useState(false)
@@ -76,8 +76,11 @@ export default function AuthModal() {
   const [guestEmail, setGuestEmail] = useState('')
   const [smsResendable, setSmsResendable] = useState(true)
   const [emailResendable, setEmailResendable] = useState(true)
+  const [emailResendCountdown, setEmailResendCountdown] = useState(0)
   const inputRef = useRef(null)
   const recaptchaContainerRef = useRef(null)
+  const urlCodeRef = useRef(null)
+  const urlSlugRef = useRef(null)
   const modalRef = useRef(null)
   const inputContainerRef = useRef(null)
   const prevFocusRef = useRef(null)
@@ -123,6 +126,9 @@ export default function AuthModal() {
     setAwaitingSmsCode(false)
     setSmsCode(Array(6).fill(''))
     smsCodeRefs.current = []
+    setAwaitingEmailLink(false)
+    setEmailCode(Array(6).fill(''))
+    emailCodeRefs.current = []
     setVerificationId('')
     setSendingSms(false)
     setVerifyingCode(false)
@@ -134,7 +140,11 @@ export default function AuthModal() {
     setEmailResendable(true)
     sessionStorage.removeItem('awaiting_sms')
     sessionStorage.removeItem('sms_sent_at')
+    sessionStorage.removeItem('awaiting_email')
     sessionStorage.removeItem('email_sent_at')
+    sessionStorage.removeItem('pending_email_code')
+    sessionStorage.removeItem('pending_email_addr')
+    sessionStorage.removeItem('pending_email_name')
     sessionStorage.removeItem('pending_guest_id')
     sessionStorage.removeItem('pending_guest_phone')
     sessionStorage.removeItem('pending_guest_email')
@@ -155,29 +165,69 @@ export default function AuthModal() {
     setSaving(true)
     setFirebaseError(null)
     try {
-      const slug = getGuestSlug(selectedMatch)
-      const continueUrl = `${window.location.origin}/g/${slug}`
-      await sendEmailSignInLink(guestEmail, continueUrl)
+      await sendVerificationCode(
+        guestEmail,
+        `${selectedMatch.firstName} ${selectedMatch.lastName}`.trim(),
+      )
       setAwaitingEmailLink(true)
       sessionStorage.setItem('awaiting_email', '1')
       sessionStorage.setItem('email_sent_at', String(Date.now()))
     } catch (err) {
-      const code = err?.code || 'unknown'
-      setFirebaseError(
-        `Failed to send sign-in link (${code}). Check the browser console for details.`,
-      )
+      setFirebaseError(err.message || 'Failed to send verification code')
       track('signin_failed', {
         method: 'email',
-        reason: code,
-        message: err.message,
+        reason: err.message,
         guest: selectedMatch?.firstName,
         guestId: selectedMatch?.id,
       })
-      console.error('[auth] sendEmailSignInLink failed:', code, err)
     } finally {
       setSaving(false)
     }
   }, [guestEmail, selectedMatch, saving, setFirebaseError, recordLoginAttempt])
+
+  const handleEmailCodeComplete = useCallback(
+    async code => {
+      if (!verifyCode(code)) {
+        setFirebaseError('Invalid code. Check your email and try again.')
+        return
+      }
+      setSaving(true)
+      setFirebaseError(null)
+      try {
+        if (selectedMatch) {
+          await updateContact({ phone: guestPhone, email: guestEmail })
+          signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
+          setSignedIn(selectedMatch)
+        } else {
+          setShowAuthModal(false)
+        }
+      } catch (err) {
+        setFirebaseError(err.message || 'Failed to complete sign in')
+        track('signin_failed', {
+          method: 'email_code',
+          reason: err.message,
+          guest: selectedMatch?.firstName,
+          guestId: selectedMatch?.id,
+        })
+      } finally {
+        setSaving(false)
+      }
+    },
+    [
+      guestPhone,
+      guestEmail,
+      selectedMatch,
+      updateContact,
+      signInAsGuest,
+      setShowAuthModal,
+      setFirebaseError,
+    ],
+  )
+
+  const handleEmailCodeCompleteRef = useRef(handleEmailCodeComplete)
+  useEffect(() => {
+    handleEmailCodeCompleteRef.current = handleEmailCodeComplete
+  }, [handleEmailCodeComplete])
 
   const handlePhoneConfirm = useCallback(async () => {
     if (saving || sendingSms || !isUsNumber(guestPhone)) return
@@ -397,60 +447,55 @@ export default function AuthModal() {
   )
 
   useEffect(() => {
-    if (!isEmailSignInLink(window.location.href)) return
-    if (!content.guests?.length || !content.loaded) return
+    const params = new URLSearchParams(window.location.search)
+    const urlCode = params.get('code')
     const pathSlug = window.location.pathname.match(/^\/g\/(.+)/)?.[1]
-    const guest = pathSlug
-      ? content.guests.find(g => getGuestSlug(g) === decodeURIComponent(pathSlug))
-      : null
-    let email = null
-    try {
-      email = window.localStorage.getItem('emailForSignIn')
-    } catch {
-      email = null
+    const queryG = params.get('g')
+    const slug = pathSlug
+      ? decodeURIComponent(pathSlug)
+      : queryG
+        ? decodeURIComponent(queryG)
+        : null
+
+    if (urlCode && urlCode.length === 6) {
+      window.history.replaceState({}, '', window.location.pathname)
+      sessionStorage.setItem('awaiting_email', '1')
+      sessionStorage.setItem('pending_email_code', urlCode)
+      urlCodeRef.current = urlCode
+      urlSlugRef.current = slug
+      setTimeout(() => {
+        setAwaitingEmailLink(true)
+        setShowAuthModal(true)
+      }, 0)
+    } else if (slug && !showAuthModal) {
+      urlSlugRef.current = slug
+      setShowAuthModal(true)
     }
-    if (guest && guest.email) {
-      email = guest.email
-    }
-    if (!email) {
-      setFirebaseError('Please re-open the sign-in link from your email, or try signing in again.')
-      return
-    }
-    let cancelled = false
-    setTimeout(async () => {
-      if (cancelled) return
-      setSaving(true)
-      setFirebaseError(null)
-      try {
-        await completeEmailLinkSignIn(window.location.href, email)
-        if (cancelled) return
-        if (guest) {
-          if (guest.id) recordLoginAttempt(guest.id)
-          signInAsGuest(guest, { phone: guest.phone || '', email })
-          setSignedIn(guest)
-        } else {
-          setFirebaseError(
-            'Signed in, but could not match this email to a guest on the list. Try a different sign-in method.',
-          )
-        }
-        window.history.replaceState({}, '', guest ? `/g/${getGuestSlug(guest)}` : '/')
-      } catch (err) {
-        if (cancelled) return
-        setFirebaseError(err.message || 'Failed to complete sign-in link')
-        track('signin_failed', {
-          method: 'email_link',
-          reason: err.message,
-          guest: guest?.firstName,
-          guestId: guest?.id,
-        })
-      } finally {
-        if (!cancelled) setSaving(false)
+  }, [setShowAuthModal, showAuthModal])
+
+  useEffect(() => {
+    const code = urlCodeRef.current
+    const slug = urlSlugRef.current
+    if (!slug || !content.guests?.length || !content.loaded) return
+    urlSlugRef.current = null
+    urlCodeRef.current = null
+    setTimeout(() => {
+      const guest = content.guests.find(g => {
+        const gs = `${g.firstName} ${g.lastName}`.trim().toLowerCase().replace(/\s+/g, '-')
+        return gs === slug
+      })
+      if (guest) {
+        setSelectedMatch(guest)
+        setGuestPhone(stripPhone(guest.phone))
+        setGuestEmail(guest.email || '')
+        if (guest.id) recordLoginAttempt(guest.id)
+      }
+      if (code) {
+        setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
+        setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
       }
     }, 0)
-    return () => {
-      cancelled = true
-    }
-  }, [content.guests, content.loaded, recordLoginAttempt, signInAsGuest, setFirebaseError])
+  }, [content.guests, content.loaded, recordLoginAttempt])
 
   useEffect(() => {
     if (showAuthModal) {
@@ -490,19 +535,49 @@ export default function AuthModal() {
   }, [awaitingSmsCode])
 
   useEffect(() => {
-    if (!awaitingEmailLink) return
-    const sentAt = sessionStorage.getItem('email_sent_at')
-    if (!sentAt) {
-      setTimeout(() => setEmailResendable(true), 0)
+    if (!awaitingEmailLink) {
+      setTimeout(() => setEmailResendCountdown(0), 0)
       return
     }
+    const sentAt = sessionStorage.getItem('email_sent_at')
+    if (!sentAt) {
+      setTimeout(() => {
+        setEmailResendable(true)
+        setEmailResendCountdown(0)
+      }, 0)
+      return
+    }
+    const COOLDOWN_MS = 5 * 60 * 1000
     const elapsed = Date.now() - parseInt(sentAt, 10)
-    if (elapsed > 15 * 60 * 1000) {
-      setTimeout(() => setEmailResendable(true), 0)
+    if (elapsed >= COOLDOWN_MS) {
+      setTimeout(() => {
+        setEmailResendable(true)
+        setEmailResendCountdown(0)
+      }, 0)
     } else {
       setTimeout(() => setEmailResendable(false), 0)
-      const timer = setTimeout(() => setEmailResendable(true), 15 * 60 * 1000 - elapsed)
-      return () => clearTimeout(timer)
+      const update = () => {
+        const left = Math.max(0, COOLDOWN_MS - (Date.now() - parseInt(sentAt, 10)))
+        setEmailResendCountdown(Math.ceil(left / 1000))
+        if (left <= 0) {
+          setTimeout(() => {
+            setEmailResendable(true)
+            setEmailResendCountdown(0)
+          }, 0)
+        }
+      }
+      setTimeout(update, 0)
+      const interval = setInterval(update, 1000)
+      const timeout = setTimeout(() => {
+        setTimeout(() => {
+          setEmailResendable(true)
+          setEmailResendCountdown(0)
+        }, 0)
+      }, COOLDOWN_MS - elapsed)
+      return () => {
+        clearInterval(interval)
+        clearTimeout(timeout)
+      }
     }
   }, [awaitingEmailLink])
 
@@ -974,34 +1049,90 @@ export default function AuthModal() {
                     </div>
                   )}
 
-                  {/* Email link — check inbox */}
+                  {/* Email code input + resend (below grid) */}
                   {awaitingEmailLink && (
-                    <div className="text-center py-2 space-y-3">
-                      <div className="bg-gold/10 border border-gold/25 rounded-sm p-3 text-left space-y-1.5">
+                    <div>
+                      <div className="bg-gold/10 border border-gold/25 rounded-sm p-3 mb-3 text-left space-y-1.5">
                         <p className="text-[10px] tracking-widest uppercase text-gold-dark font-medium">
                           Check your spam folder
                         </p>
                         <p className="text-[11px] text-charcoal-light/80 leading-relaxed">
-                          The magic link email is sent from{' '}
-                          <code className="font-mono text-[10px] bg-cream px-1 py-0.5 rounded-sm border border-gold/20 break-all">
-                            noreply@ar-weddingsite.firebaseapp.com
-                          </code>
-                          . It often lands in <strong>Spam</strong>, <strong>Junk</strong>, or{' '}
+                          The code is emailed from noreply via EmailJS. It often lands in{' '}
+                          <strong>Spam</strong>, <strong>Junk</strong>, or{' '}
                           <strong>Promotions</strong>. Mark it as &quot;Not spam&quot; so future
-                          links arrive in your inbox.
+                          codes arrive in your inbox.
                         </p>
                       </div>
-                      <p className="text-xs text-charcoal-light/70 leading-relaxed">
-                        We sent a sign-in link to:
+                      <p className="text-[10px] text-charcoal-light/50 mb-2 text-center">
+                        A 6-digit code was sent to your email
                       </p>
-                      <p className="text-sm font-mono text-charcoal break-all">
-                        {maskEmail(guestEmail)}
-                      </p>
-                      <p className="text-[10px] text-charcoal-light/50 leading-relaxed">
-                        Click the link in that email on this device to finish signing in. Link
-                        expires in 1 hour.
-                      </p>
-                      <div className="mt-1 flex items-center justify-center gap-3">
+                      <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                        <span className="text-sm text-charcoal-light/50 font-mono select-none">
+                          code:
+                        </span>
+                        <div className="flex gap-1.5">
+                          {[0, 1, 2, 3, 4, 5].map(i => (
+                            <input
+                              key={i}
+                              ref={el => {
+                                if (el) emailCodeRefs.current[i] = el
+                              }}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={i === 0 ? 6 : 1}
+                              value={emailCode[i] || ''}
+                              onChange={e => {
+                                const raw = e.target.value.replace(/\D/g, '')
+                                if (!raw) return
+                                if (raw.length > 1) {
+                                  const next = raw.split('')
+                                  while (next.length < 6) next.push('')
+                                  setEmailCode(next)
+                                  if (raw.length === 6) handleEmailCodeComplete(raw)
+                                  else emailCodeRefs.current[raw.length]?.focus()
+                                  return
+                                }
+                                const next = [...emailCode]
+                                next[i] = raw
+                                setEmailCode(next)
+                                if (i < 5) emailCodeRefs.current[i + 1]?.focus()
+                                if (i === 5 || (raw && i < 3 && !next[i + 1])) {
+                                  const full = next.join('')
+                                  if (full.length === 6) handleEmailCodeComplete(full)
+                                }
+                              }}
+                              onKeyDown={e => {
+                                if (e.key === 'Backspace') {
+                                  const next = [...emailCode]
+                                  if (next[i]) {
+                                    next[i] = ''
+                                    setEmailCode(next)
+                                  } else if (i > 0) {
+                                    next[i - 1] = ''
+                                    setEmailCode(next)
+                                    emailCodeRefs.current[i - 1]?.focus()
+                                  }
+                                }
+                              }}
+                              onPaste={e => {
+                                e.preventDefault()
+                                const pasted = e.clipboardData
+                                  .getData('text')
+                                  .replace(/\D/g, '')
+                                  .slice(0, 6)
+                                const next = pasted.split('')
+                                while (next.length < 6) next.push('')
+                                setEmailCode(next)
+                                if (pasted.length === 6) handleEmailCodeComplete(pasted)
+                                else emailCodeRefs.current[pasted.length]?.focus()
+                              }}
+                              className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                              autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center justify-center gap-3">
                         {emailResendable ? (
                           <button
                             type="button"
@@ -1009,9 +1140,15 @@ export default function AuthModal() {
                             disabled={saving}
                             className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
                           >
-                            {saving ? 'Sending...' : 'Resend Link'}
+                            {saving ? 'Sending...' : 'Resend Code'}
                           </button>
-                        ) : null}
+                        ) : (
+                          <p className="text-[10px] text-charcoal-light/40">
+                            A code was already sent. Resend in{' '}
+                            {Math.floor(emailResendCountdown / 60)}:
+                            {String(emailResendCountdown % 60).padStart(2, '0')}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
