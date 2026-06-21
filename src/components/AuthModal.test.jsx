@@ -275,6 +275,25 @@ describe('AuthModal welcome screen', () => {
     render(<AuthModal />)
     await waitFor(() => expect(screen.getByText(/Welcome.*Jane/)).toBeTruthy())
   })
+
+  it('does not open sign-in modal when signed-in user lands on /g/<slug>', async () => {
+    window.history.pushState({}, '', '/g/jane-doe')
+    const signedInUser = {
+      id: 'g001',
+      firstName: 'Jane',
+      lastName: 'Doe',
+      role: 'invited_guest',
+      side: 'bride',
+      relationship: 'Cousin',
+    }
+    mockUseAuth.mockReturnValue({ ...baseAuth(), user: signedInUser, showAuthModal: false })
+    render(<AuthModal />)
+
+    await new Promise(r => setTimeout(r, 100))
+    expect(screen.queryByPlaceholderText('Start typing your name')).toBeFalsy()
+    expect(window.location.pathname).toBe('/')
+    window.history.pushState({}, '', '/')
+  })
 })
 
 describe('AuthModal settings mode', () => {

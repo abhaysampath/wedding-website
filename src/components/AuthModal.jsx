@@ -457,6 +457,13 @@ export default function AuthModal() {
         ? decodeURIComponent(queryG)
         : null
 
+    if (user) {
+      if (urlCode || slug) {
+        window.history.replaceState({}, '', '/')
+      }
+      return
+    }
+
     if (urlCode && urlCode.length === 6) {
       window.history.replaceState({}, '', window.location.pathname)
       sessionStorage.setItem('awaiting_email', '1')
@@ -472,7 +479,7 @@ export default function AuthModal() {
       urlSlugRef.current = slug
       setShowAuthModal(true)
     }
-  }, [setShowAuthModal])
+  }, [setShowAuthModal, user])
 
   useEffect(() => {
     const code = urlCodeRef.current
