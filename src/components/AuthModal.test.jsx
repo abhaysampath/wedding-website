@@ -56,6 +56,14 @@ vi.mock('../firebase', () => ({
   completeEmailLinkSignIn: vi.fn(),
 }))
 
+const { mockSendVerificationCode } = vi.hoisted(() => ({
+  mockSendVerificationCode: vi.fn(),
+}))
+vi.mock('../utils/verifyEmail', () => ({
+  sendVerificationCode: mockSendVerificationCode,
+  verifyCode: vi.fn(() => false),
+}))
+
 vi.mock('@vercel/analytics', () => ({ track: vi.fn() }))
 
 const mockUseAuth = vi.fn()
@@ -334,5 +342,23 @@ describe('AuthModal phone & email verification', () => {
     fireEvent.click(screen.getByText('Jane Doe'))
     const confirmButtons = screen.getAllByText('Confirm')
     expect(confirmButtons.length).toBe(2)
+  })
+
+  it('does not re-send OTP if one was sent within the last 5 minutes', async () => {
+    sessionStorage.setItem('email_sent_at', String(Date.now()))
+
+    mockSendVerificationCode.mockClear()
+    mockSendVerificationCode.mockResolvedValue(undefined)
+
+    render(<AuthModal />)
+    const input = screen.getByPlaceholderText('Start typing your name')
+    fireEvent.change(input, { target: { value: 'Jan' } })
+    fireEvent.click(screen.getByText('Jane Doe'))
+
+    const emailConfirm = screen.getAllByText('Confirm')[1]
+    fireEvent.click(emailConfirm)
+
+    await new Promise(r => setTimeout(r, 100))
+    expect(mockSendVerificationCode).not.toHaveBeenCalled()
   })
 })

@@ -161,6 +161,15 @@ export default function AuthModal() {
 
   const handleEmailConfirm = useCallback(async () => {
     if (saving || !guestEmail || !selectedMatch) return
+
+    const sentAt = sessionStorage.getItem('email_sent_at')
+    const COOLDOWN_MS = 5 * 60 * 1000
+    if (sentAt && Date.now() - parseInt(sentAt, 10) < COOLDOWN_MS) {
+      setAwaitingEmailLink(true)
+      sessionStorage.setItem('awaiting_email', '1')
+      return
+    }
+
     if (selectedMatch) recordLoginAttempt(selectedMatch.id)
     setSaving(true)
     setFirebaseError(null)
