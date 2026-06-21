@@ -69,7 +69,20 @@ export default function AuthModal() {
   const smsCodeRefs = useRef([])
   const [emailCode, setEmailCode] = useState(Array(6).fill(''))
   const emailCodeRefs = useRef([])
-  const [verificationId, setVerificationId] = useState('')
+  const [verificationId, setVerificationId] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('pending_verification_id')
+      const phone = sessionStorage.getItem('pending_verification_phone')
+      const sentAt = sessionStorage.getItem('pending_verification_sent_at')
+      if (stored && phone && sentAt) {
+        const elapsed = Date.now() - parseInt(sentAt, 10)
+        if (elapsed < 5 * 60 * 1000) return stored
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+    return ''
+  })
   const [sendingSms, setSendingSms] = useState(false)
   const [verifyingCode, setVerifyingCode] = useState(false)
   const [guestPhone, setGuestPhone] = useState('')
@@ -148,6 +161,9 @@ export default function AuthModal() {
     sessionStorage.removeItem('pending_guest_id')
     sessionStorage.removeItem('pending_guest_phone')
     sessionStorage.removeItem('pending_guest_email')
+    sessionStorage.removeItem('pending_verification_id')
+    sessionStorage.removeItem('pending_verification_phone')
+    sessionStorage.removeItem('pending_verification_sent_at')
     clearRecaptchaVerifier()
   }, [setFirebaseError])
 
@@ -241,6 +257,21 @@ export default function AuthModal() {
   const handlePhoneConfirm = useCallback(async () => {
     if (saving || sendingSms || !isUsNumber(guestPhone)) return
     if (selectedMatch) recordLoginAttempt(selectedMatch.id)
+
+    const e164Phone = formatE164(guestPhone)
+    const storedVid = sessionStorage.getItem('pending_verification_id')
+    const storedPhone = sessionStorage.getItem('pending_verification_phone')
+    const sentAt = sessionStorage.getItem('pending_verification_sent_at')
+    if (storedVid && storedPhone === e164Phone && sentAt) {
+      const elapsed = Date.now() - parseInt(sentAt, 10)
+      if (elapsed < 5 * 60 * 1000) {
+        setVerificationId(storedVid)
+        setAwaitingSmsCode(true)
+        sessionStorage.setItem('awaiting_sms', '1')
+        return
+      }
+    }
+
     setSendingSms(true)
     setFirebaseError(null)
     try {
@@ -256,11 +287,14 @@ export default function AuthModal() {
       if (!verifier) {
         throw new Error('Failed to initialize reCAPTCHA')
       }
-      const result = await sendPhoneCode(formatE164(guestPhone), verifier)
+      const result = await sendPhoneCode(e164Phone, verifier)
       setVerificationId(result.verificationId)
       setAwaitingSmsCode(true)
       sessionStorage.setItem('awaiting_sms', '1')
       sessionStorage.setItem('sms_sent_at', String(Date.now()))
+      sessionStorage.setItem('pending_verification_id', result.verificationId)
+      sessionStorage.setItem('pending_verification_phone', e164Phone)
+      sessionStorage.setItem('pending_verification_sent_at', String(Date.now()))
     } catch (err) {
       console.error('Phone auth error:', err)
       track('signin_failed', {
