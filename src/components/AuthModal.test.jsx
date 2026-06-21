@@ -231,6 +231,30 @@ describe('AuthModal sign-in mode', () => {
     const svgs = document.querySelectorAll('svg')
     expect(svgs.length).toBeGreaterThan(0)
   })
+
+  it('does not re-open after closing when URL has /g/<slug>', async () => {
+    window.history.pushState({}, '', '/g/jane-doe')
+    const replaceSpy = vi.spyOn(window.history, 'replaceState')
+
+    mockUseAuth.mockReturnValue({
+      ...baseAuth(),
+      user: { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest' },
+    })
+    const { rerender } = render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(replaceSpy).toHaveBeenCalled()
+    })
+
+    mockUseAuth.mockReturnValue({ ...baseAuth(), user: null, showAuthModal: false })
+    rerender(<AuthModal />)
+
+    await new Promise(r => setTimeout(r, 50))
+    expect(screen.queryByPlaceholderText('Start typing your name')).toBeFalsy()
+
+    replaceSpy.mockRestore()
+    window.history.pushState({}, '', '/')
+  })
 })
 
 describe('AuthModal welcome screen', () => {

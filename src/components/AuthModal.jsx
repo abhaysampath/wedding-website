@@ -467,11 +467,12 @@ export default function AuthModal() {
         setAwaitingEmailLink(true)
         setShowAuthModal(true)
       }, 0)
-    } else if (slug && !showAuthModal) {
+    } else if (slug) {
+      window.history.replaceState({}, '', window.location.pathname)
       urlSlugRef.current = slug
       setShowAuthModal(true)
     }
-  }, [setShowAuthModal, showAuthModal])
+  }, [setShowAuthModal])
 
   useEffect(() => {
     const code = urlCodeRef.current
