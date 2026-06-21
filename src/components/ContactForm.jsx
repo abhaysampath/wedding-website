@@ -206,6 +206,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
+  const [plusOneAnyChanges, setPlusOneAnyChanges] = useState(false)
   const inactivityRef = useRef(null)
   const plusOneSaveAllRef = useRef(null)
 
@@ -221,7 +222,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     address !== originalAddress ||
     dietaryPreferences !== originalDietaryPreferences
   const rsvpChanged = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
-  const hasChanges = contactChanged || rsvpChanged
+  const hasChanges = contactChanged || rsvpChanged || plusOneAnyChanges
 
   const weddingsList = useMemo(() => user?.weddings || [], [user?.weddings])
 
@@ -368,10 +369,10 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     w => {
       if (switchWedding) switchWedding(w)
       setShowAuthModal(false)
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         const el = document.getElementById('details')
         if (el) el.scrollIntoView({ behavior: 'smooth' })
-      }, 300)
+      })
     },
     [switchWedding, setShowAuthModal],
   )
@@ -412,6 +413,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           onSaveAll={fn => {
             plusOneSaveAllRef.current = fn
           }}
+          onAnyChangesChange={setPlusOneAnyChanges}
         />
       )}
 

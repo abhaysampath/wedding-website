@@ -18,16 +18,24 @@ function normalizeRsvpValue(value) {
 function RsvpStatusBadge({ weddingKey, value }) {
   const label = WEDDING_LABELS[weddingKey]?.short || weddingKey
   const isYes = value === 'Yes'
-  const isNo = value === 'No'
+  const isUnset = !value
+  if (isUnset) {
+    return (
+      <span
+        aria-label={`${label}: not set`}
+        className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium text-charcoal-light/40"
+      >
+        Not set
+      </span>
+    )
+  }
   return (
     <span
-      aria-label={`${label}: ${value || 'not set'}`}
+      aria-label={`${label}: ${value}`}
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium ${
         isYes
           ? 'bg-gold/20 text-gold-dark border border-gold/30'
-          : isNo
-            ? 'bg-charcoal-light/10 text-charcoal-light/70 border border-charcoal-light/20'
-            : 'bg-cream-dark/30 text-charcoal-light/40 border border-charcoal-light/10'
+          : 'bg-charcoal-light/10 text-charcoal-light/70 border border-charcoal-light/20'
       }`}
     >
       <span
@@ -47,7 +55,7 @@ function RsvpStatusBadge({ weddingKey, value }) {
           </svg>
         )}
       </span>
-      {value || '—'}
+      {value}
     </span>
   )
 }
@@ -125,6 +133,18 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
 
   return (
     <div className="bg-charcoal-light/10 border-t border-gold/15 p-4 space-y-3">
+      <div className="space-y-2">
+        {guest.weddings?.includes('us') && (
+          <RsvpToggle weddingKey="us" value={state.rsvpUs} onChange={v => update({ rsvpUs: v })} />
+        )}
+        {guest.weddings?.includes('india') && (
+          <RsvpToggle
+            weddingKey="india"
+            value={state.rsvpIndia}
+            onChange={v => update({ rsvpIndia: v })}
+          />
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-[10px] tracking-widest uppercase text-charcoal-light/60 mb-1">
@@ -188,18 +208,6 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
           placeholder="123 Main St, City, State ZIP"
         />
       </div>
-      <div className="space-y-2">
-        {guest.weddings?.includes('us') && (
-          <RsvpToggle weddingKey="us" value={state.rsvpUs} onChange={v => update({ rsvpUs: v })} />
-        )}
-        {guest.weddings?.includes('india') && (
-          <RsvpToggle
-            weddingKey="india"
-            value={state.rsvpIndia}
-            onChange={v => update({ rsvpIndia: v })}
-          />
-        )}
-      </div>
       <div>
         <label className="block text-[10px] tracking-widest uppercase text-charcoal-light/60 mb-1">
           Dietary Preferences
@@ -248,7 +256,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
   )
 }
 
-function PlusOneRow({ guest, registerSave }) {
+function PlusOneRow({ guest, registerSave, reportChanges }) {
   const { content } = useAuth()
   const guestFromContent = useMemo(
     () => content?.guests?.find(g => g.id === guest.id) || null,
@@ -303,6 +311,10 @@ function PlusOneRow({ guest, registerSave }) {
     })
     return () => registerSave(guest.id, null)
   }, [registerSave, guest.id, doSave, hasChanges])
+
+  useEffect(() => {
+    if (reportChanges) reportChanges(guest.id, hasChanges)
+  }, [reportChanges, guest.id, hasChanges])
 
   return (
     <div className="border-b border-gold/10 last:border-b-0">
@@ -366,7 +378,7 @@ function PlusOneRow({ guest, registerSave }) {
   )
 }
 
-export default function PlusOneEditor({ user, guests, onSaveAll }) {
+export default function PlusOneEditor({ user, guests, onSaveAll, onAnyChangesChange }) {
   const groupMembers = useMemo(() => {
     if (!user || !guests || user.plusOne !== 'Allowed+1') return []
     const rowOf = g => parseInt(String(g.id).replace(/[^\d]/g, ''), 10)
@@ -387,10 +399,20 @@ export default function PlusOneEditor({ user, guests, onSaveAll }) {
   }, [user, guests])
 
   const saveHandlersRef = useRef(new Map())
+  const changesRef = useRef(new Map())
   const registerSave = useCallback((id, handler) => {
     if (handler) saveHandlersRef.current.set(id, handler)
     else saveHandlersRef.current.delete(id)
   }, [])
+
+  const reportChanges = useCallback(
+    (id, hasChanges) => {
+      changesRef.current.set(id, hasChanges)
+      const any = Array.from(changesRef.current.values()).some(Boolean)
+      if (onAnyChangesChange) onAnyChangesChange(any)
+    },
+    [onAnyChangesChange],
+  )
 
   const saveAll = useCallback(async () => {
     const results = await Promise.all(
@@ -414,7 +436,12 @@ export default function PlusOneEditor({ user, guests, onSaveAll }) {
       </h3>
       <div className="border border-gold/15 rounded-sm overflow-hidden">
         {groupMembers.map(g => (
-          <PlusOneRow key={g.id} guest={g} registerSave={registerSave} />
+          <PlusOneRow
+            key={g.id}
+            guest={g}
+            registerSave={registerSave}
+            reportChanges={reportChanges}
+          />
         ))}
       </div>
     </div>

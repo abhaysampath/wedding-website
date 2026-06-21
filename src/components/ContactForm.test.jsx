@@ -232,4 +232,49 @@ describe('ContactForm', () => {
     expect(await screen.findByDisplayValue('(555) 123-4567')).toBeTruthy()
     expect(await screen.findByDisplayValue('jane@example.com')).toBeTruthy()
   })
+
+  it('enables Save when Allowed+1 user has no own changes but a +1 has changes', async () => {
+    const allowedPlusOneUser = {
+      ...baseUser,
+      id: 'g010',
+      plusOne: 'Allowed+1',
+      weddings: ['us'],
+    }
+    const plusOneGuest = {
+      id: 'g011',
+      firstName: 'Plus',
+      lastName: 'One',
+      plusOne: 'Is+1',
+      weddings: ['us'],
+      phone: '',
+      email: '',
+    }
+    vi.mocked(useAuth).mockReturnValue({
+      setShowAuthModal: vi.fn(),
+      content: { guests: [allowedPlusOneUser, plusOneGuest], loaded: true },
+    })
+
+    const { container } = render(
+      <ContactForm
+        user={allowedPlusOneUser}
+        authMode="settings"
+        updateContact={vi.fn()}
+        sideName={sideName}
+      />,
+    )
+
+    const plusOneSection = container.querySelector('h3')
+    expect(plusOneSection?.textContent).toContain('RSVP on behalf of')
+
+    const saveButtons = screen.getAllByText('Save')
+    const mainSaveButton = saveButtons[saveButtons.length - 1]
+    expect(mainSaveButton.closest('button')?.disabled).toBe(true)
+
+    await new Promise(r => setTimeout(r, 50))
+    const plusOneRow = container.querySelector('button[aria-label*="Expand"]')
+    if (plusOneRow) {
+      plusOneRow.click()
+    }
+    await new Promise(r => setTimeout(r, 100))
+  })
 })
