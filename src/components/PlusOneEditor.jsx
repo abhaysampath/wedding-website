@@ -25,7 +25,7 @@ function RsvpStatusBadge({ weddingKey, value }) {
         aria-label={`${label}: not set`}
         className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium text-charcoal-light/40"
       >
-        Not set
+        RSVP on behalf
       </span>
     )
   }

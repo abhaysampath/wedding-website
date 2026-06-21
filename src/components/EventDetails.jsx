@@ -94,7 +94,8 @@ export default function EventDetails() {
     if (!visibility) return true
     if (!userRole) return visibility === 'public'
     if (userRole === 'bride' || userRole === 'groom') return true
-    if (userRole === 'vendor') return visibility === 'vendor'
+    if (userRole === 'vendor')
+      return visibility === 'vendor' || visibility === 'close_family' || visibility === 'public'
     if (userRole === 'close_family') return visibility === 'close_family' || visibility === 'public'
     return visibility === 'public'
   })
@@ -157,7 +158,8 @@ export default function EventDetails() {
             <div className="space-y-8 md:space-y-12">
               {filteredTimeline.map((event, i) => {
                 const isExpanded = expanded === i
-                const isVendor = userRole === 'vendor' && event.vendorHighlight
+                const isVendorHighlight = event.visibility === 'vendor'
+                const isCloseFamily = event.visibility === 'close_family'
                 return (
                   <motion.div
                     key={event.label}
@@ -166,7 +168,7 @@ export default function EventDetails() {
                     transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
                     className={`relative flex flex-col md:flex-row items-start gap-5 md:gap-0 ${
                       i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                    } ${isVendor ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-gold/20' : ''}`}
+                    } ${isVendorHighlight ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-gold/20' : ''}`}
                   >
                     <button
                       type="button"
@@ -182,9 +184,14 @@ export default function EventDetails() {
                       >
                         <span className="inline-flex items-center gap-2 bg-gold/10 text-gold-dark text-xs font-medium tracking-wider uppercase px-3 py-1.5 rounded-sm mb-3">
                           {event.time}
-                          {isVendor && (
+                          {isVendorHighlight && (
                             <span className="text-[9px] bg-gold/20 text-gold-dark px-1.5 py-0.5 rounded-sm -mr-1">
                               Vendor
+                            </span>
+                          )}
+                          {isCloseFamily && (
+                            <span className="text-[9px] bg-sage/20 text-sage px-1.5 py-0.5 rounded-sm -mr-1">
+                              Close Family
                             </span>
                           )}
                         </span>

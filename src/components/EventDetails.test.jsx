@@ -106,7 +106,7 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.queryByText('Vendor Load Out')).toBeNull()
   })
 
-  it('shows only vendor events for vendor', () => {
+  it('shows vendor, close_family, and public events for vendor', () => {
     mockUseAuth.mockReturnValue({
       activeWedding: 'us',
       user: { role: 'vendor' },
@@ -114,12 +114,11 @@ describe('EventDetails role-based filtering', () => {
     render(<EventDetails />)
     expect(screen.getByText('Vendor Access to Venue')).toBeTruthy()
     expect(screen.getByText('Vendor Load Out')).toBeTruthy()
-
-    expect(screen.queryByText('Couple Access to Venue for Photography')).toBeNull()
-    expect(screen.queryByText('Guest Arrival')).toBeNull()
-    expect(screen.queryByText('Ceremony')).toBeNull()
-    expect(screen.queryByText('Cocktail Hour')).toBeNull()
-    expect(screen.queryByText('Reception')).toBeNull()
+    expect(screen.getByText('Couple Access to Venue for Photography')).toBeTruthy()
+    expect(screen.getByText('Guest Arrival')).toBeTruthy()
+    expect(screen.getByText('Ceremony')).toBeTruthy()
+    expect(screen.getByText('Cocktail Hour')).toBeTruthy()
+    expect(screen.getByText('Reception')).toBeTruthy()
   })
 
   it('shows Vendor badge on vendor-highlighted events for vendor user', () => {
@@ -164,6 +163,36 @@ describe('EventDetails role-based filtering', () => {
     expect(screen.queryByText('Vendor Access to Venue')).toBeNull()
     expect(screen.queryByText('Couple Access to Venue for Photography')).toBeNull()
     expect(screen.queryByText('Vendor Load Out')).toBeNull()
+  })
+
+  it('shows Close Family indicator on close_family events for close_family user', () => {
+    mockUseAuth.mockReturnValue({
+      activeWedding: 'us',
+      user: { role: 'close_family' },
+    })
+    render(<EventDetails />)
+    const badges = screen.getAllByText('Close Family')
+    expect(badges.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows Close Family indicator on close_family events for vendor user', () => {
+    mockUseAuth.mockReturnValue({
+      activeWedding: 'us',
+      user: { role: 'vendor' },
+    })
+    render(<EventDetails />)
+    expect(screen.getAllByText('Close Family').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Vendor').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('shows no Close Family or Vendor indicators for invited_guest', () => {
+    mockUseAuth.mockReturnValue({
+      activeWedding: 'us',
+      user: { role: 'invited_guest' },
+    })
+    render(<EventDetails />)
+    expect(screen.queryByText('Close Family')).toBeNull()
+    expect(screen.queryByText('Vendor')).toBeNull()
   })
 
   it('expands event details on click and collapses on second click', () => {
