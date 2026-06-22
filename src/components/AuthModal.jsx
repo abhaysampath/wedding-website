@@ -156,7 +156,6 @@ export default function AuthModal() {
     sessionStorage.removeItem('awaiting_sms')
     sessionStorage.removeItem('sms_sent_at')
     sessionStorage.removeItem('awaiting_email')
-    sessionStorage.removeItem('email_sent_at')
     sessionStorage.removeItem('pending_email_code')
     sessionStorage.removeItem('pending_email_addr')
     sessionStorage.removeItem('pending_email_name')
@@ -181,8 +180,9 @@ export default function AuthModal() {
     if (saving || !guestEmail || !selectedMatch) return
 
     const sentAt = sessionStorage.getItem('email_sent_at')
+    const lastAddr = sessionStorage.getItem('pending_email_addr')
     const COOLDOWN_MS = 5 * 60 * 1000
-    if (sentAt && Date.now() - parseInt(sentAt, 10) < COOLDOWN_MS) {
+    if (sentAt && lastAddr === guestEmail && Date.now() - parseInt(sentAt, 10) < COOLDOWN_MS) {
       setAwaitingEmailLink(true)
       sessionStorage.setItem('awaiting_email', '1')
       return
@@ -213,8 +213,8 @@ export default function AuthModal() {
   }, [guestEmail, selectedMatch, saving, setFirebaseError, recordLoginAttempt])
 
   const handleEmailCodeComplete = useCallback(
-    async code => {
-      if (!verifyCode(code)) {
+    async (code, trusted = false) => {
+      if (!trusted && !verifyCode(code)) {
         setFirebaseError('Invalid code. Check your email and try again.')
         return
       }
@@ -513,6 +513,9 @@ export default function AuthModal() {
       window.history.replaceState({}, '', window.location.pathname)
       sessionStorage.setItem('awaiting_email', '1')
       sessionStorage.setItem('pending_email_code', urlCode)
+      if (!sessionStorage.getItem('email_sent_at')) {
+        sessionStorage.setItem('email_sent_at', String(Date.now()))
+      }
       urlCodeRef.current = urlCode
       urlSlugRef.current = slug
       setTimeout(() => {
@@ -541,11 +544,12 @@ export default function AuthModal() {
         setSelectedMatch(guest)
         setGuestPhone(stripPhone(guest.phone))
         setGuestEmail(guest.email || '')
+        if (guest.email) sessionStorage.setItem('pending_email_addr', guest.email)
         if (guest.id) recordLoginAttempt(guest.id)
       }
       if (code) {
         setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
-        setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
+        setTimeout(() => handleEmailCodeCompleteRef.current(code, true), 200)
       }
     }, 0)
   }, [content.guests, content.loaded, recordLoginAttempt])

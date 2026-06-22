@@ -344,8 +344,9 @@ describe('AuthModal phone & email verification', () => {
     expect(confirmButtons.length).toBe(2)
   })
 
-  it('does not re-send OTP if one was sent within the last 5 minutes', async () => {
+  it('does not re-send OTP if one was sent within the last 5 minutes to the same email', async () => {
     sessionStorage.setItem('email_sent_at', String(Date.now()))
+    sessionStorage.setItem('pending_email_addr', 'jane@example.com')
 
     mockSendVerificationCode.mockClear()
     mockSendVerificationCode.mockResolvedValue(undefined)
