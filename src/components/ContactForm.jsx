@@ -206,6 +206,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const [saving, setSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
+  const [saveError, setSaveError] = useState(null)
   const [plusOneAnyChanges, setPlusOneAnyChanges] = useState(false)
   const inactivityRef = useRef(null)
   const plusOneSaveAllRef = useRef(null)
@@ -313,6 +314,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
   const handleSave = useCallback(async () => {
     if (saveStatus === 'saving') return
     const hadRsvpChange = rsvpUs !== originalRsvpUs || rsvpIndia !== originalRsvpIndia
+    setSaveError(null)
     setSaveStatus('saving')
     try {
       await updateContact({
@@ -336,8 +338,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       }
     } catch (err) {
       console.error('Save failed:', err)
+      setSaveError(err.message || 'Save failed. Please try again.')
       setSaveStatus('error')
-      setTimeout(() => setSaveStatus(null), 3000)
+      setTimeout(() => setSaveStatus(null), 5000)
     }
   }, [
     phone,
@@ -563,7 +566,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center"
           aria-live="polite"
         >
-          <p>Failed to save. Please try again.</p>
+          <p className="font-medium">Failed to save.</p>
+          {saveError && <p className="mt-1 text-red/80">{saveError}</p>}
           <button
             type="button"
             onClick={() => handleSave()}

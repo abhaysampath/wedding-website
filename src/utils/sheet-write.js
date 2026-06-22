@@ -13,26 +13,27 @@ export async function writeToSheet(guestId, data) {
       body: JSON.stringify(data),
     })
     if (!res.ok) {
-      console.error(
-        'Sheet write failed:',
-        guestId,
-        data,
-        res.status,
-        await res.text().catch(() => ''),
-      )
-      return false
+      const errBody = await res.json().catch(() => ({}))
+      const err = new Error(errBody.error || `Sheet write failed (${res.status})`)
+      err.status = res.status
+      err.body = errBody
+      console.error('Sheet write failed:', guestId, res.status, errBody)
+      throw err
     }
     const body = await res.json()
-    if (!body.updated) console.warn('Sheet write returned 0 updates:', guestId, data)
+    if (!body.updated) {
+      console.warn('Sheet write returned 0 updates:', guestId, data)
+    }
     return body.updated > 0
   } catch (err) {
+    if (err.status) throw err
     console.error('Sheet write error:', guestId, data, err)
-    return false
+    throw err
   }
 }
 
 export async function mintServerSession(guestId) {
-  if (!guestId) return false
+  if (!guestId) return { ok: false, status: 0, error: 'No guestId' }
   try {
     const res = await fetch('/api/auth/session', {
       method: 'POST',
@@ -40,10 +41,15 @@ export async function mintServerSession(guestId) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ guestId }),
     })
-    return res.ok
+    const body = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      console.error('mintServerSession failed:', guestId, res.status, body)
+      return { ok: false, status: res.status, error: body.error }
+    }
+    return { ok: true, ...body }
   } catch (err) {
-    console.error('mintServerSession failed:', guestId, err)
-    return false
+    console.error('mintServerSession error:', guestId, err)
+    return { ok: false, status: 0, error: err.message }
   }
 }
 

@@ -152,7 +152,7 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const processSignIn = useCallback((guest, fbUser) => {
+  const processSignIn = useCallback(async (guest, fbUser) => {
     setFirebaseError(null)
     const now = eastTime()
     const payload = {
@@ -177,7 +177,15 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    const sessionResult = await mintServerSession(guest.id)
+    if (!sessionResult.ok) {
+      console.warn('Cookie session mint failed for Firebase user:', sessionResult)
+    }
+    try {
+      await writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    } catch (err) {
+      console.warn('Audit write failed (non-fatal):', err)
+    }
     updateUrlSlug(getGuestSlug(guest))
 
     setAuthMode('settings')
@@ -213,8 +221,18 @@ export function AuthProvider({ children }) {
     setUser(payload)
     setActiveWedding(getDefaultWedding(guest.weddings))
     localStorage.setItem('wedding_user', JSON.stringify(payload))
-    await mintServerSession(guest.id)
-    writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    const sessionResult = await mintServerSession(guest.id)
+    if (!sessionResult.ok) {
+      console.error('Cookie session mint failed:', sessionResult)
+      setFirebaseError(
+        'Sign-in succeeded but server session failed. Your RSVP changes may not save. Please try again.',
+      )
+    }
+    try {
+      await writeToSheet(guest.id, { lastLogin: now, loginFailed: 'SUCCESS' })
+    } catch (err) {
+      console.warn('Audit write failed (non-fatal):', err)
+    }
     updateUrlSlug(getGuestSlug(guest))
 
     const hasContact = payload.phone || payload.email
@@ -248,7 +266,7 @@ export function AuthProvider({ children }) {
 
           const emailMatch = findGuestByEmail(content.guests, authUser.email)
           if (emailMatch) {
-            processSignIn(emailMatch, authUser)
+            await processSignIn(emailMatch, authUser)
             return
           }
 
@@ -262,7 +280,7 @@ export function AuthProvider({ children }) {
 
           const nameMatch = findGuestByName(content.guests, authUser.name)
           if (nameMatch) {
-            processSignIn(nameMatch, authUser)
+            await processSignIn(nameMatch, authUser)
             return
           }
 
