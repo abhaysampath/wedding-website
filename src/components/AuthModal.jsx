@@ -13,7 +13,7 @@ import {
   getRecaptchaVerifier,
   clearRecaptchaVerifier,
 } from '../firebase'
-import { sendVerificationCode, verifyCode } from '../utils/verifyEmail'
+import { sendVerificationCode, verifyCodeServer } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
 import { stripPhone, guestLabel, fullName } from '../utils/guest'
 
@@ -141,7 +141,6 @@ export default function AuthModal() {
     setAwaitingSmsCode(false)
     setSmsCode(Array(6).fill(''))
     smsCodeRefs.current = []
-    setAwaitingEmailLink(false)
     setEmailCode(Array(6).fill(''))
     emailCodeRefs.current = []
     setVerificationId('')
@@ -155,7 +154,6 @@ export default function AuthModal() {
     setEmailResendable(true)
     sessionStorage.removeItem('awaiting_sms')
     sessionStorage.removeItem('sms_sent_at')
-    sessionStorage.removeItem('awaiting_email')
     sessionStorage.removeItem('pending_email_code')
     sessionStorage.removeItem('pending_email_addr')
     sessionStorage.removeItem('pending_email_name')
@@ -213,14 +211,21 @@ export default function AuthModal() {
   }, [guestEmail, selectedMatch, saving, setFirebaseError, recordLoginAttempt])
 
   const handleEmailCodeComplete = useCallback(
-    async (code, trusted = false) => {
-      if (!trusted && !verifyCode(code)) {
-        setFirebaseError('Invalid code. Check your email and try again.')
-        return
-      }
+    async code => {
       setSaving(true)
       setFirebaseError(null)
       try {
+        const result = await verifyCodeServer(code, guestEmail)
+        if (!result.valid) {
+          setFirebaseError('Invalid code. Check your email and try again.')
+          track('signin_failed', {
+            method: 'email_code',
+            reason: result.reason,
+            guest: selectedMatch?.firstName,
+            guestId: selectedMatch?.id,
+          })
+          return
+        }
         if (selectedMatch) {
           await updateContact({ phone: guestPhone, email: guestEmail })
           signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
@@ -549,7 +554,7 @@ export default function AuthModal() {
       }
       if (code) {
         setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
-        setTimeout(() => handleEmailCodeCompleteRef.current(code, true), 200)
+        setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
       }
     }, 0)
   }, [content.guests, content.loaded, recordLoginAttempt])
