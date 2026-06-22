@@ -46,6 +46,8 @@ export default function AuthModal() {
     config,
     firebaseLoading,
     firebaseError,
+    nameMismatch,
+    setNameMismatch,
     setFirebaseError,
     handleFirebaseSignIn,
     signInAsGuest,
@@ -782,7 +784,7 @@ export default function AuthModal() {
                       scale: 0.93,
                       transition: { type: 'spring', stiffness: 500, damping: 12 },
                     }}
-                    className="mx-auto w-full flex items-center justify-center gap-2 py-3 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50 max-w-[260px]"
+                    className="mx-auto w-full flex items-center justify-center gap-3 py-3.5 px-5 border-2 border-gold/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-cream hover:border-gold/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50 max-w-[280px]"
                   >
                     {firebaseLoading ? (
                       <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -806,7 +808,7 @@ export default function AuthModal() {
                         />
                       </svg>
                     )}
-                    Google
+                    Sign in with Google
                   </motion.button>
 
                   <div className="relative">
@@ -889,6 +891,64 @@ export default function AuthModal() {
                     </div>
                   )}
 
+                  {nameMismatch && (
+                    <div className="p-4 bg-red/10 border border-red/20 rounded-sm space-y-3">
+                      <div>
+                        <p className="text-xs font-medium text-red mb-2">
+                          We couldn't match your Google account to a guest.
+                        </p>
+                        <div className="text-xs text-charcoal-light/70 space-y-1">
+                          <p>
+                            <span className="text-charcoal-light/40">Google name:</span>{' '}
+                            <span className="font-medium">{nameMismatch.googleName}</span>
+                          </p>
+                          {nameMismatch.closestName && (
+                            <p>
+                              <span className="text-charcoal-light/40">Closest in guest list:</span>{' '}
+                              <span className="font-medium">{nameMismatch.closestName}</span>
+                            </p>
+                          )}
+                          {nameMismatch.googleEmail && (
+                            <p>
+                              <span className="text-charcoal-light/40">Email:</span>{' '}
+                              <span className="font-medium">{nameMismatch.googleEmail}</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.dispatchEvent(
+                              new CustomEvent('pending-contact-msg', {
+                                detail: {
+                                  reason: 'rsvp',
+                                  message: `Name mismatch report:\nGoogle name: ${nameMismatch.googleName}\nGoogle email: ${nameMismatch.googleEmail}\nClosest in guest list: ${nameMismatch.closestName || '(none)'}\nGuest ID (if known): ${nameMismatch.closestId || '(none)'}`,
+                                },
+                              }),
+                            )
+                            setNameMismatch(null)
+                            setAuthMode('contact')
+                          }}
+                          className="w-full py-2 border border-gold/30 bg-cream rounded-sm text-xs tracking-widest uppercase text-charcoal hover:bg-gold/10 transition-colors"
+                        >
+                          Report Name Mismatch
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNameMismatch(null)
+                            setFirebaseError(null)
+                          }}
+                          className="w-full py-2 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors"
+                        >
+                          Try a different account
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="text-center pt-2">
                     <button
                       type="button"
@@ -917,7 +977,7 @@ export default function AuthModal() {
                       type="button"
                       onClick={() => handleOAuthSignIn('google')}
                       disabled={firebaseLoading}
-                      className="flex items-center justify-center gap-2 py-2.5 px-6 border border-gold/20 rounded-sm text-sm text-charcoal-light hover:bg-cream-dark hover:border-gold/40 transition-colors disabled:opacity-50"
+                      className="flex items-center justify-center gap-3 py-3 px-6 border-2 border-gold/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-cream hover:border-gold/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                     >
                       {firebaseLoading ? (
                         <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -941,7 +1001,7 @@ export default function AuthModal() {
                           />
                         </svg>
                       )}
-                      Google
+                      Sign in with Google
                     </button>
                   </div>
 

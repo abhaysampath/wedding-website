@@ -142,7 +142,7 @@ describe('AuthModal sign-in mode', () => {
 
   it('renders Google OAuth button', () => {
     render(<AuthModal />)
-    expect(screen.getByText('Google')).toBeTruthy()
+    expect(screen.getByText('Sign in with Google')).toBeTruthy()
   })
 
   it('renders name search input', () => {
@@ -207,7 +207,7 @@ describe('AuthModal sign-in mode', () => {
   it('disables Google button when firebaseLoading is true', () => {
     mockUseAuth.mockReturnValue({ ...baseAuth(), firebaseLoading: true })
     render(<AuthModal />)
-    const googleBtn = screen.getByText('Google').closest('button')
+    const googleBtn = screen.getByText('Sign in with Google').closest('button')
     expect(googleBtn.disabled).toBe(true)
   })
 

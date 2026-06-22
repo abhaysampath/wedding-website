@@ -44,23 +44,40 @@ function getDefaultWedding(weddings) {
 function findGuestByName(guests, name) {
   const t = normalize(name)
   if (!t) return null
-  let best = null
-  let bestScore = 0
+  const tParts = t.split(' ').filter(Boolean)
+  if (tParts.length < 2) return null
   for (const g of guests) {
-    const full = normalize(`${g.firstName} ${g.lastName}`)
-    const score = similarity(full, t)
-    if (score > bestScore && score > 0.4) {
-      bestScore = score
-      best = g
-    }
+    const first = normalize(g.firstName)
+    const last = normalize(g.lastName)
+    if (!first || !last) continue
+    const full = `${first} ${last}`
+    if (normalize(full) === t) return g
+    if (first === tParts[0] && last === tParts[tParts.length - 1]) return g
   }
-  return best
+  return null
 }
 
 function findGuestByEmail(guests, email) {
   if (!email) return null
   const t = email.trim().toLowerCase()
   return guests.find(g => g.email.toLowerCase() === t) || null
+}
+
+function findClosestByName(guests, name) {
+  const t = normalize(name)
+  if (!t) return null
+  let best = null
+  let bestScore = 0
+  for (const g of guests) {
+    const full = normalize(`${g.firstName} ${g.lastName}`)
+    if (!full) continue
+    const score = similarity(full, t)
+    if (score > bestScore) {
+      bestScore = score
+      best = g
+    }
+  }
+  return best
 }
 
 function getGuestSlug(guest) {
@@ -89,6 +106,7 @@ export function AuthProvider({ children }) {
   })
   const [firebaseLoading, setFirebaseLoading] = useState(false)
   const [firebaseError, setFirebaseError] = useState(null)
+  const [nameMismatch, setNameMismatch] = useState(null)
 
   useEffect(() => {
     async function loadContent() {
@@ -215,6 +233,7 @@ export function AuthProvider({ children }) {
     async provider => {
       setFirebaseLoading(true)
       setFirebaseError(null)
+      setNameMismatch(null)
       try {
         const result = await signInWithGoogle()
         if (result?.user) {
@@ -225,18 +244,37 @@ export function AuthProvider({ children }) {
             uid: result.user.uid,
           }
 
-          const guest = content.guests?.length
-            ? findGuestByName(content.guests, authUser.name) ||
-              findGuestByEmail(content.guests, authUser.email)
-            : null
-          if (guest) {
-            processSignIn(guest, authUser)
-          } else {
-            setFirebaseError(
-              `Could not find "${authUser.name}" on the guest list. Try a different account or contact the couple.`,
-            )
-            track('guest_not_found', { name: authUser.name, email: authUser.email })
+          if (!content.guests?.length) return
+
+          const emailMatch = findGuestByEmail(content.guests, authUser.email)
+          if (emailMatch) {
+            processSignIn(emailMatch, authUser)
+            return
           }
+
+          if (!authUser.name) {
+            setFirebaseError(
+              'Your Google account has no name. Please use the name search below or contact the couple.',
+            )
+            track('guest_not_found', { name: '', email: authUser.email })
+            return
+          }
+
+          const nameMatch = findGuestByName(content.guests, authUser.name)
+          if (nameMatch) {
+            processSignIn(nameMatch, authUser)
+            return
+          }
+
+          const closest = findClosestByName(content.guests, authUser.name)
+          setNameMismatch({
+            googleName: authUser.name,
+            googleEmail: authUser.email,
+            googleUid: authUser.uid,
+            closestName: closest ? `${closest.firstName} ${closest.lastName}`.trim() : null,
+            closestId: closest?.id || null,
+          })
+          track('name_mismatch', { name: authUser.name, email: authUser.email })
         }
       } catch (err) {
         setFirebaseError(err.message || 'Sign in failed')
@@ -317,11 +355,13 @@ export function AuthProvider({ children }) {
     authMode,
     firebaseLoading,
     firebaseError,
+    nameMismatch,
     config,
     content,
     setShowAuthModal,
     setAuthMode,
     setFirebaseError,
+    setNameMismatch,
     handleFirebaseSignIn,
     signInAsGuest,
     signOut,
