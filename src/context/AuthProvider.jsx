@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { track } from '@vercel/analytics'
 import { AuthContext } from './AuthContext'
 import config from '../config'
-import { signInWithGoogle } from '../firebase'
+import { signInWithGoogle, signOutFirebase } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
 import { writeToSheet, mintServerSession, clearServerSession } from '../utils/sheet-write'
@@ -332,23 +332,32 @@ export function AuthProvider({ children }) {
   const recordLoginAttempt = useCallback(async guestId => {
     if (!guestId) return
     const now = eastTime()
-    await writeToSheet(guestId, { loginFailed: now })
+    try {
+      await writeToSheet(guestId, { loginFailed: now })
+    } catch (err) {
+      console.warn('recordLoginAttempt failed:', err)
+    }
   }, [])
 
-  const recordLogin = useCallback(() => {
+  const recordLogin = useCallback(async () => {
     if (!user) return
     const now = eastTime()
     const updated = { ...user, lastLogin: now }
     setUser(updated)
     localStorage.setItem('wedding_user', JSON.stringify(updated))
-    writeToSheet(user.id, { lastLogin: now })
+    try {
+      await writeToSheet(user.id, { lastLogin: now })
+    } catch (err) {
+      console.warn('recordLogin write failed:', err)
+    }
   }, [user])
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
     setUser(null)
     setActiveWedding('us')
     localStorage.removeItem('wedding_user')
-    clearServerSession()
+    await clearServerSession()
+    await signOutFirebase()
     updateUrlSlug('')
   }, [])
 

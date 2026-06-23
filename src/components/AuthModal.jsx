@@ -221,9 +221,20 @@ export default function AuthModal() {
       setSaving(true)
       setFirebaseError(null)
       try {
+        if (!guestEmail) {
+          setFirebaseError('Session lost. Please close and sign in again.')
+          setSaving(false)
+          return
+        }
         const result = await verifyCodeServer(code, guestEmail)
         if (!result.valid) {
-          setFirebaseError('Invalid code. Check your email and try again.')
+          const msg =
+            result.reason === 'No code sent or expired'
+              ? 'Your code expired. Click Resend to get a new one.'
+              : result.reason === 'Code already used'
+                ? 'This code was already used. Click Resend to get a new one.'
+                : 'Invalid code. Check your email and try again.'
+          setFirebaseError(msg)
           track('signin_failed', {
             method: 'email_code',
             reason: result.reason,
@@ -232,12 +243,17 @@ export default function AuthModal() {
           })
           return
         }
+        sessionStorage.removeItem('pending_email_code')
         if (selectedMatch) {
-          await updateContact({ phone: guestPhone, email: guestEmail })
           signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
           setSignedIn(selectedMatch)
+          try {
+            await updateContact({ phone: guestPhone, email: guestEmail })
+          } catch (err) {
+            console.warn('Contact update after email sign-in failed:', err)
+          }
         } else {
-          setShowAuthModal(false)
+          setFirebaseError('We could not match this code to a guest. Please sign in by name below.')
         }
       } catch (err) {
         setFirebaseError(err.message || 'Failed to complete sign in')
@@ -251,15 +267,7 @@ export default function AuthModal() {
         setSaving(false)
       }
     },
-    [
-      guestPhone,
-      guestEmail,
-      selectedMatch,
-      updateContact,
-      signInAsGuest,
-      setShowAuthModal,
-      setFirebaseError,
-    ],
+    [guestPhone, guestEmail, selectedMatch, updateContact, signInAsGuest, setFirebaseError],
   )
 
   const handleEmailCodeCompleteRef = useRef(handleEmailCodeComplete)
@@ -269,6 +277,7 @@ export default function AuthModal() {
 
   const handlePhoneConfirm = useCallback(async () => {
     if (saving || sendingSms || !isUsNumber(guestPhone)) return
+    setSendingSms(true)
     if (selectedMatch) recordLoginAttempt(selectedMatch.id)
 
     const e164Phone = formatE164(guestPhone)
@@ -281,11 +290,11 @@ export default function AuthModal() {
         setVerificationId(storedVid)
         setAwaitingSmsCode(true)
         sessionStorage.setItem('awaiting_sms', '1')
+        setSendingSms(false)
         return
       }
     }
 
-    setSendingSms(true)
     setFirebaseError(null)
     try {
       if (!user?.uid) {

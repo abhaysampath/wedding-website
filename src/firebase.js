@@ -47,6 +47,17 @@ export async function signInWithGoogle() {
   return result
 }
 
+export async function signOutFirebase() {
+  const a = init()
+  if (!a) return
+  try {
+    const { getAuth, signOut } = await import('firebase/auth')
+    await signOut(getAuth())
+  } catch (err) {
+    console.warn('Firebase signOut failed:', err)
+  }
+}
+
 export async function getIdToken(forceRefresh = false) {
   const a = init()
   if (!a) return null

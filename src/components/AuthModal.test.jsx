@@ -51,6 +51,7 @@ vi.mock('../firebase', () => ({
   linkPhoneCredential: vi.fn(),
   getRecaptchaVerifier: vi.fn(() => ({})),
   clearRecaptchaVerifier: vi.fn(),
+  signOutFirebase: vi.fn(),
   sendEmailSignInLink: vi.fn(),
   isEmailSignInLink: vi.fn(() => false),
   completeEmailLinkSignIn: vi.fn(),
