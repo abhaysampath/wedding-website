@@ -79,7 +79,8 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
       <button
         type="button"
         onClick={handleToggle}
-        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+        aria-pressed={isActive}
+        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-gold/30 ${
           isActive
             ? 'bg-gold/10'
             : hasRsvp
@@ -129,13 +130,13 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
 
       <div className="px-4 pb-4 pt-3 border-t border-gold/10">
         <div className="space-y-1.5">
-          <p className="text-xs text-charcoal-light/70">{info.date}</p>
-          <p className="text-xs text-charcoal-light/70">{info.venue}</p>
-          <p className="text-xs text-charcoal-light/50">{info.address}</p>
+          <p className="text-xs text-charcoal-light">{info.date}</p>
+          <p className="text-xs text-charcoal-light">{info.venue}</p>
+          <p className="text-xs text-charcoal-light/70">{info.address}</p>
           <button
             type="button"
             onClick={() => onOpenDetails(weddingKey)}
-            className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1"
+            className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1 focus:outline-none focus:ring-2 focus:ring-gold/30 rounded-sm"
           >
             View Event Details
           </button>
@@ -388,12 +389,12 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
     <div className="space-y-5">
       <div className="p-4 bg-cream-dark border border-gold/10 rounded-sm">
         <p className="font-heading text-lg text-charcoal">{fullName(user)}</p>
-        <p className="text-xs text-charcoal-light/50 mt-1">{guestLabel(user, sideName)}</p>
+        <p className="text-xs text-charcoal-light/70 mt-1">{guestLabel(user, sideName)}</p>
       </div>
 
       {weddingsList.length > 0 && (
         <div className="space-y-3">
-          <p className="text-xs tracking-widest uppercase text-charcoal-light/50">RSVP</p>
+          <p className="text-xs tracking-widest uppercase text-charcoal-light font-medium">RSVP</p>
           {weddingsList.includes('us') && (
             <RsvpCheckbox
               weddingKey="us"
@@ -424,7 +425,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
         />
       )}
 
-      <p className="text-sm text-charcoal-light/70 leading-relaxed">
+      <p className="text-sm text-charcoal-light leading-relaxed">
         {authMode === 'contact'
           ? 'Add your contact info so we can send you wedding updates.'
           : 'Update your contact info below.'}
@@ -433,7 +434,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       <div>
         <label
           htmlFor="cf-phone"
-          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+          className="block text-xs tracking-widest uppercase text-charcoal-light font-medium mb-1.5"
         >
           Phone Number
         </label>
@@ -450,17 +451,22 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             onFocus={() => setPhoneFocused(true)}
             onBlur={() => setPhoneFocused(false)}
             disabled={saving}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors disabled:opacity-30"
+            aria-describedby="cf-phone-hint"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors disabled:opacity-30"
             placeholder="5551234567"
           />
+          <span id="cf-phone-hint" className="sr-only">
+            10-digit US phone number
+          </span>
           <AnimatePresence>
             <motion.button
               type="button"
               key="phone-save"
               onClick={handleSaveField}
               disabled={!phoneChanged || !validPhone || saving}
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: phoneChanged && validPhone && !saving ? 1 : 0.3 }}
+              aria-label="Save phone number"
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: phoneChanged && validPhone && !saving ? 1 : 0.5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
             >
@@ -473,7 +479,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       <div>
         <label
           htmlFor="cf-email"
-          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+          className="block text-xs tracking-widest uppercase text-charcoal-light font-medium mb-1.5"
         >
           Email Address
         </label>
@@ -483,17 +489,22 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+            aria-describedby="cf-email-hint"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors"
             placeholder="you@email.com"
           />
+          <span id="cf-email-hint" className="sr-only">
+            Your email address
+          </span>
           <AnimatePresence>
             <motion.button
               type="button"
               key="email-save"
               onClick={handleSaveField}
               disabled={!emailChanged || !validEmail || saving}
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: emailChanged && validEmail && !saving ? 1 : 0.3 }}
+              aria-label="Save email address"
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: emailChanged && validEmail && !saving ? 1 : 0.5 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}
               className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 px-1.5 text-[9px] tracking-widest uppercase font-medium rounded-sm border border-current transition-colors disabled:cursor-not-allowed hover:text-sage"
             >
@@ -506,7 +517,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       <div>
         <label
           htmlFor="cf-address"
-          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+          className="block text-xs tracking-widest uppercase text-charcoal-light font-medium mb-1.5"
         >
           Mailing Address
         </label>
@@ -517,10 +528,15 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             onChange={e => setAddress(e.target.value)}
             rows={2}
             maxLength={500}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            aria-describedby="cf-address-counter"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors resize-none"
             placeholder="123 Main St, City, State ZIP"
           />
-          <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+          <span
+            id="cf-address-counter"
+            aria-live="polite"
+            className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/60 font-medium"
+          >
             {address.length}/500
           </span>
         </div>
@@ -529,7 +545,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       <div>
         <label
           htmlFor="cf-diet"
-          className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
+          className="block text-xs tracking-widest uppercase text-charcoal-light font-medium mb-1.5"
         >
           Dietary Preferences
         </label>
@@ -540,10 +556,15 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             onChange={e => setDietaryPreferences(e.target.value)}
             rows={2}
             maxLength={500}
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors resize-none"
+            aria-describedby="cf-diet-counter"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors resize-none"
             placeholder="Any dietary restrictions or preferences"
           />
-          <span className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/30">
+          <span
+            id="cf-diet-counter"
+            aria-live="polite"
+            className="absolute bottom-2 right-3 text-[10px] text-charcoal-light/60 font-medium"
+          >
             {dietaryPreferences.length}/500
           </span>
         </div>
@@ -567,15 +588,16 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          className="p-3 bg-red/10 border border-red/20 rounded-sm text-xs text-red text-center"
-          aria-live="polite"
+          role="alert"
+          className="p-3 bg-red/10 border border-red/30 rounded-sm text-xs text-red text-center"
+          aria-live="assertive"
         >
-          <p className="font-medium">Failed to save.</p>
-          {saveError && <p className="mt-1 text-red/80">{saveError}</p>}
+          <p className="font-semibold">Failed to save.</p>
+          {saveError && <p className="mt-1 text-red">{saveError}</p>}
           <button
             type="button"
             onClick={() => handleSave()}
-            className="mt-2 text-[10px] tracking-widest uppercase underline underline-offset-2 hover:text-red/80"
+            className="mt-2 text-[10px] tracking-widest uppercase underline underline-offset-2 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-red/40 rounded-sm"
           >
             Retry
           </button>
