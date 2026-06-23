@@ -26,16 +26,12 @@ export async function sendVerificationCode(email, name = '') {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
     })
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      if (res.status === 200 && data.cooldown) {
-        throw new Error('Please wait before requesting a new code')
-      }
-      throw new Error(data.error || 'Failed to generate code')
-    }
-    const data = await res.json()
+    const data = await res.json().catch(() => ({}))
     if (data.cooldown) {
-      throw new Error('Please wait before requesting a new code')
+      return { cooldown: true, retryAfter: data.retryAfter }
+    }
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to generate code')
     }
     const code = data.code
     const link = verifyUrl.replace('__CODE__', code)
@@ -57,7 +53,7 @@ export async function sendVerificationCode(email, name = '') {
     } catch (error) {
       throw new Error(error?.text || error?.message || 'Failed to send email', { cause: error })
     }
-    return code
+    return { code }
   })()
 
   _sendInFlight = sendPromise

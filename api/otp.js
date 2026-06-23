@@ -48,12 +48,16 @@ export default async function handler(req, res) {
       hash: hash(salt, newCode),
       sentAt: Date.now(),
       expiresAt: Date.now() + CODE_TTL_MS,
+      verified: false,
     })
     return res.status(200).json({ code: newCode })
   }
 
   if (!existing) {
     return res.status(400).json({ valid: false, reason: 'No code sent or expired' })
+  }
+  if (existing.verified) {
+    return res.status(400).json({ valid: false, reason: 'Code already used' })
   }
   if (existing.expiresAt < Date.now()) {
     store.delete(key)
@@ -63,7 +67,8 @@ export default async function handler(req, res) {
   const salt = uid || key
   const valid = existing.hash === hash(salt, String(code))
   if (valid) {
-    store.delete(key)
+    existing.verified = true
+    existing.expiresAt = Date.now() + COOLDOWN_MS
   }
   return res.status(200).json({ valid })
 }

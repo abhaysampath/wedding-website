@@ -90,4 +90,16 @@ describe('OTP endpoint', () => {
     await handler(makeReq('POST', { email: 'onetime@example.com', code }), second)
     expect(second.json.mock.calls[0][0].valid).toBe(false)
   })
+
+  it('cooldown persists after a successful verify', async () => {
+    const sendRes = makeRes()
+    await handler(makeReq('POST', { email: 'persist@example.com' }), sendRes)
+    const code = sendRes.json.mock.calls[0][0].code
+
+    await handler(makeReq('POST', { email: 'persist@example.com', code }), makeRes())
+
+    const resend = makeRes()
+    await handler(makeReq('POST', { email: 'persist@example.com' }), resend)
+    expect(resend.json.mock.calls[0][0].cooldown).toBe(true)
+  })
 })

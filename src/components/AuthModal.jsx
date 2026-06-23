@@ -190,13 +190,19 @@ export default function AuthModal() {
     setSaving(true)
     setFirebaseError(null)
     try {
-      await sendVerificationCode(
+      const result = await sendVerificationCode(
         guestEmail,
         `${selectedMatch.firstName} ${selectedMatch.lastName}`.trim(),
       )
+      if (result?.cooldown) {
+        sessionStorage.setItem('email_sent_at', String(Date.now()))
+        sessionStorage.setItem('pending_email_addr', guestEmail)
+      } else {
+        sessionStorage.setItem('email_sent_at', String(Date.now()))
+        sessionStorage.setItem('pending_email_addr', guestEmail)
+      }
       setAwaitingEmailLink(true)
       sessionStorage.setItem('awaiting_email', '1')
-      sessionStorage.setItem('email_sent_at', String(Date.now()))
     } catch (err) {
       setFirebaseError(err.message || 'Failed to send verification code')
       track('signin_failed', {
