@@ -338,7 +338,11 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       }
     } catch (err) {
       console.error('Save failed:', err)
-      setSaveError(err.message || 'Save failed. Please try again.')
+      const msg =
+        err.status === 401
+          ? 'Your session expired. Please close this and sign in again.'
+          : err.message || 'Save failed. Please try again.'
+      setSaveError(msg)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 5000)
     }

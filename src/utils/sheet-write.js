@@ -14,6 +14,9 @@ export async function writeToSheet(guestId, data) {
     })
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}))
+      if (res.status === 401) {
+        await clearServerSession()
+      }
       const err = new Error(errBody.error || `Sheet write failed (${res.status})`)
       err.status = res.status
       err.body = errBody
