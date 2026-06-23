@@ -138,11 +138,11 @@ describe('PATCH /api/guest/:id', () => {
     expect(res.body).toEqual({ error: 'Authentication required' })
   })
 
-  it('rejects when Firebase env is missing but Bearer token sent', async () => {
-    mockGetSession.mockResolvedValue({ kind: 'unconfigured' })
+  it('rejects when Firebase env is missing and no cookie', async () => {
+    mockGetSession.mockResolvedValue(null)
     const res = makeRes()
     await handler(makeReq({ headers: { authorization: 'Bearer x.y.z' } }), res)
-    expect(res.statusCode).toBe(503)
+    expect(res.statusCode).toBe(401)
   })
 
   it('rejects invalid row index', async () => {

@@ -144,11 +144,11 @@ describe('getSession', () => {
     })
   })
 
-  it('returns unconfigured when Bearer token is sent but Firebase env is missing', async () => {
+  it('falls through to cookie when Bearer token sent but Firebase env is missing', async () => {
     const session = await getSession({
       headers: { authorization: 'Bearer some.jwt.token' },
     })
-    expect(session).toEqual({ kind: 'unconfigured' })
+    expect(session).toBeNull()
   })
 
   it('returns null for an empty Bearer token (falls through to cookie)', async () => {
@@ -160,7 +160,7 @@ describe('getSession', () => {
     const session = await getSession({
       headers: { Authorization: 'Bearer some.jwt.token' },
     })
-    expect(session).toEqual({ kind: 'unconfigured' })
+    expect(session).toBeNull()
   })
 
   it('falls through to cookie when no Bearer header is present', async () => {

@@ -242,9 +242,6 @@ export default async function handler(req, res) {
   if (!session) {
     return res.status(401).json({ error: 'Authentication required' })
   }
-  if (session.kind === 'unconfigured') {
-    return res.status(503).json({ error: 'Server auth not configured' })
-  }
 
   try {
     const id = req.query?.id || req.url.split('/').pop()

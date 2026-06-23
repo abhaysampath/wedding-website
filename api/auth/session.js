@@ -51,8 +51,6 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const session = await getSession(req)
     if (!session) return res.status(200).json({ authenticated: false })
-    if (session.kind === 'unconfigured')
-      return res.status(503).json({ error: 'Auth not configured' })
     return res.status(200).json({ authenticated: true, kind: session.kind, ...session })
   }
   if (req.method !== 'POST' && req.method !== 'DELETE') {

@@ -17,6 +17,14 @@ export async function writeToSheet(guestId, data) {
       if (res.status === 401) {
         await clearServerSession()
       }
+      if (res.status === 503) {
+        console.warn(
+          'Sheet write returned 503 (server auth not configured for this method). Skipping — user is still signed in locally.',
+          guestId,
+          errBody,
+        )
+        return true
+      }
       const err = new Error(errBody.error || `Sheet write failed (${res.status})`)
       err.status = res.status
       err.body = errBody

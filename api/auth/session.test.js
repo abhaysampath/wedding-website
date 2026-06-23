@@ -93,11 +93,12 @@ describe('GET /api/auth/session', () => {
     expect(res.body.kind).toBe('cookie')
   })
 
-  it('returns 503 when Firebase env is missing', async () => {
-    mockGetSession.mockResolvedValue({ kind: 'unconfigured' })
+  it('returns 200 authenticated=false when no session', async () => {
+    mockGetSession.mockResolvedValue(null)
     const res = makeRes()
     await handler({ method: 'GET' }, res)
-    expect(res.statusCode).toBe(503)
+    expect(res.statusCode).toBe(200)
+    expect(res.body).toEqual({ authenticated: false })
   })
 })
 

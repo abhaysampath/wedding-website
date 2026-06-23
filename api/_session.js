@@ -148,19 +148,21 @@ export async function getSession(req) {
     const token = authHeader.slice(7).trim()
     if (token) {
       const admin = await getAdmin()
-      if (!admin) return { kind: 'unconfigured' }
-      try {
-        const decoded = await admin.auth().verifyIdToken(token)
-        if (!decoded.uid) return null
-        return {
-          kind: 'firebase',
-          uid: decoded.uid,
-          email: (decoded.email || '').toLowerCase(),
-          name: (decoded.name || decoded['name'] || '').toString(),
-          emailVerified: !!decoded.email_verified,
+      if (admin) {
+        try {
+          const decoded = await admin.auth().verifyIdToken(token)
+          if (decoded.uid) {
+            return {
+              kind: 'firebase',
+              uid: decoded.uid,
+              email: (decoded.email || '').toLowerCase(),
+              name: (decoded.name || decoded['name'] || '').toString(),
+              emailVerified: !!decoded.email_verified,
+            }
+          }
+        } catch {
+          // fall through to cookie check
         }
-      } catch {
-        return null
       }
     }
   }
