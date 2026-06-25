@@ -325,10 +325,17 @@ export default function AuthModal() {
         guest: selectedMatch?.firstName,
         guestId: selectedMatch?.id,
       })
-      if (err.code === 'auth/captcha-check-failed') {
+      const code = err?.code || ''
+      if (
+        code === 'auth/captcha-check-failed' ||
+        code === 'auth/invalid-app-credential' ||
+        /recaptcha/i.test(err?.message || '')
+      ) {
         setFirebaseError(
-          'reCAPTCHA verification failed. Please check your internet connection and try again.',
+          'Phone sign-in is temporarily unavailable due to a reCAPTCHA configuration issue. Please sign in with email instead, or try again later.',
         )
+      } else if (code === 'auth/too-many-requests') {
+        setFirebaseError('Too many attempts. Please wait a few minutes and try again.')
       } else {
         setFirebaseError(err.message || 'Failed to send verification code')
       }
@@ -1047,7 +1054,7 @@ export default function AuthModal() {
 
                   <div className="flex flex-col gap-4">
                     {/* Phone — always visible when guest has phone */}
-                    {guestPhone && isUsNumber(guestPhone) && !awaitingSmsCode && (
+                    {guestPhone && isUsNumber(guestPhone) && (
                       <div>
                         <label
                           htmlFor="am-phone"
@@ -1076,7 +1083,7 @@ export default function AuthModal() {
                     )}
 
                     {/* Email — always visible when guest has email */}
-                    {guestEmail && !awaitingEmailLink && (
+                    {guestEmail && (
                       <div>
                         <label
                           htmlFor="am-email"
