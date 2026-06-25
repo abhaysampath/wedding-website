@@ -334,7 +334,9 @@ export default function Gallery() {
                   setExpanded(null)
                 }
               }}
-              role="presentation"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`Image ${expanded + 1} of ${images.length}: ${images[expanded]?.alt || 'Untitled'}`}
             >
               <motion.div
                 ref={lightboxRef}
@@ -348,7 +350,8 @@ export default function Gallery() {
                 <button
                   type="button"
                   onClick={() => setExpanded(null)}
-                  className="absolute -top-12 right-0 text-cream/50 hover:text-cream text-[11px] tracking-[0.2em] uppercase transition-colors"
+                  aria-label="Close image viewer"
+                  className="absolute -top-12 right-0 min-h-[44px] min-w-[44px] px-3 py-2 text-cream/70 hover:text-cream text-[11px] tracking-[0.2em] uppercase transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cream/60 rounded-sm"
                 >
                   Close <span className="text-cream/30 ml-1">(Esc)</span>
                 </button>

@@ -95,10 +95,24 @@ export default function Navbar() {
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  signOut()
+                onClick={e => {
+                  const btn = e.currentTarget
+                  if (btn.dataset.confirm === '1') {
+                    signOut()
+                    return
+                  }
+                  btn.dataset.confirm = '1'
+                  btn.textContent = 'Sure?'
+                  btn.setAttribute('aria-label', 'Tap again to confirm sign out')
+                  setTimeout(() => {
+                    if (btn.isConnected) {
+                      btn.dataset.confirm = ''
+                      btn.textContent = '✕'
+                      btn.setAttribute('aria-label', 'Sign out')
+                    }
+                  }, 3000)
                 }}
-                className="text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1"
+                className="min-h-[44px] min-w-[44px] px-2 text-[10px] opacity-40 hover:opacity-80 hover:text-red-400 transition-opacity uppercase tracking-wider ml-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/60 rounded-sm"
                 aria-label="Sign out"
               >
                 ✕

@@ -56,7 +56,11 @@ function ScrollProgress() {
 
 function NavbarSkeleton() {
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 h-20 bg-cream/95 backdrop-blur-md animate-pulse">
+    <nav
+      className="fixed top-0 left-0 w-full z-50 h-20 bg-cream/95 backdrop-blur-md animate-pulse"
+      role="status"
+      aria-label="Loading navigation"
+    >
       <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
         <div className="h-6 bg-cream-dark rounded-sm w-24" />
         <div className="h-6 bg-cream-dark rounded-sm w-24" />
@@ -70,6 +74,8 @@ function HeroSkeleton() {
     <section
       id="hero"
       className="relative min-h-screen flex flex-col items-center overflow-hidden select-none bg-charcoal"
+      role="status"
+      aria-label="Loading hero"
     >
       <div className="absolute inset-0 bg-sage-light/10 animate-pulse" />
       <div className="absolute inset-0 bg-gradient-to-b from-charcoal/40 via-charcoal/30 to-charcoal/60" />
@@ -293,15 +299,27 @@ function BottomNav() {
 
 function UserSkeleton() {
   return (
-    <div className="min-h-screen bg-cream-dark flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+    <div
+      className="min-h-screen bg-cream-dark flex items-center justify-center"
+      role="status"
+      aria-label="Loading content"
+    >
+      <div
+        className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin"
+        aria-hidden="true"
+      />
     </div>
   )
 }
 
 function GallerySkeleton() {
   return (
-    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream">
+    <section
+      id="gallery"
+      className="py-24 md:py-32 pl-6 bg-cream"
+      role="status"
+      aria-label="Loading gallery"
+    >
       <div className="max-w-7xl mx-auto text-center mb-12 pr-6">
         <div className="h-8 bg-cream-dark rounded-sm w-48 mx-auto mb-3" />
         <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />

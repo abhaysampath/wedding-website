@@ -442,6 +442,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <input
             id="cf-phone"
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
             value={
               !phoneFocused && phone === originalPhone
                 ? `(${phone.slice(0, 3)}) ${phone.slice(3, 6)}-${phone.slice(6, 10)}`
@@ -451,8 +453,9 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             onFocus={() => setPhoneFocused(true)}
             onBlur={() => setPhoneFocused(false)}
             disabled={saving}
+            aria-invalid={phone.length > 0 && !validPhone}
             aria-describedby="cf-phone-hint"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors disabled:opacity-30"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors disabled:opacity-30 aria-[invalid=true]:border-red/50"
             placeholder="5551234567"
           />
           <span id="cf-phone-hint" className="sr-only">
@@ -487,10 +490,13 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <input
             id="cf-email"
             type="email"
+            inputMode="email"
+            autoComplete="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            aria-invalid={email.length > 0 && !validEmail}
             aria-describedby="cf-email-hint"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors"
+            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors aria-[invalid=true]:border-red/50"
             placeholder="you@email.com"
           />
           <span id="cf-email-hint" className="sr-only">

@@ -172,11 +172,12 @@ export default function EventDetails() {
                   >
                     <button
                       type="button"
-                      className={`flex-1 pl-16 md:pl-0 cursor-pointer ${
+                      className={`flex-1 pl-16 md:pl-0 cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 rounded-sm ${
                         i % 2 === 0 ? 'md:text-right md:pr-16' : 'md:text-left md:pl-16'
                       }`}
                       onClick={() => toggleEvent(i)}
                       aria-expanded={isExpanded}
+                      aria-controls={`event-panel-${i}`}
                       aria-label={`Toggle ${event.title}`}
                     >
                       <div
@@ -206,6 +207,9 @@ export default function EventDetails() {
                       <AnimatePresence initial={false}>
                         {isExpanded && (
                           <motion.div
+                            id={`event-panel-${i}`}
+                            role="region"
+                            aria-label={`${event.label} details`}
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
