@@ -389,13 +389,17 @@ export default function AuthModal() {
   )
 
   const handleCancel = useCallback(
-    e => {
+    async e => {
       if (e && e.target !== e.currentTarget) return
       if (backdropPointerDownRef.current !== e.currentTarget) return
       if (user && (authMode === 'settings' || authMode === 'contact')) {
         setShowAuthModal(false)
       } else if (user) {
-        recordLogin()
+        try {
+          await recordLogin()
+        } catch (err) {
+          console.warn('recordLogin failed on cancel:', err)
+        }
         setShowAuthModal(false)
         setAuthMode('signin')
         resetState()
@@ -413,14 +417,18 @@ export default function AuthModal() {
     [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode],
   )
 
-  const handleDiscardAndClose = useCallback(() => {
+  const handleDiscardAndClose = useCallback(async () => {
     try {
       sessionStorage.removeItem('contact_draft_' + user?.id)
     } catch (err) {
       console.error('Failed to remove contact draft:', err)
     }
     if (user) {
-      recordLogin()
+      try {
+        await recordLogin()
+      } catch (err) {
+        console.warn('recordLogin failed on discard:', err)
+      }
       setShowAuthModal(false)
       setAuthMode('signin')
       resetState()

@@ -258,6 +258,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       console.error('Auto-save failed:', err)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 3000)
+    } finally {
+      setSaveStatus(prev => (prev === 'saving' ? null : prev))
     }
   }, [
     phone,
@@ -346,6 +348,8 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
       setSaveError(msg)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus(null), 5000)
+    } finally {
+      setSaveStatus(prev => (prev === 'saving' ? null : prev))
     }
   }, [
     phone,
