@@ -90,6 +90,7 @@ export default function AuthModal() {
   const [guestPhone, setGuestPhone] = useState('')
   const [guestEmail, setGuestEmail] = useState('')
   const [smsResendable, setSmsResendable] = useState(true)
+  const [smsResendCountdown, setSmsResendCountdown] = useState(0)
   const [emailResendable, setEmailResendable] = useState(true)
   const [emailResendCountdown, setEmailResendCountdown] = useState(0)
   const inputRef = useRef(null)
@@ -235,6 +236,14 @@ export default function AuthModal() {
                 ? 'This code was already used. Click Resend to get a new one.'
                 : 'Invalid code. Check your email and try again.'
           setFirebaseError(msg)
+          if (
+            result.reason === 'No code sent or expired' ||
+            result.reason === 'Code already used'
+          ) {
+            setEmailResendable(true)
+            setEmailResendCountdown(0)
+            sessionStorage.removeItem('email_sent_at')
+          }
           track('signin_failed', {
             method: 'email_code',
             reason: result.reason,
@@ -325,10 +334,17 @@ export default function AuthModal() {
         guest: selectedMatch?.firstName,
         guestId: selectedMatch?.id,
       })
-      if (err.code === 'auth/captcha-check-failed') {
+      const code = err?.code || ''
+      if (
+        code === 'auth/captcha-check-failed' ||
+        code === 'auth/invalid-app-credential' ||
+        /recaptcha/i.test(err?.message || '')
+      ) {
         setFirebaseError(
-          'reCAPTCHA verification failed. Please check your internet connection and try again.',
+          'Phone sign-in is temporarily unavailable due to a reCAPTCHA configuration issue. Please sign in with email instead, or try again later.',
         )
+      } else if (code === 'auth/too-many-requests') {
+        setFirebaseError('Too many attempts. Please wait a few minutes and try again.')
       } else {
         setFirebaseError(err.message || 'Failed to send verification code')
       }
@@ -389,13 +405,17 @@ export default function AuthModal() {
   )
 
   const handleCancel = useCallback(
-    e => {
+    async e => {
       if (e && e.target !== e.currentTarget) return
       if (backdropPointerDownRef.current !== e.currentTarget) return
       if (user && (authMode === 'settings' || authMode === 'contact')) {
         setShowAuthModal(false)
       } else if (user) {
-        recordLogin()
+        try {
+          await recordLogin()
+        } catch (err) {
+          console.warn('recordLogin failed on cancel:', err)
+        }
         setShowAuthModal(false)
         setAuthMode('signin')
         resetState()
@@ -413,14 +433,18 @@ export default function AuthModal() {
     [user, recordLogin, setShowAuthModal, setAuthMode, resetState, authMode],
   )
 
-  const handleDiscardAndClose = useCallback(() => {
+  const handleDiscardAndClose = useCallback(async () => {
     try {
       sessionStorage.removeItem('contact_draft_' + user?.id)
     } catch (err) {
       console.error('Failed to remove contact draft:', err)
     }
     if (user) {
-      recordLogin()
+      try {
+        await recordLogin()
+      } catch (err) {
+        console.warn('recordLogin failed on discard:', err)
+      }
       setShowAuthModal(false)
       setAuthMode('signin')
       resetState()
@@ -569,10 +593,17 @@ export default function AuthModal() {
       }
       if (code) {
         setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
-        setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
+        setTimeout(() => {
+          try {
+            handleEmailCodeCompleteRef.current?.(code)
+          } catch (err) {
+            console.error('Auto sign-in failed:', err)
+            setFirebaseError('Auto sign-in failed. Enter the 6-digit code from your email.')
+          }
+        }, 500)
       }
     }, 0)
-  }, [content.guests, content.loaded, recordLoginAttempt])
+  }, [content.guests, content.loaded, recordLoginAttempt, setFirebaseError])
 
   useEffect(() => {
     if (showAuthModal) {
@@ -657,6 +688,34 @@ export default function AuthModal() {
       }
     }
   }, [awaitingEmailLink])
+
+  useEffect(() => {
+    if (!awaitingSmsCode || smsResendable) {
+      setTimeout(() => setSmsResendCountdown(0), 0)
+      return
+    }
+    const sentAt = sessionStorage.getItem('pending_verification_sent_at')
+    if (!sentAt) return
+    const COOLDOWN_MS = 15 * 60 * 1000
+    const update = () => {
+      const elapsed = Date.now() - parseInt(sentAt, 10)
+      const left = Math.max(0, COOLDOWN_MS - elapsed)
+      setSmsResendCountdown(Math.ceil(left / 1000))
+      if (left <= 0) {
+        setTimeout(() => {
+          setSmsResendable(true)
+          setSmsResendCountdown(0)
+        }, 0)
+        return false
+      }
+      return true
+    }
+    if (!update()) return
+    const id = setInterval(() => {
+      if (!update()) clearInterval(id)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [awaitingSmsCode, smsResendable])
 
   useEffect(() => {
     if (!showAuthModal) return
@@ -1039,7 +1098,7 @@ export default function AuthModal() {
 
                   <div className="flex flex-col gap-4">
                     {/* Phone — always visible when guest has phone */}
-                    {guestPhone && isUsNumber(guestPhone) && !awaitingSmsCode && (
+                    {guestPhone && isUsNumber(guestPhone) && (
                       <div>
                         <label
                           htmlFor="am-phone"
@@ -1064,21 +1123,112 @@ export default function AuthModal() {
                             {sendingSms ? 'Sending...' : 'Confirm'}
                           </button>
                         </div>
+                        {awaitingSmsCode && (
+                          <div className="mt-3 space-y-2">
+                            <p className="text-[10px] text-charcoal-light/50">
+                              Enter the 6-digit code sent to your phone:
+                            </p>
+                            <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                              <span className="text-sm text-charcoal-light/50 font-mono select-none">
+                                code:
+                              </span>
+                              <div className="flex gap-1.5">
+                                {[0, 1, 2, 3, 4, 5].map(i => (
+                                  <input
+                                    key={i}
+                                    ref={el => {
+                                      if (el) smsCodeRefs.current[i] = el
+                                    }}
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={i === 0 ? 6 : 1}
+                                    value={smsCode[i] || ''}
+                                    onChange={e => {
+                                      const raw = e.target.value.replace(/\D/g, '')
+                                      if (!raw) return
+                                      if (raw.length > 1) {
+                                        const next = raw.split('')
+                                        while (next.length < 6) next.push('')
+                                        setSmsCode(next)
+                                        if (raw.length === 6) handleVerifySmsCode(raw)
+                                        else smsCodeRefs.current[raw.length]?.focus()
+                                        return
+                                      }
+                                      const next = [...smsCode]
+                                      next[i] = raw
+                                      setSmsCode(next)
+                                      if (i < 5) smsCodeRefs.current[i + 1]?.focus()
+                                      if (i === 5 || (raw && i < 3 && !next[i + 1])) {
+                                        const full = next.join('')
+                                        if (full.length === 6) handleVerifySmsCode(full)
+                                      }
+                                    }}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Backspace') {
+                                        const next = [...smsCode]
+                                        if (next[i]) {
+                                          next[i] = ''
+                                          setSmsCode(next)
+                                        } else if (i > 0) {
+                                          next[i - 1] = ''
+                                          setSmsCode(next)
+                                          smsCodeRefs.current[i - 1]?.focus()
+                                        }
+                                      }
+                                    }}
+                                    onPaste={e => {
+                                      e.preventDefault()
+                                      const pasted = e.clipboardData
+                                        .getData('text')
+                                        .replace(/\D/g, '')
+                                        .slice(0, 6)
+                                      const next = pasted.split('')
+                                      while (next.length < 6) next.push('')
+                                      setSmsCode(next)
+                                      if (pasted.length === 6) handleVerifySmsCode(pasted)
+                                      else smsCodeRefs.current[pasted.length]?.focus()
+                                    }}
+                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                    autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              {smsResendable ? (
+                                <button
+                                  type="button"
+                                  onClick={handlePhoneConfirm}
+                                  disabled={sendingSms}
+                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                >
+                                  {sendingSms ? 'Sending...' : 'Resend Code'}
+                                </button>
+                              ) : (
+                                <p className="text-[10px] text-charcoal-light/40">
+                                  A code was already sent. Resend in{' '}
+                                  {Math.floor(smsResendCountdown / 60)}:
+                                  {String(smsResendCountdown % 60).padStart(2, '0')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
                     {/* Email — always visible when guest has email */}
-                    {guestEmail && !awaitingEmailLink && (
+                    {guestEmail && (
                       <div>
                         <label
-                          htmlFor="am-email"
+                          htmlFor="cf-email"
                           className="block text-xs tracking-widest uppercase text-charcoal-light/50 mb-1.5"
                         >
                           Email Address
                         </label>
                         <div className="relative">
                           <input
-                            id="am-email"
+                            id="cf-email"
                             type="email"
                             value={maskEmail(guestEmail)}
                             readOnly
@@ -1093,200 +1243,110 @@ export default function AuthModal() {
                             {saving ? 'Sending...' : 'Confirm'}
                           </button>
                         </div>
+                        {awaitingEmailLink && (
+                          <div className="mt-3 space-y-2">
+                            <p className="text-[10px] text-charcoal-light/50">
+                              Enter the 6-digit code sent to your email:
+                            </p>
+                            <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                              <span className="text-sm text-charcoal-light/50 font-mono select-none">
+                                code:
+                              </span>
+                              <div className="flex gap-1.5">
+                                {[0, 1, 2, 3, 4, 5].map(i => (
+                                  <input
+                                    key={i}
+                                    ref={el => {
+                                      if (el) emailCodeRefs.current[i] = el
+                                    }}
+                                    type="text"
+                                    inputMode="numeric"
+                                    maxLength={i === 0 ? 6 : 1}
+                                    value={emailCode[i] || ''}
+                                    onChange={e => {
+                                      const raw = e.target.value.replace(/\D/g, '')
+                                      if (!raw) return
+                                      if (raw.length > 1) {
+                                        const next = raw.split('')
+                                        while (next.length < 6) next.push('')
+                                        setEmailCode(next)
+                                        if (raw.length === 6) handleEmailCodeComplete(raw)
+                                        else emailCodeRefs.current[raw.length]?.focus()
+                                        return
+                                      }
+                                      const next = [...emailCode]
+                                      next[i] = raw
+                                      setEmailCode(next)
+                                      if (i < 5) emailCodeRefs.current[i + 1]?.focus()
+                                      if (i === 5 || (raw && i < 3 && !next[i + 1])) {
+                                        const full = next.join('')
+                                        if (full.length === 6) handleEmailCodeComplete(full)
+                                      }
+                                    }}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Backspace') {
+                                        const next = [...emailCode]
+                                        if (next[i]) {
+                                          next[i] = ''
+                                          setEmailCode(next)
+                                        } else if (i > 0) {
+                                          next[i - 1] = ''
+                                          setEmailCode(next)
+                                          emailCodeRefs.current[i - 1]?.focus()
+                                        }
+                                      }
+                                    }}
+                                    onPaste={e => {
+                                      e.preventDefault()
+                                      const pasted = e.clipboardData
+                                        .getData('text')
+                                        .replace(/\D/g, '')
+                                        .slice(0, 6)
+                                      const next = pasted.split('')
+                                      while (next.length < 6) next.push('')
+                                      setEmailCode(next)
+                                      if (pasted.length === 6) handleEmailCodeComplete(pasted)
+                                      else emailCodeRefs.current[pasted.length]?.focus()
+                                    }}
+                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                    autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between gap-2">
+                              {emailResendable ? (
+                                <button
+                                  type="button"
+                                  onClick={handleEmailConfirm}
+                                  disabled={saving}
+                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                >
+                                  {saving ? 'Sending...' : 'Resend Code'}
+                                </button>
+                              ) : (
+                                <p className="text-[10px] text-charcoal-light/40">
+                                  A code was already sent. Resend in{' '}
+                                  {Math.floor(emailResendCountdown / 60)}:
+                                  {String(emailResendCountdown % 60).padStart(2, '0')}
+                                </p>
+                              )}
+                              <details className="text-[10px] text-charcoal-light/40 ml-auto">
+                                <summary className="cursor-pointer hover:text-charcoal-light/60 list-none">
+                                  Didn't get it?
+                                </summary>
+                                <p className="mt-1 text-charcoal-light/50 max-w-[280px] text-right">
+                                  Codes are sent from noreply via EmailJS. If you don't see it,
+                                  check your Spam, Junk, or Promotions folder. Mark as &quot;Not
+                                  spam&quot; so future codes arrive in your inbox.
+                                </p>
+                              </details>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-
-                  {/* SMS code input + resend (below grid) */}
-                  {awaitingSmsCode && (
-                    <div>
-                      <p className="text-[10px] text-charcoal-light/50 mb-2 text-center">
-                        A verification code was sent to your phone
-                      </p>
-                      <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
-                        <span className="text-sm text-charcoal-light/50 font-mono select-none">
-                          code:
-                        </span>
-                        <div className="flex gap-1.5">
-                          {[0, 1, 2, 3, 4, 5].map(i => (
-                            <input
-                              key={i}
-                              ref={el => {
-                                if (el) smsCodeRefs.current[i] = el
-                              }}
-                              type="text"
-                              inputMode="numeric"
-                              maxLength={i === 0 ? 6 : 1}
-                              value={smsCode[i] || ''}
-                              onChange={e => {
-                                const raw = e.target.value.replace(/\D/g, '')
-                                if (!raw) return
-                                if (raw.length > 1) {
-                                  const next = raw.split('')
-                                  while (next.length < 6) next.push('')
-                                  setSmsCode(next)
-                                  if (raw.length === 6) handleVerifySmsCode(raw)
-                                  else smsCodeRefs.current[raw.length]?.focus()
-                                  return
-                                }
-                                const next = [...smsCode]
-                                next[i] = raw
-                                setSmsCode(next)
-                                if (i < 5) smsCodeRefs.current[i + 1]?.focus()
-                                if (i === 5 || (raw && i < 3 && !next[i + 1])) {
-                                  const full = next.join('')
-                                  if (full.length === 6) handleVerifySmsCode(full)
-                                }
-                              }}
-                              onKeyDown={e => {
-                                if (e.key === 'Backspace') {
-                                  const next = [...smsCode]
-                                  if (next[i]) {
-                                    next[i] = ''
-                                    setSmsCode(next)
-                                  } else if (i > 0) {
-                                    next[i - 1] = ''
-                                    setSmsCode(next)
-                                    smsCodeRefs.current[i - 1]?.focus()
-                                  }
-                                }
-                              }}
-                              onPaste={e => {
-                                e.preventDefault()
-                                const pasted = e.clipboardData
-                                  .getData('text')
-                                  .replace(/\D/g, '')
-                                  .slice(0, 6)
-                                const next = pasted.split('')
-                                while (next.length < 6) next.push('')
-                                setSmsCode(next)
-                                if (pasted.length === 6) handleVerifySmsCode(pasted)
-                                else smsCodeRefs.current[pasted.length]?.focus()
-                              }}
-                              className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                              autoComplete={i === 0 ? 'one-time-code' : 'off'}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-center gap-3">
-                        {smsResendable ? (
-                          <button
-                            type="button"
-                            onClick={handlePhoneConfirm}
-                            disabled={sendingSms}
-                            className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
-                          >
-                            {sendingSms ? 'Sending...' : 'Resend Code'}
-                          </button>
-                        ) : null}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Email code input + resend (below grid) */}
-                  {awaitingEmailLink && (
-                    <div>
-                      <div className="bg-gold/10 border border-gold/25 rounded-sm p-3 mb-3 text-left space-y-1.5">
-                        <p className="text-[10px] tracking-widest uppercase text-gold-dark font-medium">
-                          Check your spam folder
-                        </p>
-                        <p className="text-[11px] text-charcoal-light/80 leading-relaxed">
-                          The code is emailed from noreply via EmailJS. It often lands in{' '}
-                          <strong>Spam</strong>, <strong>Junk</strong>, or{' '}
-                          <strong>Promotions</strong>. Mark it as &quot;Not spam&quot; so future
-                          codes arrive in your inbox.
-                        </p>
-                      </div>
-                      <p className="text-[10px] text-charcoal-light/50 mb-2 text-center">
-                        A 6-digit code was sent to your email
-                      </p>
-                      <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
-                        <span className="text-sm text-charcoal-light/50 font-mono select-none">
-                          code:
-                        </span>
-                        <div className="flex gap-1.5">
-                          {[0, 1, 2, 3, 4, 5].map(i => (
-                            <input
-                              key={i}
-                              ref={el => {
-                                if (el) emailCodeRefs.current[i] = el
-                              }}
-                              type="text"
-                              inputMode="numeric"
-                              maxLength={i === 0 ? 6 : 1}
-                              value={emailCode[i] || ''}
-                              onChange={e => {
-                                const raw = e.target.value.replace(/\D/g, '')
-                                if (!raw) return
-                                if (raw.length > 1) {
-                                  const next = raw.split('')
-                                  while (next.length < 6) next.push('')
-                                  setEmailCode(next)
-                                  if (raw.length === 6) handleEmailCodeComplete(raw)
-                                  else emailCodeRefs.current[raw.length]?.focus()
-                                  return
-                                }
-                                const next = [...emailCode]
-                                next[i] = raw
-                                setEmailCode(next)
-                                if (i < 5) emailCodeRefs.current[i + 1]?.focus()
-                                if (i === 5 || (raw && i < 3 && !next[i + 1])) {
-                                  const full = next.join('')
-                                  if (full.length === 6) handleEmailCodeComplete(full)
-                                }
-                              }}
-                              onKeyDown={e => {
-                                if (e.key === 'Backspace') {
-                                  const next = [...emailCode]
-                                  if (next[i]) {
-                                    next[i] = ''
-                                    setEmailCode(next)
-                                  } else if (i > 0) {
-                                    next[i - 1] = ''
-                                    setEmailCode(next)
-                                    emailCodeRefs.current[i - 1]?.focus()
-                                  }
-                                }
-                              }}
-                              onPaste={e => {
-                                e.preventDefault()
-                                const pasted = e.clipboardData
-                                  .getData('text')
-                                  .replace(/\D/g, '')
-                                  .slice(0, 6)
-                                const next = pasted.split('')
-                                while (next.length < 6) next.push('')
-                                setEmailCode(next)
-                                if (pasted.length === 6) handleEmailCodeComplete(pasted)
-                                else emailCodeRefs.current[pasted.length]?.focus()
-                              }}
-                              className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
-                              autoComplete={i === 0 ? 'one-time-code' : 'off'}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-center gap-3">
-                        {emailResendable ? (
-                          <button
-                            type="button"
-                            onClick={handleEmailConfirm}
-                            disabled={saving}
-                            className="py-2 px-3 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
-                          >
-                            {saving ? 'Sending...' : 'Resend Code'}
-                          </button>
-                        ) : (
-                          <p className="text-[10px] text-charcoal-light/40">
-                            A code was already sent. Resend in{' '}
-                            {Math.floor(emailResendCountdown / 60)}:
-                            {String(emailResendCountdown % 60).padStart(2, '0')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
 
                   {firebaseError && (
                     <div

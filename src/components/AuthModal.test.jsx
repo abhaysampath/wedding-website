@@ -274,4 +274,17 @@ describe('AuthModal phone & email verification', () => {
     const confirmButtons = screen.getAllByText('Confirm')
     expect(confirmButtons.length).toBe(2)
   })
+
+  it('keeps phone and email fields visible when code is awaiting (no switching)', () => {
+    sessionStorage.setItem('awaiting_email', '1')
+    sessionStorage.setItem('email_sent_at', String(Date.now()))
+    render(<AuthModal />)
+    const input = screen.getByPlaceholderText('Start typing your name')
+    fireEvent.change(input, { target: { value: 'Jan' } })
+    fireEvent.click(screen.getByText('Jane Doe'))
+    expect(screen.getByLabelText(/phone number/i)).toBeTruthy()
+    expect(screen.getByLabelText(/email address/i)).toBeTruthy()
+    sessionStorage.removeItem('awaiting_email')
+    sessionStorage.removeItem('email_sent_at')
+  })
 })
