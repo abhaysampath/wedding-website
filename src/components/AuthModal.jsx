@@ -573,6 +573,14 @@ export default function AuthModal() {
     }
   }, [setShowAuthModal, user])
 
+  // ⚠️  FROZEN — Magic-link auto sign-in flow (locked 2026-06-26).
+  //  This effect runs after the URL handler effect (line ~538) saves the
+  //  code and slug from the URL into refs. It looks up the guest, pre-fills
+  //  the code, then calls handleEmailCodeCompleteRef to auto-verify.
+  //  Do NOT refactor the setTimeout chains or move the call sites without
+  //  re-running the regression tests in AuthModal.test.jsx under
+  //  "AuthModal magic-link auto sign-in (regression)".
+  //  Tested manually on production 2026-06-26 — works end-to-end.
   useEffect(() => {
     const code = urlCodeRef.current
     const slug = urlSlugRef.current

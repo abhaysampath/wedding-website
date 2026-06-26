@@ -288,3 +288,93 @@ describe('AuthModal phone & email verification', () => {
     sessionStorage.removeItem('email_sent_at')
   })
 })
+
+describe('AuthModal magic-link auto sign-in (regression)', () => {
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue(baseAuth())
+    sessionStorage.clear()
+  })
+
+  afterEach(() => {
+    sessionStorage.clear()
+    window.history.pushState({}, '', '/')
+  })
+
+  it('strips ?code= from URL when magic link is opened', async () => {
+    window.history.pushState({}, '', '/g/jane-doe?code=123456')
+    render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/g/jane-doe')
+      expect(window.location.search).toBe('')
+    })
+  })
+
+  it('stores pending email code in sessionStorage for fallback manual entry', async () => {
+    window.history.pushState({}, '', '/g/jane-doe?code=123456')
+    render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem('pending_email_code')).toBe('123456')
+    })
+  })
+
+  it('sets awaiting_email flag in sessionStorage when magic link is opened', async () => {
+    window.history.pushState({}, '', '/g/jane-doe?code=123456')
+    render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem('awaiting_email')).toBe('1')
+    })
+  })
+
+  it('does not auto-sign-in when /g/<slug> matches no guest', async () => {
+    const mockSignInAsGuest = vi.fn()
+    mockUseAuth.mockReturnValue({
+      ...baseAuth(),
+      signInAsGuest: mockSignInAsGuest,
+      user: null,
+    })
+
+    window.history.pushState({}, '', '/g/nonexistent-person?code=123456')
+    render(<AuthModal />)
+
+    await new Promise(r => setTimeout(r, 1500))
+    expect(mockSignInAsGuest).not.toHaveBeenCalled()
+  })
+
+  it('does not auto-sign-in when user is already signed in', async () => {
+    const mockSignInAsGuest = vi.fn()
+    mockUseAuth.mockReturnValue({
+      ...baseAuth(),
+      signInAsGuest: mockSignInAsGuest,
+      user: { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest' },
+    })
+
+    window.history.pushState({}, '', '/g/jane-doe?code=123456')
+    render(<AuthModal />)
+
+    await new Promise(r => setTimeout(r, 1500))
+    expect(mockSignInAsGuest).not.toHaveBeenCalled()
+    expect(window.location.pathname).toBe('/')
+  })
+
+  it('strips URL immediately for /g/<slug> without code (no code in URL)', async () => {
+    window.history.pushState({}, '', '/g/jane-doe')
+    render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe('/g/jane-doe')
+      expect(window.location.search).toBe('')
+    })
+  })
+
+  it('ignores invalid codes (length !== 6)', async () => {
+    window.history.pushState({}, '', '/g/jane-doe?code=abc')
+    render(<AuthModal />)
+
+    await waitFor(() => {
+      expect(sessionStorage.getItem('pending_email_code')).not.toBe('abc')
+    })
+  })
+})
