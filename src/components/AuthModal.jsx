@@ -1331,11 +1331,11 @@ export default function AuthModal() {
                                   {String(emailResendCountdown % 60).padStart(2, '0')}
                                 </p>
                               )}
-                              <details className="text-[10px] text-charcoal-light/40 ml-auto">
-                                <summary className="cursor-pointer hover:text-charcoal-light/60 list-none">
+                              <details className="text-[10px] text-charcoal-light/50">
+                                <summary className="cursor-pointer hover:text-charcoal-light/70 list-none">
                                   Didn't get it?
                                 </summary>
-                                <p className="mt-1 text-charcoal-light/50 max-w-[280px] text-right">
+                                <p className="mt-1 text-charcoal-light/60 leading-relaxed">
                                   Codes are sent from noreply via EmailJS. If you don't see it,
                                   check your Spam, Junk, or Promotions folder. Mark as &quot;Not
                                   spam&quot; so future codes arrive in your inbox.
