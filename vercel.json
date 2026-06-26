@@ -1,4 +1,5 @@
 {
+  "engines": { "node": "22.x" },
   "rewrites": [
     { "source": "/g/:path*", "destination": "/" }
   ],

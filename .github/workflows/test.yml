@@ -111,23 +111,35 @@ jobs:
           path: screenshots/
           retention-days: 14
 
-      # Step 9: Build Vercel output for production (creates .vercel/output/ from dist/)
-      - name: Build Vercel output
-        run: npx vercel@54.9.1 build --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
+      # Step 9: Wait for Vercel auto-deploy to publish github.sha to production
+      # Vercel auto-deploys on push to the production branch (main).
+      # No CLI step — the CLI hangs on the Hobby plan. We poll the API instead.
+      - name: Wait for Vercel auto-deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          PROJECT_ID: prj_1alSAVdV4DgibUJwPVzgLYp5EWK7
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          for i in {1..40}; do
+            curl -sS "https://api.vercel.com/v6/deployments?projectId=$PROJECT_ID&target=production&limit=1" \
+              -H "Authorization: Bearer $VERCEL_TOKEN" > /tmp/d.json
+            STATE=$(python3 -c "import json; d=json.load(open('/tmp/d.json')); print(d['deployments'][0]['state'] if d.get('deployments') else 'NONE')")
+            SHA=$(python3 -c "import json; d=json.load(open('/tmp/d.json')); print(d['deployments'][0].get('meta', {}).get('githubCommitSha', '') if d.get('deployments') else '')")
+            echo "  attempt $i: state=$STATE sha=$SHA"
+            if [ "$STATE" = "READY" ] && [ "$SHA" = "$COMMIT_SHA" ]; then
+              echo "  Vercel deployed $COMMIT_SHA"
+              break
+            fi
+            if [ $i -eq 40 ]; then
+              echo "Timed out waiting for Vercel auto-deploy of $COMMIT_SHA"
+              exit 1
+            fi
+            sleep 5
+          done
 
-      # Step 10: Deploy to Vercel production (prebuilt — uses .vercel/output/)
-      # The vercel CLI reliably hangs on the Hobby plan after the deployment
-      # succeeds. The deploy IS live on Vercel by the time the CLI hangs;
-      # the smoke test below verifies the live state. continue-on-error
-      # prevents the hung CLI from failing the workflow.
-      - name: Deploy to Vercel
-        continue-on-error: true
-        timeout-minutes: 20
-        run: npx vercel@54.9.1 deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }} || echo "vercel deploy CLI hung after deploy succeeded — this is a known Hobby-plan quirk. The deployment IS live on Vercel; the smoke test below will verify."
-
-      # Step 11: Smoke test against production
+      # Step 10: Smoke test against production
       - name: E2E smoke test on production
         run: |
-          sleep 10  # Wait for Vercel to propagate
+          sleep 5
           node scripts/deploy-e2e.mjs https://abhayandrebecca.com
 
