@@ -105,7 +105,7 @@ npm run dev
 | `npm test` | Run all unit tests ([Vitest](https://vitest.dev)) |
 | `npm run test:local` | Same as `npm test` — all local-run-safe tests |
 | `npm run test:full` | Unit tests + production build (matches CI) |
-| `npm run deploy` | Build + deploy to Vercel production |
+| `npm run deploy` | Build + trigger Vercel auto-deploy (pushes to `main`); CI handles the rest |
 | `npm run preview` | Serve the production build locally (port 4173) |
 | `npm run preview:check` | Start preview server on 3002, takes 2 mobile screenshots, emails them |
 | `npm run e2e:local` | Run E2E browser tests against `http://localhost:3000` |
