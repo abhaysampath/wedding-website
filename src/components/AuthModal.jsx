@@ -593,10 +593,17 @@ export default function AuthModal() {
       }
       if (code) {
         setEmailCode(code.split('').concat(Array(6 - code.length).fill('')))
-        setTimeout(() => handleEmailCodeCompleteRef.current(code), 200)
+        setTimeout(() => {
+          try {
+            handleEmailCodeCompleteRef.current?.(code)
+          } catch (err) {
+            console.error('Auto sign-in failed:', err)
+            setFirebaseError('Auto sign-in failed. Enter the 6-digit code from your email.')
+          }
+        }, 500)
       }
     }, 0)
-  }, [content.guests, content.loaded, recordLoginAttempt])
+  }, [content.guests, content.loaded, recordLoginAttempt, setFirebaseError])
 
   useEffect(() => {
     if (showAuthModal) {
