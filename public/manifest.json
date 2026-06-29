@@ -4,8 +4,8 @@
   "description": "Rebecca and Abhay's Wedding Website",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FEFCF3",
-  "theme_color": "#C9A96E",
+  "background_color": "#faf6ed",
+  "theme_color": "#6b7a42",
   "orientation": "portrait-primary",
   "icons": [
     {
