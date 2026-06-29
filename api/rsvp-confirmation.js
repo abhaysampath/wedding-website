@@ -1,4 +1,4 @@
-import SHEET_CONFIG from '../sheets-config.js'
+import SHEET_CONFIG from './sheets-config.js'
 import { isAllowedOrigin } from './_origin.js'
 import { getSession } from './_session.js'
 import { applyLimit } from './_rate-limit.js'

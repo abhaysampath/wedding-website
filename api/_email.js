@@ -4,13 +4,14 @@
  * RSVP confirmation email builder.
  */
 
+import { Resend } from 'resend'
+
 let _resend = null
 
 export function getResend() {
   if (_resend) return _resend
   const API_KEY = process.env.RESEND_API_KEY
   if (!API_KEY) return null
-  const { Resend } = require('resend')
   _resend = new Resend(API_KEY)
   return _resend
 }
