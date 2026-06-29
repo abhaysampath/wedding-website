@@ -200,4 +200,13 @@ describe('_email helpers', () => {
       expect(html).not.toContain('<script>danger</script>')
     })
   })
+
+  describe('getResend (regression: was CommonJS require in ESM context)', () => {
+    it('imports without throwing ReferenceError', async () => {
+      const { getResend } = await import('./_email.js')
+      expect(typeof getResend).toBe('function')
+      const client = getResend()
+      expect(client === null || typeof client.send === 'function' || typeof client.emails?.send === 'function').toBe(true)
+    })
+  })
 })
