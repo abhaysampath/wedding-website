@@ -42,5 +42,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: guests-backup
-          path: public/guests-backup.json
+          path: .backups/guests-backup.json
           retention-days: 30
+          if-no-files-found: ignore
