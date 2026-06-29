@@ -22,7 +22,7 @@ export default function TravelAccommodations() {
   return (
     <section
       id="travel"
-      className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-sage-soft/40 transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-5xl mx-auto">
@@ -35,7 +35,7 @@ export default function TravelAccommodations() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Travel & Accommodations
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
+          <div className="w-12 h-[1px] bg-sage mx-auto mb-4" />
           <p className="text-charcoal-light/60 text-sm max-w-lg mx-auto">
             Whether you're coming from near or far, we want to make your stay as comfortable as
             possible
@@ -62,7 +62,7 @@ export default function TravelAccommodations() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.15 * i }}
-                  className="bg-cream border border-gold/20 rounded-sm p-6 hover:shadow-lg hover:shadow-sage/5 transition-shadow duration-300 transition-wedding"
+                  className="bg-cream border border-sage/25 rounded-sm p-6 hover:shadow-lg hover:shadow-sage/5 transition-shadow duration-300 transition-wedding"
                 >
                   <div className="w-8 h-[1px] bg-gold mb-4" />
                   <h3 className="font-cormorant text-xl text-charcoal mb-2 font-semibold">
@@ -108,7 +108,7 @@ export default function TravelAccommodations() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="bg-cream border border-gold/20 rounded-sm p-8 max-w-2xl mx-auto transition-wedding"
+            className="bg-cream border border-sage/25 rounded-sm p-8 max-w-2xl mx-auto transition-wedding"
           >
             <h3 className="font-heading text-xl text-charcoal mb-4 text-center">Getting Here</h3>
             <div className="space-y-4 text-sm text-charcoal-light/70 leading-relaxed">

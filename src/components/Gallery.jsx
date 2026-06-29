@@ -214,7 +214,7 @@ export default function Gallery() {
   }, [expanded, goNext, goPrev])
 
   return (
-    <section id="gallery" className="py-24 md:py-32 pl-6 bg-cream relative" ref={ref}>
+    <section id="gallery" className="py-24 md:py-32 pl-6 bg-sage-fog relative" ref={ref}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -225,7 +225,7 @@ export default function Gallery() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Gallery
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
+          <div className="w-12 h-[1px] bg-sage mx-auto mb-4" />
           <p className="text-charcoal-light/60 text-sm max-w-md mx-auto">
             A glimpse into our journey together
           </p>

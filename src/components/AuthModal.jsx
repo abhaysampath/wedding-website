@@ -850,7 +850,7 @@ export default function AuthModal() {
                 type="button"
                 onClick={handleDiscardAndClose}
                 aria-label="Close"
-                className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/30 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-gold/20"
+                className="absolute top-4 md:top-10 right-4 md:right-6 w-9 h-9 md:w-[42px] md:h-[42px] flex items-center justify-center rounded-sm text-charcoal-light/50 hover:text-charcoal hover:bg-cream-dark transition-colors border border-transparent hover:border-sage/25"
               >
                 <svg
                   className="w-4 h-4"
@@ -875,7 +875,7 @@ export default function AuthModal() {
                       scale: 0.93,
                       transition: { type: 'spring', stiffness: 500, damping: 12 },
                     }}
-                    className="mx-auto w-full flex items-center justify-center gap-3 py-3.5 px-5 border-2 border-gold/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-cream hover:border-gold/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50 max-w-[280px]"
+                    className="mx-auto w-full flex items-center justify-center gap-3 py-3.5 px-5 border-2 border-sage/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-sage-fog hover:border-sage/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50 max-w-[280px]"
                   >
                     {firebaseLoading ? (
                       <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -907,7 +907,7 @@ export default function AuthModal() {
                       <div className="w-full border-t border-gold/10" />
                     </div>
                     <div className="relative flex justify-center">
-                      <span className="bg-cream px-3 text-xs text-charcoal-light/30">or</span>
+                      <span className="bg-cream px-3 text-xs text-charcoal-light/50">or</span>
                     </div>
                   </div>
 
@@ -927,7 +927,7 @@ export default function AuthModal() {
                       aria-activedescendant={
                         highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined
                       }
-                      className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 transition-colors"
+                      className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                       placeholder="Start typing your name"
                       autoComplete="off"
                     />
@@ -944,7 +944,7 @@ export default function AuthModal() {
                             left: dropdownPos.left,
                             width: dropdownPos.width,
                           }}
-                          className="mt-1 bg-cream border border-gold/20 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
+                          className="mt-1 bg-cream border border-sage/25 rounded-sm shadow-lg max-h-48 overflow-y-auto z-[60]"
                           onClick={e => e.stopPropagation()}
                         >
                           {matches.map((g, i) => (
@@ -976,7 +976,7 @@ export default function AuthModal() {
                   {firebaseError && (
                     <div
                       role="alert"
-                      className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70"
+                      className="p-3 bg-gold/10 border border-sage/25 rounded-sm text-xs text-charcoal-light/70"
                     >
                       {firebaseError}
                     </div>
@@ -990,18 +990,18 @@ export default function AuthModal() {
                         </p>
                         <div className="text-xs text-charcoal-light/70 space-y-1">
                           <p>
-                            <span className="text-charcoal-light/40">Google name:</span>{' '}
+                            <span className="text-charcoal-light/60">Google name:</span>{' '}
                             <span className="font-medium">{nameMismatch.googleName}</span>
                           </p>
                           {nameMismatch.closestName && (
                             <p>
-                              <span className="text-charcoal-light/40">Closest in guest list:</span>{' '}
+                              <span className="text-charcoal-light/60">Closest in guest list:</span>{' '}
                               <span className="font-medium">{nameMismatch.closestName}</span>
                             </p>
                           )}
                           {nameMismatch.googleEmail && (
                             <p>
-                              <span className="text-charcoal-light/40">Email:</span>{' '}
+                              <span className="text-charcoal-light/60">Email:</span>{' '}
                               <span className="font-medium">{nameMismatch.googleEmail}</span>
                             </p>
                           )}
@@ -1022,7 +1022,7 @@ export default function AuthModal() {
                             setNameMismatch(null)
                             setAuthMode('contact')
                           }}
-                          className="w-full py-2 border border-gold/30 bg-cream rounded-sm text-xs tracking-widest uppercase text-charcoal hover:bg-gold/10 transition-colors"
+                          className="w-full py-2 border border-sage/35 bg-cream rounded-sm text-xs tracking-widest uppercase text-charcoal hover:bg-gold/10 transition-colors"
                         >
                           Report Name Mismatch
                         </button>
@@ -1032,7 +1032,7 @@ export default function AuthModal() {
                             setNameMismatch(null)
                             setFirebaseError(null)
                           }}
-                          className="w-full py-2 text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors"
+                          className="w-full py-2 text-[10px] tracking-widest uppercase text-charcoal-light/60 hover:text-charcoal-light transition-colors"
                         >
                           Try a different account
                         </button>
@@ -1044,7 +1044,7 @@ export default function AuthModal() {
                     <button
                       type="button"
                       onClick={handleNeedHelp}
-                      className="text-[10px] tracking-widest uppercase text-charcoal-light/30 hover:text-charcoal-light transition-colors"
+                      className="text-[10px] tracking-widest uppercase text-charcoal-light/50 hover:text-charcoal-light transition-colors"
                     >
                       Having trouble? Contact us
                     </button>
@@ -1068,7 +1068,7 @@ export default function AuthModal() {
                       type="button"
                       onClick={() => handleOAuthSignIn('google')}
                       disabled={firebaseLoading}
-                      className="flex items-center justify-center gap-3 py-3 px-6 border-2 border-gold/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-cream hover:border-gold/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
+                      className="flex items-center justify-center gap-3 py-3 px-6 border-2 border-sage/40 bg-white rounded-sm text-sm font-medium text-charcoal hover:bg-sage-fog hover:border-sage/60 shadow-sm hover:shadow-md transition-all disabled:opacity-50"
                     >
                       {firebaseLoading ? (
                         <div className="w-4 h-4 border-2 border-gold border-t-transparent rounded-full animate-spin" />
@@ -1098,7 +1098,7 @@ export default function AuthModal() {
 
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-px bg-gold/10" />
-                    <span className="text-charcoal-light/30 text-[10px] tracking-widest uppercase">
+                    <span className="text-charcoal-light/50 text-[10px] tracking-widest uppercase">
                       or verify by
                     </span>
                     <div className="flex-1 h-px bg-gold/10" />
@@ -1120,7 +1120,7 @@ export default function AuthModal() {
                             type="tel"
                             value={maskPhone(guestPhone)}
                             readOnly
-                            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
+                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
                           />
                           <button
                             type="button"
@@ -1136,7 +1136,7 @@ export default function AuthModal() {
                             <p className="text-[10px] text-charcoal-light/50">
                               Enter the 6-digit code sent to your phone:
                             </p>
-                            <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                            <div className="flex items-center gap-2 bg-cream-dark border border-sage/25 rounded-sm px-3 py-2.5">
                               <span className="text-sm text-charcoal-light/50 font-mono select-none">
                                 code:
                               </span>
@@ -1196,7 +1196,7 @@ export default function AuthModal() {
                                       if (pasted.length === 6) handleVerifySmsCode(pasted)
                                       else smsCodeRefs.current[pasted.length]?.focus()
                                     }}
-                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                                     autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                   />
                                 ))}
@@ -1208,12 +1208,12 @@ export default function AuthModal() {
                                   type="button"
                                   onClick={handlePhoneConfirm}
                                   disabled={sendingSms}
-                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/60 hover:text-charcoal-light transition-colors disabled:opacity-30"
                                 >
                                   {sendingSms ? 'Sending...' : 'Resend Code'}
                                 </button>
                               ) : (
-                                <p className="text-[10px] text-charcoal-light/40">
+                                <p className="text-[10px] text-charcoal-light/60">
                                   A code was already sent. Resend in{' '}
                                   {Math.floor(smsResendCountdown / 60)}:
                                   {String(smsResendCountdown % 60).padStart(2, '0')}
@@ -1240,7 +1240,7 @@ export default function AuthModal() {
                             type="email"
                             value={maskEmail(guestEmail)}
                             readOnly
-                            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-gold/50 transition-colors cursor-default"
+                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
                           />
                           <button
                             type="button"
@@ -1256,7 +1256,7 @@ export default function AuthModal() {
                             <p className="text-[10px] text-charcoal-light/50">
                               Enter the 6-digit code sent to your email:
                             </p>
-                            <div className="flex items-center gap-2 bg-cream-dark border border-gold/20 rounded-sm px-3 py-2.5">
+                            <div className="flex items-center gap-2 bg-cream-dark border border-sage/25 rounded-sm px-3 py-2.5">
                               <span className="text-sm text-charcoal-light/50 font-mono select-none">
                                 code:
                               </span>
@@ -1316,7 +1316,7 @@ export default function AuthModal() {
                                       if (pasted.length === 6) handleEmailCodeComplete(pasted)
                                       else emailCodeRefs.current[pasted.length]?.focus()
                                     }}
-                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-gold/50 transition-colors"
+                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                                     autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                   />
                                 ))}
@@ -1328,12 +1328,12 @@ export default function AuthModal() {
                                   type="button"
                                   onClick={handleEmailConfirm}
                                   disabled={saving}
-                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/40 hover:text-charcoal-light transition-colors disabled:opacity-30"
+                                  className="text-[10px] tracking-widest uppercase text-charcoal-light/60 hover:text-charcoal-light transition-colors disabled:opacity-30"
                                 >
                                   {saving ? 'Sending...' : 'Resend Code'}
                                 </button>
                               ) : (
-                                <p className="text-[10px] text-charcoal-light/40">
+                                <p className="text-[10px] text-charcoal-light/60">
                                   A code was already sent. Resend in{' '}
                                   {Math.floor(emailResendCountdown / 60)}:
                                   {String(emailResendCountdown % 60).padStart(2, '0')}
@@ -1359,7 +1359,7 @@ export default function AuthModal() {
                   {firebaseError && (
                     <div
                       role="alert"
-                      className="p-3 bg-gold/10 border border-gold/20 rounded-sm text-xs text-charcoal-light/70"
+                      className="p-3 bg-gold/10 border border-sage/25 rounded-sm text-xs text-charcoal-light/70"
                     >
                       {firebaseError}
                     </div>
@@ -1369,7 +1369,7 @@ export default function AuthModal() {
                     <button
                       type="button"
                       onClick={handleRejectName}
-                      className="w-full py-2.5 border border-gold/20 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
+                      className="w-full py-2.5 border border-sage/25 rounded-sm text-xs text-charcoal-light hover:bg-cream-dark transition-colors"
                     >
                       No, that's not me
                     </button>
@@ -1405,13 +1405,13 @@ export default function AuthModal() {
                         <div className="h-6 bg-cream border border-gold/10 rounded-sm w-1/2" />
                         <div className="h-4 bg-cream border border-gold/10 rounded-sm w-1/3 mt-2" />
                       </div>
-                      <div className="h-12 bg-cream-dark border border-gold/20 rounded-sm" />
-                      <div className="h-12 bg-cream-dark border border-gold/20 rounded-sm" />
-                      <div className="h-24 bg-cream-dark border border-gold/20 rounded-sm" />
-                      <div className="h-24 bg-cream-dark border border-gold/20 rounded-sm" />
+                      <div className="h-12 bg-cream-dark border border-sage/25 rounded-sm" />
+                      <div className="h-12 bg-cream-dark border border-sage/25 rounded-sm" />
+                      <div className="h-24 bg-cream-dark border border-sage/25 rounded-sm" />
+                      <div className="h-24 bg-cream-dark border border-sage/25 rounded-sm" />
                       <div className="flex gap-3">
-                        <div className="flex-1 h-10 bg-cream-dark border border-gold/20 rounded-sm" />
-                        <div className="flex-1 h-10 bg-cream-dark border border-gold/20 rounded-sm" />
+                        <div className="flex-1 h-10 bg-cream-dark border border-sage/25 rounded-sm" />
+                        <div className="flex-1 h-10 bg-cream-dark border border-sage/25 rounded-sm" />
                       </div>
                     </div>
                   }

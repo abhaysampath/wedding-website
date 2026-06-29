@@ -27,7 +27,7 @@ export default function Registry() {
   return (
     <section
       id="registry"
-      className="py-24 md:py-32 px-6 bg-cream-dark transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-3xl mx-auto">
@@ -40,7 +40,7 @@ export default function Registry() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
             Registry
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
+          <div className="w-12 h-[1px] bg-sage mx-auto mb-4" />
           <p className="text-charcoal-light/60 text-sm max-w-lg mx-auto leading-relaxed">
             Your presence at our wedding is the greatest gift of all. If you wish to honor us with a
             gift, we've registered at a few places we love.
@@ -54,9 +54,9 @@ export default function Registry() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: 0.15 * i }}
-              className="block bg-cream border border-gold/20 rounded-sm p-8 text-center group"
+              className="block bg-cream border border-sage/25 rounded-sm p-8 text-center group"
             >
-              <div className="w-8 h-[1px] bg-gold mx-auto mb-4 group-hover:w-12 transition-all duration-300" />
+              <div className="w-8 h-[1px] bg-sage mx-auto mb-4 group-hover:w-12 transition-all duration-300" />
               <h3 className="font-heading text-xl text-charcoal mb-2">{item.name}</h3>
               <p className="text-charcoal-light/50 text-xs">{item.description}</p>
             </motion.div>

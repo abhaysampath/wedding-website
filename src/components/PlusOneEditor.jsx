@@ -23,7 +23,7 @@ function RsvpStatusBadge({ weddingKey, value }) {
     return (
       <span
         aria-label={`${label}: not set`}
-        className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium text-charcoal-light/40"
+        className="inline-flex items-center px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium text-charcoal-light/65"
       >
         RSVP on behalf
       </span>
@@ -34,7 +34,7 @@ function RsvpStatusBadge({ weddingKey, value }) {
       aria-label={`${label}: ${value}`}
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-[10px] tracking-widest uppercase font-medium ${
         isYes
-          ? 'bg-gold/20 text-gold-dark border border-gold/30'
+          ? 'bg-gold/20 text-gold-dark border border-sage/35'
           : 'bg-charcoal-light/10 text-charcoal-light/70 border border-charcoal-light/20'
       }`}
     >
@@ -77,7 +77,7 @@ function RsvpToggle({ weddingKey, value, onChange }) {
       aria-label={`${label}: ${value || 'not set'}`}
       className={`flex items-center gap-2 px-3 py-2 rounded-sm border text-xs tracking-wide transition-colors w-full ${
         isYes
-          ? 'bg-gold/15 border-gold/30 text-charcoal'
+          ? 'bg-gold/15 border-sage/35 text-charcoal'
           : isNo
             ? 'bg-cream-dark/50 border-gold/10 text-charcoal-light/70'
             : 'bg-cream border-gold/15 text-charcoal-light/50 hover:border-gold/25'
@@ -93,7 +93,7 @@ function RsvpToggle({ weddingKey, value, onChange }) {
       <span className="font-medium">{weddingKey === 'us' ? 'US Wedding' : 'India Wedding'}</span>
       <span
         className={`ml-auto text-[10px] tracking-widest uppercase font-medium ${
-          isYes ? 'text-gold-dark' : isNo ? 'text-charcoal-light/70' : 'text-charcoal-light/40'
+          isYes ? 'text-gold-dark' : isNo ? 'text-charcoal-light/70' : 'text-charcoal-light/65'
         }`}
       >
         {value || '—'}
@@ -155,7 +155,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
             value={state.firstName}
             onChange={e => update({ firstName: e.target.value })}
             placeholder="First name"
-            className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
+            className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
           />
         </div>
         <div>
@@ -167,7 +167,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
             value={state.lastName}
             onChange={e => update({ lastName: e.target.value })}
             placeholder="Last name"
-            className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
+            className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
           />
         </div>
       </div>
@@ -180,7 +180,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
           value={state.phone}
           onChange={e => update({ phone: e.target.value.replace(/\D/g, '') })}
           placeholder="5551234567"
-          className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
+          className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
       </div>
       <div>
@@ -192,7 +192,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
           value={state.email}
           onChange={e => update({ email: e.target.value })}
           placeholder="email@example.com"
-          className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
+          className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
       </div>
       <div>
@@ -204,7 +204,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
           onChange={e => update({ address: e.target.value })}
           rows={2}
           maxLength={500}
-          className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal placeholder:text-charcoal-light/30 focus:outline-none focus:border-gold/50 resize-none"
+          className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal placeholder:text-charcoal-light/55 focus:outline-none focus:border-gold/50 resize-none"
           placeholder="123 Main St, City, State ZIP"
         />
       </div>
@@ -217,7 +217,7 @@ function PlusOneExpandedEditor({ guest, state, onStateChange, saving, status, er
           value={state.dietary}
           onChange={e => update({ dietary: e.target.value })}
           placeholder="e.g. vegetarian, nut allergy"
-          className="w-full text-sm border border-gold/20 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
+          className="w-full text-sm border border-sage/25 rounded-sm px-3 py-2 bg-cream text-charcoal focus:outline-none focus:border-gold/50"
         />
       </div>
       <div className="flex items-center justify-between">

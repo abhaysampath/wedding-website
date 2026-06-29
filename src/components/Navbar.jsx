@@ -78,7 +78,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="relative text-xs md:text-sm tracking-widest uppercase font-medium hover:text-gold transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
+              className="relative text-xs md:text-sm tracking-widest uppercase font-medium hover:text-sage transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-sage after:transition-all after:duration-300 hover:after:w-full"
             >
               {link.label}
             </a>
@@ -123,7 +123,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={handleSignInClick}
-              className="text-xs md:text-sm tracking-widest uppercase font-medium hover:text-gold transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-gold after:transition-all after:duration-300 hover:after:w-full"
+              className="text-xs md:text-sm tracking-widest uppercase font-medium hover:text-sage transition-colors duration-300 after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-sage after:transition-all after:duration-300 hover:after:w-full"
             >
               Sign in
             </button>

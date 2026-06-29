@@ -103,7 +103,7 @@ export default function EventDetails() {
   return (
     <section
       id="details"
-      className="py-20 md:py-32 px-6 bg-cream-dark transition-colors duration-700"
+      className="py-20 md:py-32 px-6 bg-cream transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-4xl mx-auto">
@@ -116,13 +116,13 @@ export default function EventDetails() {
           <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-4 tracking-wide">
             Event Details
           </h2>
-          <div className="w-16 h-[1.5px] bg-gold mx-auto mb-8" />
+          <div className="w-16 h-[1.5px] bg-sage mx-auto mb-8" />
 
           <div className="flex justify-center mb-10 md:mb-12">
             <WeddingSwitcher />
           </div>
 
-          <div className="inline-block w-full md:w-auto border border-gold/30 rounded-sm px-6 md:px-10 py-6 md:py-8 bg-cream transition-wedding shadow-sm">
+          <div className="inline-block w-full md:w-auto border border-sage/35 rounded-sm px-6 md:px-10 py-6 md:py-8 bg-cream transition-wedding shadow-sm">
             <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2 pt-1">{w.date}</p>
             <p className="text-charcoal-light text-sm md:text-base tracking-wide">
               {w.venueUrl ? (
@@ -153,7 +153,7 @@ export default function EventDetails() {
 
         {filteredTimeline.length > 0 && (
           <div className="relative">
-            <div className="absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-gold/30 via-gold/10 to-transparent -translate-x-1/2" />
+            <div className="absolute left-[22px] md:left-1/2 top-0 bottom-0 w-[1.5px] bg-gradient-to-b from-sage/40 via-sage/15 to-transparent -translate-x-1/2" />
 
             <div className="space-y-8 md:space-y-12">
               {filteredTimeline.map((event, i) => {
@@ -168,7 +168,7 @@ export default function EventDetails() {
                     transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
                     className={`relative flex flex-col md:flex-row items-start gap-5 md:gap-0 ${
                       i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                    } ${isVendorHighlight ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-gold/20' : ''}`}
+                    } ${isVendorHighlight ? 'md:px-4 md:py-3 md:-mx-4 md:rounded-sm md:bg-gold/[0.04] md:border md:border-sage/25' : ''}`}
                   >
                     <button
                       type="button"

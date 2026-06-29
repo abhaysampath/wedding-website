@@ -73,7 +73,7 @@ export default function FAQ() {
   return (
     <section
       id="faq"
-      className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-sage-fog transition-colors duration-700"
       ref={ref}
       aria-labelledby="faq-heading"
     >
@@ -90,7 +90,7 @@ export default function FAQ() {
           >
             FAQ
           </h2>
-          <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
+          <div className="w-12 h-[1px] bg-sage mx-auto mb-6" />
 
           <div className="flex justify-center">
             <WeddingSwitcher />
@@ -109,7 +109,7 @@ export default function FAQ() {
         )}
 
         {faqs.length === 0 ? (
-          <p className="text-center text-charcoal-light/40 text-sm" role="status">
+          <p className="text-center text-charcoal-light/65 text-sm" role="status">
             No FAQs available yet. Check back closer to the wedding date.
           </p>
         ) : (
@@ -117,7 +117,7 @@ export default function FAQ() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-cream-dark border border-gold/10 rounded-sm px-6 md:px-10 transition-wedding"
+            className="bg-cream border border-sage/20 rounded-sm px-6 md:px-10 transition-wedding shadow-sm"
           >
             {faqs.map((item, i) => (
               <AccordionItem

@@ -196,7 +196,7 @@ export default function Hero() {
                   e.stopPropagation()
                   goTo(i, true)
                 }}
-                className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? 'bg-cream w-4' : 'bg-cream/30 hover:bg-cream/50'}`}
+                className={`w-2 h-2 rounded-full transition-all ${i === currentIndex ? 'bg-sage-light w-4' : 'bg-sage-light/30 hover:bg-sage-light/50'}`}
                 aria-label={`Go to slide ${i + 1}`}
               />
             ))}

@@ -27,11 +27,13 @@
 }
 
 @theme {
-  --color-sage: #8a9a5b;
-  --color-sage-light: #a8b87e;
-  --color-sage-dark: #6b7a42;
-  --color-cream: #fefcf3;
-  --color-cream-dark: #f5f0e0;
+  --color-sage: #6b7a42;
+  --color-sage-light: #8a9a5b;
+  --color-sage-dark: #4a5828;
+  --color-sage-soft: #d8dec5;
+  --color-sage-fog: #eef0e3;
+  --color-cream: #faf6ed;
+  --color-cream-dark: #ede6d2;
   --color-gold: #c9a96e;
   --color-gold-light: #decca0;
   --color-gold-dark: #a8884a;

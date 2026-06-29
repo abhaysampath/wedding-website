@@ -9,7 +9,7 @@ function SectionTitle({ children }) {
       <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
         {children}
       </h2>
-      <div className="w-12 h-[1px] bg-gold mx-auto" />
+      <div className="w-12 h-[1px] bg-sage mx-auto" />
     </div>
   )
 }
@@ -45,7 +45,7 @@ export default function OurStory() {
   return (
     <section
       id="story"
-      className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-sage-fog transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-5xl mx-auto">

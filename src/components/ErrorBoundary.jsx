@@ -41,7 +41,7 @@ class ErrorBoundary extends Component {
       const sectionName = this.props.name
       return (
         <div className="fixed inset-0 flex items-center justify-center bg-charcoal/90 backdrop-blur-md z-50 p-4 text-center">
-          <div className="bg-cream-dark/80 backdrop-blur-sm p-8 rounded-xl border border-gold/20 max-w-2xl w-full">
+          <div className="bg-cream-dark/80 backdrop-blur-sm p-8 rounded-xl border border-sage/25 max-w-2xl w-full">
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-10 h-10 bg-gold/20 rounded-full flex items-center justify-center">
                 <svg

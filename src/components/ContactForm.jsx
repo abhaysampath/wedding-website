@@ -73,14 +73,14 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
       layout
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       className={`rounded-sm overflow-hidden border transition-all ${
-        isActive ? 'border-gold/20' : 'border-gold/10'
+        isActive ? 'border-sage/25' : 'border-gold/10'
       }`}
     >
       <button
         type="button"
         onClick={handleToggle}
         aria-pressed={isActive}
-        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-gold/30 ${
+        className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-sage/25 ${
           isActive
             ? 'bg-gold/10'
             : hasRsvp
@@ -120,7 +120,7 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
         {checked && (
           <span
             className={`text-[10px] tracking-widest uppercase ml-auto ${
-              isActive ? 'text-gold-dark' : 'text-charcoal-light/40'
+              isActive ? 'text-gold-dark' : 'text-charcoal-light/65'
             }`}
           >
             {checked}
@@ -136,7 +136,7 @@ function RsvpCheckbox({ weddingKey, checked, onChange, onOpenDetails }) {
           <button
             type="button"
             onClick={() => onOpenDetails(weddingKey)}
-            className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1 focus:outline-none focus:ring-2 focus:ring-gold/30 rounded-sm"
+            className="text-[10px] tracking-widest uppercase text-gold-dark hover:text-gold transition-colors pt-1 focus:outline-none focus:ring-2 focus:ring-sage/25 rounded-sm"
           >
             View Event Details
           </button>
@@ -459,7 +459,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             disabled={saving}
             aria-invalid={phone.length > 0 && !validPhone}
             aria-describedby="cf-phone-hint"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors disabled:opacity-30 aria-[invalid=true]:border-red/50"
+            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/25 transition-colors disabled:opacity-30 aria-[invalid=true]:border-red/50"
             placeholder="5551234567"
           />
           <span id="cf-phone-hint" className="sr-only">
@@ -500,7 +500,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             onChange={e => setEmail(e.target.value)}
             aria-invalid={email.length > 0 && !validEmail}
             aria-describedby="cf-email-hint"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors aria-[invalid=true]:border-red/50"
+            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/25 transition-colors aria-[invalid=true]:border-red/50"
             placeholder="you@email.com"
           />
           <span id="cf-email-hint" className="sr-only">
@@ -539,7 +539,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             rows={2}
             maxLength={500}
             aria-describedby="cf-address-counter"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors resize-none"
+            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/25 transition-colors resize-none"
             placeholder="123 Main St, City, State ZIP"
           />
           <span
@@ -567,7 +567,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             rows={2}
             maxLength={500}
             aria-describedby="cf-diet-counter"
-            className="w-full bg-cream-dark border border-gold/20 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/30 transition-colors resize-none"
+            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/25 transition-colors resize-none"
             placeholder="Any dietary restrictions or preferences"
           />
           <span
@@ -619,7 +619,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
+            className="flex-1 py-2.5 border border-sage/25 rounded-sm text-xs tracking-widest uppercase text-charcoal hover:text-charcoal-light hover:bg-cream-dark transition-colors"
           >
             Close
           </button>
@@ -627,7 +627,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
             type="button"
             onClick={handleSave}
             disabled={!hasChanges || saveStatus === 'saving'}
-            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
+            className="flex-1 py-2.5 border border-sage/25 rounded-sm text-xs tracking-widest uppercase transition-colors disabled:opacity-30"
             style={{
               color: hasChanges ? 'var(--color-charcoal)' : undefined,
               borderColor: hasChanges ? 'var(--color-gold)' : undefined,
@@ -639,7 +639,7 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           <button
             type="button"
             onClick={handleMessageClick}
-            className="flex-1 py-2.5 border border-gold/20 rounded-sm text-xs tracking-widest uppercase transition-colors"
+            className="flex-1 py-2.5 border border-sage/25 rounded-sm text-xs tracking-widest uppercase transition-colors"
             style={{
               color: hasChanges ? 'var(--color-charcoal)' : undefined,
               borderColor: hasChanges ? 'var(--color-gold)' : undefined,
