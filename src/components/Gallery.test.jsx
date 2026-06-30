@@ -59,4 +59,9 @@ describe('Gallery', () => {
     expect(heading).not.toBeNull()
     expect(heading.tagName).toBe('H2')
   })
+
+  test('Sign-in overlay does not appear immediately on first render', () => {
+    render(<Gallery />)
+    expect(screen.queryByText(/Sign in to view all photos/i)).toBeNull()
+  })
 })

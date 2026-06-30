@@ -66,6 +66,7 @@ export default function Gallery() {
   const sectionInView = useInView(ref, { once: true, margin: '-100px' })
   const [showOverlay, setShowOverlay] = useState(false)
   const overlayShown = useRef(false)
+  const overlayTimerSetRef = useRef(false)
   const [eagerReady, setEagerReady] = useState(false)
   const preloaded = useRef(new Set())
   const lightboxRef = useRef(null)
@@ -131,22 +132,31 @@ export default function Gallery() {
     return () => observer.disconnect()
   }, [images.length])
 
+  // Mark the section as eligible to show the sign-in overlay once
+  // it scrolls into view. The actual timer is set in the next effect.
   useEffect(() => {
     if (user) return
-    if (sectionInView && !overlayShown.current) {
+    if (sectionInView) {
       overlayShown.current = true
-      // Wait until the first batch of images has loaded, then give the
-      // guest a few more seconds to look at the photos before showing
-      // the sign-in overlay. The first batch is images 0..FIRST_BATCH-1.
-      const firstBatch = images.slice(0, FIRST_BATCH)
-      let delay = 5500
-      const loadedCount = Object.values(loadedImages).filter(Boolean).length
-      if (loadedCount < firstBatch.length) {
-        delay = Math.max(delay, 5500 + (firstBatch.length - loadedCount) * 800)
-      }
-      const id = setTimeout(() => setShowOverlay(true), delay)
-      return () => clearTimeout(id)
+    } else {
+      // reset so the timer can run again if the section leaves and re-enters
+      overlayShown.current = false
+      overlayTimerSetRef.current = false
     }
+  }, [sectionInView, user])
+
+  // When the first batch of images is loaded AND the section is
+  // eligible, show the sign-in overlay after a short grace period.
+  // overlayTimerSetRef ensures the timer is only set once, even if
+  // loadedImages re-renders this effect multiple times.
+  useEffect(() => {
+    if (user || !overlayShown.current || overlayTimerSetRef.current) return
+    const firstBatch = images.slice(0, FIRST_BATCH)
+    const allLoaded = firstBatch.every(img => loadedImages[img?.jpg])
+    if (!allLoaded) return
+    overlayTimerSetRef.current = true
+    const id = setTimeout(() => setShowOverlay(true), 2500)
+    return () => clearTimeout(id)
   }, [sectionInView, user, loadedImages, images])
 
   useEffect(() => {
