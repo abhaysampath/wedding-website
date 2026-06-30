@@ -2,8 +2,17 @@ const VERSION = '__SW_VERSION__'
 const CACHE = 'wedding-static-' + VERSION
 const SHELL_CACHE = 'wedding-shell-' + VERSION
 
+// skipWaiting() removed: the new SW waits for all tabs to close before
+// activating, so the page never refreshes itself mid-session.
+// To force an update, post {type:'SKIP_WAITING'} from the client.
 self.addEventListener('install', () => {
-  self.skipWaiting()
+  // do nothing — let the new SW enter 'waiting' state
+})
+
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 self.addEventListener('activate', (e) => {
@@ -14,7 +23,7 @@ self.addEventListener('activate', (e) => {
           .filter((k) => k !== CACHE && k !== SHELL_CACHE)
           .map((k) => caches.delete(k))
       )
-    ).then(() => self.clients.claim())
+    )
   )
 })
 
