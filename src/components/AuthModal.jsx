@@ -836,11 +836,14 @@ export default function AuthModal() {
               {/* Sign In — OAuth first, then name entry */}
               {authMode === 'signin' && !selectedMatch && (
                 <div className="space-y-4">
-                  <div className="text-center mb-2">
-                    <h2 className="font-heading text-2xl md:text-3xl text-charcoal leading-tight">
+                  <div className="text-center mb-3 px-2">
+                    <p className="text-[10px] tracking-[0.25em] uppercase text-charcoal-light/55 mb-1">
+                      You're invited
+                    </p>
+                    <h2 className="font-heading text-xl md:text-2xl text-charcoal leading-snug">
                       RSVP for Rebecca &amp; Abhay
                     </h2>
-                    <p className="text-charcoal-light/65 text-xs mt-1">
+                    <p className="text-charcoal-light/60 text-[11px] mt-1.5">
                       Stone Mill, NY Botanical Garden · May 30 2027
                     </p>
                   </div>
