@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/useAuth'
-import { guestLabel, fullName } from '../utils/guest'
 
 const guestLinks = [{ href: '#gallery', label: 'Gallery' }]
 
 const authLinks = [
-  { href: '#story', label: 'Our Story' },
+  { href: '#story', label: 'Story' },
   { href: '#details', label: 'Event Details' },
   { href: '#gallery', label: 'Gallery' },
   { href: '#travel', label: 'Travel' },
@@ -64,7 +63,10 @@ export default function Navbar() {
   }, [])
 
   return (
-    <nav
+    <motion.nav
+      initial={{ y: 60, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled ? 'bg-cream/95 backdrop-blur-md shadow-soft' : 'bg-transparent'
       }`}
@@ -88,9 +90,9 @@ export default function Navbar() {
           {user && (
             <div className="flex items-center gap-2 text-right">
               <div>
-                <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
-                <p className="text-[10px] opacity-60 tracking-wider uppercase">
-                  {guestLabel(user, { bride: 'Rebecca', groom: 'Abhay' })}
+                <p className="text-xs font-medium leading-tight">{user.firstName}</p>
+                <p className="text-[10px] font-light opacity-70 leading-tight">
+                  {user.relationship}
                 </p>
               </div>
               <button
@@ -134,12 +136,13 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile layout — icon top-right, no menu */}
+      {/* Mobile layout — slides up from the bottom (not down from the top) */}
       <div className="md:hidden flex items-center justify-end px-6 h-16">
         <div className={`flex items-center gap-3 ${scrolled ? 'text-charcoal' : 'text-cream'}`}>
           {user && (
             <div className="text-right">
-              <p className="text-xs font-medium leading-tight">{fullName(user)}</p>
+              <p className="text-xs font-medium leading-tight">{user.firstName}</p>
+              <p className="text-[10px] font-light opacity-70 leading-tight">{user.relationship}</p>
             </div>
           )}
           <div ref={mobileBtnRef}>
@@ -147,6 +150,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   )
 }

@@ -86,7 +86,7 @@ export default function FAQ() {
         >
           <h2
             id="faq-heading"
-            className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3"
+            className="font-heading text-3xl sm:text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3 whitespace-nowrap"
           >
             FAQ
           </h2>

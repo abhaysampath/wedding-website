@@ -73,16 +73,22 @@ describe('Navbar', () => {
     expect(screen.getByText('FAQ')).toBeTruthy()
   })
 
-  it('shows user name when signed in', () => {
+  it('shows user first name and relationship when signed in', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: 'g001', firstName: 'Jane', lastName: 'Doe', role: 'invited_guest' },
+      user: {
+        id: 'g001',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        relationship: 'Cousin',
+        role: 'invited_guest',
+      },
       setShowAuthModal: vi.fn(),
       setAuthMode: vi.fn(),
       signOut: vi.fn(),
     })
     render(<Navbar />)
-    expect(screen.getAllByText('Jane Doe').length).toBeGreaterThanOrEqual(1)
-    expect(screen.getAllByText('invited guest').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Jane').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Cousin').length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders two AR logo images (desktop + mobile)', () => {

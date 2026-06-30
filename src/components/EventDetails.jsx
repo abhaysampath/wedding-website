@@ -113,7 +113,7 @@ export default function EventDetails() {
           transition={{ duration: 0.7 }}
           className="text-center mb-14 md:mb-20"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-4 tracking-wide">
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-charcoal font-light pt-1 mb-4 tracking-wide whitespace-nowrap">
             Event Details
           </h2>
           <div className="w-16 h-[1.5px] bg-sage mx-auto mb-8" />

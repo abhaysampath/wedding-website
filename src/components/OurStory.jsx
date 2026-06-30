@@ -6,7 +6,7 @@ import config, { imgUrl, imgSrcSet } from '../config'
 function SectionTitle({ children }) {
   return (
     <div className="text-center mb-16">
-      <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
+      <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3 whitespace-nowrap">
         {children}
       </h2>
       <div className="w-12 h-[1px] bg-sage mx-auto" />
@@ -54,7 +54,7 @@ export default function OurStory() {
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
         >
-          <SectionTitle>Our Story</SectionTitle>
+          <SectionTitle>Story</SectionTitle>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">

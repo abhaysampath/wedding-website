@@ -135,8 +135,8 @@ function BackToTop() {
 }
 
 const SECTIONS = [
-  { id: 'hero', label: 'Hero' },
-  { id: 'story', label: 'Our Story' },
+  { id: 'hero', label: 'AR' },
+  { id: 'story', label: 'Story' },
   { id: 'gallery', label: 'Gallery' },
   { id: 'details', label: 'Events' },
   { id: 'travel', label: 'Travel' },
@@ -174,11 +174,23 @@ function SectionNav() {
           aria-current={active === s.id ? 'true' : undefined}
           className="group relative flex items-center justify-center"
         >
-          <span
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
-            }`}
-          />
+          {s.id === 'hero' ? (
+            <img
+              src="/ar-logo.png"
+              alt="AR"
+              className={`w-6 h-6 rounded-full transition-all duration-300 pointer-events-none ${
+                active === s.id
+                  ? 'opacity-100 scale-125 ring-2 ring-gold'
+                  : 'opacity-50 hover:opacity-80'
+              }`}
+            />
+          ) : (
+            <span
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
+              }`}
+            />
+          )}
           <span className="absolute right-full mr-3 px-2 py-0.5 bg-charcoal/80 text-cream text-[10px] tracking-wider whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             {s.label}
           </span>
@@ -214,6 +226,7 @@ function BottomNav() {
               active === s.id ? 'text-gold' : 'text-charcoal-light/40 hover:text-charcoal-light/60'
             }`}
           >
+            {s.id === 'hero' && <img src="/ar-logo.png" alt="" className="w-5 h-5 rounded-full" />}
             {s.id === 'story' && (
               <svg
                 className="w-4 h-4"

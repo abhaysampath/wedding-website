@@ -70,6 +70,7 @@ export default function Gallery() {
   const preloaded = useRef(new Set())
   const lightboxRef = useRef(null)
   const touchStartX = useRef(null)
+  const touchStartY = useRef(null)
   const [zoomed, setZoomed] = useState(false)
   const lastTap = useRef(0)
   const prevFocusRef = useRef(null)
@@ -134,10 +135,19 @@ export default function Gallery() {
     if (user) return
     if (sectionInView && !overlayShown.current) {
       overlayShown.current = true
-      const id = setTimeout(() => setShowOverlay(true), 3000)
+      // Wait until the first batch of images has loaded, then give the
+      // guest a few more seconds to look at the photos before showing
+      // the sign-in overlay. The first batch is images 0..FIRST_BATCH-1.
+      const firstBatch = images.slice(0, FIRST_BATCH)
+      let delay = 5500
+      const loadedCount = Object.values(loadedImages).filter(Boolean).length
+      if (loadedCount < firstBatch.length) {
+        delay = Math.max(delay, 5500 + (firstBatch.length - loadedCount) * 800)
+      }
+      const id = setTimeout(() => setShowOverlay(true), delay)
       return () => clearTimeout(id)
     }
-  }, [sectionInView, user])
+  }, [sectionInView, user, loadedImages, images])
 
   useEffect(() => {
     if (!user) return
@@ -158,12 +168,28 @@ export default function Gallery() {
   }, [expanded, images.length])
 
   const goNext = useCallback(() => {
-    setExpanded(prev => (prev < images.length - 1 ? prev + 1 : 0))
-  }, [images.length])
+    setExpanded(prev => {
+      const next = prev < images.length - 1 ? prev + 1 : 0
+      preload([
+        images[next],
+        images[(next + 1) % images.length],
+        images[(next - 1 + images.length) % images.length],
+      ])
+      return next
+    })
+  }, [images])
 
   const goPrev = useCallback(() => {
-    setExpanded(prev => (prev > 0 ? prev - 1 : images.length - 1))
-  }, [images.length])
+    setExpanded(prev => {
+      const next = prev > 0 ? prev - 1 : images.length - 1
+      preload([
+        images[next],
+        images[(next + 1) % images.length],
+        images[(next - 1 + images.length) % images.length],
+      ])
+      return next
+    })
+  }, [images])
 
   useEffect(() => {
     if (expanded === null) return
@@ -192,24 +218,42 @@ export default function Gallery() {
     }
     const handleTouchStart = e => {
       touchStartX.current = e.touches[0].clientX
+      touchStartY.current = e.touches[0].clientY
+    }
+    const handleTouchMove = e => {
+      if (touchStartX.current === null) return
+      const dx = e.touches[0].clientX - touchStartX.current
+      const dy = e.touches[0].clientY - touchStartY.current
+      if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 8) {
+        e.preventDefault()
+      }
     }
     const handleTouchEnd = e => {
       if (touchStartX.current === null) return
       const dx = e.changedTouches[0].clientX - touchStartX.current
+      const dy = e.changedTouches[0].clientY - touchStartY.current
       touchStartX.current = null
-      if (Math.abs(dx) > 50) {
+      touchStartY.current = null
+      if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 30) {
         dx > 0 ? goPrev() : goNext()
       }
     }
+    const lightbox = lightboxRef.current
     window.addEventListener('keydown', handler)
     window.addEventListener('keydown', tabHandler)
-    window.addEventListener('touchstart', handleTouchStart, { passive: true })
-    window.addEventListener('touchend', handleTouchEnd, { passive: true })
+    if (lightbox) {
+      lightbox.addEventListener('touchstart', handleTouchStart, { passive: true })
+      lightbox.addEventListener('touchmove', handleTouchMove, { passive: false })
+      lightbox.addEventListener('touchend', handleTouchEnd, { passive: true })
+    }
     return () => {
       window.removeEventListener('keydown', handler)
       window.removeEventListener('keydown', tabHandler)
-      window.removeEventListener('touchstart', handleTouchStart, { passive: true })
-      window.removeEventListener('touchend', handleTouchEnd, { passive: true })
+      if (lightbox) {
+        lightbox.removeEventListener('touchstart', handleTouchStart)
+        lightbox.removeEventListener('touchmove', handleTouchMove)
+        lightbox.removeEventListener('touchend', handleTouchEnd)
+      }
     }
   }, [expanded, goNext, goPrev])
 
@@ -222,7 +266,7 @@ export default function Gallery() {
           transition={{ duration: 0.7 }}
           className="text-center mb-12 pr-6"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3 whitespace-nowrap">
             Gallery
           </h2>
           <div className="w-12 h-[1px] bg-sage mx-auto mb-4" />

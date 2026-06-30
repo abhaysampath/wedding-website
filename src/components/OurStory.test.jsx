@@ -51,7 +51,7 @@ import OurStory from './OurStory'
 describe('OurStory', () => {
   it('renders section title', () => {
     render(<OurStory />)
-    expect(screen.getByText('Our Story')).toBeTruthy()
+    expect(screen.getByText('Story')).toBeTruthy()
   })
 
   it('renders story text content', () => {
@@ -76,6 +76,6 @@ describe('OurStory', () => {
 
   it('renders without crashing', () => {
     render(<OurStory />)
-    expect(screen.getByText('Our Story')).toBeTruthy()
+    expect(screen.getByText('Story')).toBeTruthy()
   })
 })
