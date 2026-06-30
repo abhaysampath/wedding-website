@@ -10,6 +10,7 @@ import { createAnonymousSession, sendPhoneCode, linkPhoneCredential } from '../f
 import { sendVerificationCode, verifyCodeServer } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
 import { stripPhone, guestLabel, fullName } from '../utils/guest'
+import { friendlyAuthError } from '../utils/firebase-errors'
 
 function isUsNumber(raw) {
   const digits = stripPhone(raw)
@@ -198,7 +199,7 @@ export default function AuthModal() {
       setAwaitingEmailLink(true)
       sessionStorage.setItem('awaiting_email', '1')
     } catch (err) {
-      setFirebaseError(err.message || 'Failed to send verification code')
+      setFirebaseError(friendlyAuthError(err, 'Failed to send verification code'))
       track('signin_failed', {
         method: 'email',
         reason: err.message,
@@ -258,7 +259,7 @@ export default function AuthModal() {
           setFirebaseError('We could not match this code to a guest. Please sign in by name below.')
         }
       } catch (err) {
-        setFirebaseError(err.message || 'Failed to complete sign in')
+        setFirebaseError(friendlyAuthError(err, 'Failed to complete sign in'))
         track('signin_failed', {
           method: 'email_code',
           reason: err.message,
@@ -320,20 +321,7 @@ export default function AuthModal() {
         guest: selectedMatch?.firstName,
         guestId: selectedMatch?.id,
       })
-      const code = err?.code || ''
-      if (
-        code === 'auth/captcha-check-failed' ||
-        code === 'auth/invalid-app-credential' ||
-        /recaptcha/i.test(err?.message || '')
-      ) {
-        setFirebaseError(
-          'Phone sign-in is temporarily unavailable due to a reCAPTCHA configuration issue. Please sign in with email instead, or try again later.',
-        )
-      } else if (code === 'auth/too-many-requests') {
-        setFirebaseError('Too many attempts. Please wait a few minutes and try again.')
-      } else {
-        setFirebaseError(err.message || 'Failed to send verification code')
-      }
+      setFirebaseError(friendlyAuthError(err, 'Failed to send verification code'))
     } finally {
       setSendingSms(false)
     }
@@ -355,7 +343,7 @@ export default function AuthModal() {
           await updateContact({ phone: guestPhone, email: guestEmail })
         }
       } catch (err) {
-        setFirebaseError(err.message || 'Failed to verify code')
+        setFirebaseError(friendlyAuthError(err, 'Failed to verify code'))
         track('signin_failed', {
           method: 'sms_code',
           reason: err.message,
