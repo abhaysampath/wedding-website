@@ -6,13 +6,7 @@ import { track } from '@vercel/analytics'
 import { useAuth } from '../context/useAuth'
 
 const ContactForm = lazy(() => import('./ContactForm'))
-import {
-  createAnonymousSession,
-  sendPhoneCode,
-  linkPhoneCredential,
-  getRecaptchaVerifier,
-  clearRecaptchaVerifier,
-} from '../firebase'
+import { createAnonymousSession, sendPhoneCode, linkPhoneCredential } from '../firebase'
 import { sendVerificationCode, verifyCodeServer } from '../utils/verifyEmail'
 import { maskEmail, maskPhone } from '../utils/mask'
 import { stripPhone, guestLabel, fullName } from '../utils/guest'
@@ -55,6 +49,7 @@ export default function AuthModal() {
     recordLogin,
     recordLoginAttempt,
     content,
+    signOut,
   } = useAuth()
 
   const [nameInput, setNameInput] = useState('')
@@ -94,7 +89,6 @@ export default function AuthModal() {
   const [emailResendable, setEmailResendable] = useState(true)
   const [emailResendCountdown, setEmailResendCountdown] = useState(0)
   const inputRef = useRef(null)
-  const recaptchaContainerRef = useRef(null)
   const urlCodeRef = useRef(null)
   const urlSlugRef = useRef(null)
   const modalRef = useRef(null)
@@ -164,7 +158,6 @@ export default function AuthModal() {
     sessionStorage.removeItem('pending_verification_id')
     sessionStorage.removeItem('pending_verification_phone')
     sessionStorage.removeItem('pending_verification_sent_at')
-    clearRecaptchaVerifier()
   }, [setFirebaseError])
 
   const handleOAuthSignIn = useCallback(
@@ -311,14 +304,7 @@ export default function AuthModal() {
         if (!fbUser)
           throw new Error('Failed to create session. Check Firebase Anonymous provider is enabled.')
       }
-      if (!recaptchaContainerRef.current) {
-        throw new Error('reCAPTCHA container not ready')
-      }
-      const verifier = getRecaptchaVerifier(recaptchaContainerRef.current)
-      if (!verifier) {
-        throw new Error('Failed to initialize reCAPTCHA')
-      }
-      const result = await sendPhoneCode(e164Phone, verifier)
+      const result = await sendPhoneCode(e164Phone)
       setVerificationId(result.verificationId)
       setAwaitingSmsCode(true)
       sessionStorage.setItem('awaiting_sms', '1')
@@ -349,19 +335,9 @@ export default function AuthModal() {
         setFirebaseError(err.message || 'Failed to send verification code')
       }
     } finally {
-      clearRecaptchaVerifier()
       setSendingSms(false)
     }
-  }, [
-    guestPhone,
-    saving,
-    sendingSms,
-    user,
-    selectedMatch,
-    recordLoginAttempt,
-    setFirebaseError,
-    recaptchaContainerRef,
-  ])
+  }, [guestPhone, saving, sendingSms, user, selectedMatch, recordLoginAttempt, setFirebaseError])
 
   const handleVerifySmsCode = useCallback(
     async code => {
@@ -371,7 +347,6 @@ export default function AuthModal() {
       setFirebaseError(null)
       try {
         await linkPhoneCredential(verificationId, codeStr)
-        clearRecaptchaVerifier()
         if (selectedMatch) {
           await updateContact({ phone: guestPhone, email: guestEmail })
           signInAsGuest(selectedMatch, { phone: guestPhone, email: guestEmail })
@@ -419,10 +394,8 @@ export default function AuthModal() {
         setShowAuthModal(false)
         setAuthMode('signin')
         resetState()
-        clearRecaptchaVerifier()
       } else {
         resetState()
-        clearRecaptchaVerifier()
         setShowAuthModal(false)
         setTimeout(() => {
           const el = document.getElementById('hero')
@@ -448,10 +421,8 @@ export default function AuthModal() {
       setShowAuthModal(false)
       setAuthMode('signin')
       resetState()
-      clearRecaptchaVerifier()
     } else {
       resetState()
-      clearRecaptchaVerifier()
       setShowAuthModal(false)
       setTimeout(() => {
         const el = document.getElementById('hero')
@@ -845,7 +816,6 @@ export default function AuthModal() {
                 {selectedMatch ? ` — signed in as ${fullName(selectedMatch)}` : ''}
                 {firebaseError ? ` — error: ${firebaseError}` : ''}
               </div>
-              <div ref={recaptchaContainerRef} />
               <button
                 type="button"
                 onClick={handleDiscardAndClose}
@@ -866,6 +836,14 @@ export default function AuthModal() {
               {/* Sign In — OAuth first, then name entry */}
               {authMode === 'signin' && !selectedMatch && (
                 <div className="space-y-4">
+                  <div className="text-center mb-2">
+                    <h2 className="font-heading text-2xl md:text-3xl text-charcoal leading-tight">
+                      RSVP for Rebecca &amp; Abhay
+                    </h2>
+                    <p className="text-charcoal-light/65 text-xs mt-1">
+                      Stone Mill, NY Botanical Garden · May 30 2027
+                    </p>
+                  </div>
                   <motion.button
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
@@ -1253,8 +1231,9 @@ export default function AuthModal() {
                         </div>
                         {awaitingEmailLink && (
                           <div className="mt-3 space-y-2">
-                            <p className="text-[10px] text-charcoal-light/50">
-                              Enter the 6-digit code sent to your email:
+                            <p className="text-[10px] text-charcoal-light/55">
+                              Enter the 6-digit code from your email
+                              {guestEmail ? ` (${maskEmail(guestEmail)})` : ''}:
                             </p>
                             <div className="flex items-center gap-2 bg-cream-dark border border-sage/25 rounded-sm px-3 py-2.5">
                               <span className="text-sm text-charcoal-light/50 font-mono select-none">
@@ -1270,6 +1249,8 @@ export default function AuthModal() {
                                     type="text"
                                     inputMode="numeric"
                                     maxLength={i === 0 ? 6 : 1}
+                                    placeholder={i === 0 ? '000000' : ''}
+                                    aria-label={`Code digit ${i + 1}`}
                                     value={emailCode[i] || ''}
                                     onChange={e => {
                                       const raw = e.target.value.replace(/\D/g, '')
@@ -1393,6 +1374,16 @@ export default function AuthModal() {
                   <p className="font-heading text-2xl text-charcoal">
                     Welcome, {signedIn.firstName}!
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSignedIn(null)
+                      signOut()
+                    }}
+                    className="text-[10px] tracking-widest uppercase text-charcoal-light/60 hover:text-charcoal transition-colors underline underline-offset-2 min-h-[44px] px-3"
+                  >
+                    Not you? Sign out
+                  </button>
                 </div>
               )}
 

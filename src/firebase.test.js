@@ -20,7 +20,6 @@ vi.mock('firebase/auth', () => {
     linkWithCredential: vi.fn(),
     signInWithCredential: vi.fn(),
     signInWithPhoneNumber: vi.fn(() => Promise.resolve({ verificationId: 'verId' })),
-    RecaptchaVerifier: vi.fn(),
     browserLocalPersistence: 'local',
     setPersistence: vi.fn(),
   }
@@ -49,8 +48,18 @@ describe('firebase with config', () => {
   it('sendPhoneCode calls signInWithPhoneNumber', async () => {
     const firebaseAuth = await import('firebase/auth')
     const { sendPhoneCode } = await import('./firebase')
-    const result = await sendPhoneCode('+15555550100', {})
+    const result = await sendPhoneCode('+15555550100')
     expect(firebaseAuth.signInWithPhoneNumber).toHaveBeenCalled()
+  })
+
+  it('sendPhoneCode does NOT pass a reCAPTCHA verifier (regression: caused 400 + modal crash)', async () => {
+    const firebaseAuth = await import('firebase/auth')
+    const { sendPhoneCode } = await import('./firebase')
+    firebaseAuth.signInWithPhoneNumber.mockClear()
+    await sendPhoneCode('+15555550100')
+    const callArgs = firebaseAuth.signInWithPhoneNumber.mock.calls[0]
+    expect(callArgs.length).toBe(2)
+    expect(callArgs[2]).toBeUndefined()
   })
 
   it('linkPhoneCredential calls linkWithCredential', async () => {

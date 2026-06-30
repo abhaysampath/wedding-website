@@ -97,16 +97,18 @@ export default function FAQ() {
           </div>
         </motion.div>
 
-        {content.faq?.length > 0 && content.faq.every(f => f.wedding === 'both') && (
-          <div
-            role="status"
-            className="max-w-2xl mx-auto mb-6 p-4 border border-amber-200 bg-amber-50/60 rounded-sm text-xs text-amber-800 text-center"
-          >
-            FAQ filtering by wedding is not active — ensure your FAQ sheet has values like &ldquo;US
-            Wedding&rdquo;, &ldquo;India Wedding&rdquo;, or &ldquo;Both Weddings&rdquo; in the
-            &ldquo;WhichWedding&rdquo; column.
-          </div>
-        )}
+        {import.meta.env.DEV &&
+          content.faq?.length > 0 &&
+          content.faq.every(f => f.wedding === 'both') && (
+            <div
+              role="status"
+              className="max-w-2xl mx-auto mb-6 p-4 border border-amber-200 bg-amber-50/60 rounded-sm text-xs text-amber-800 text-center"
+            >
+              FAQ filtering by wedding is not active — ensure your FAQ sheet has values like
+              &ldquo;US Wedding&rdquo;, &ldquo;India Wedding&rdquo;, or &ldquo;Both Weddings&rdquo;
+              in the &ldquo;WhichWedding&rdquo; column.
+            </div>
+          )}
 
         {faqs.length === 0 ? (
           <p className="text-center text-charcoal-light/65 text-sm" role="status">

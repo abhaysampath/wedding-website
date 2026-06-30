@@ -7,7 +7,6 @@ import {
   PhoneAuthProvider,
   linkWithCredential,
   signInWithCredential,
-  RecaptchaVerifier,
   signInWithPhoneNumber,
   browserLocalPersistence,
   setPersistence,
@@ -84,12 +83,12 @@ export async function createAnonymousSession() {
   }
 }
 
-export async function sendPhoneCode(phoneNumber, recaptchaVerifier) {
+export async function sendPhoneCode(phoneNumber) {
   const a = init()
   if (!a) throw new Error('Firebase not initialized')
   try {
-    a.settings.appVerificationDisabledForTesting = isTestPhone(phoneNumber)
-    const confirmationResult = await signInWithPhoneNumber(a, phoneNumber, recaptchaVerifier)
+    a.settings.appVerificationDisabledForTesting = true
+    const confirmationResult = await signInWithPhoneNumber(a, phoneNumber)
     return confirmationResult
   } catch (err) {
     console.error('signInWithPhoneNumber failed:', err.code, err.message)
@@ -118,36 +117,8 @@ export async function linkPhoneCredential(verificationId, code) {
   }
 }
 
-let _recaptchaVerifier = null
-
-export function getRecaptchaVerifier(containerElement) {
-  if (_recaptchaVerifier) {
-    try {
-      _recaptchaVerifier.clear()
-    } catch (err) {
-      console.warn('Failed to clear reCAPTCHA verifier:', err)
-    }
-    _recaptchaVerifier = null
-  }
-  const a = init()
-  if (!a) return null
-  _recaptchaVerifier = new RecaptchaVerifier(a, containerElement, {
-    size: 'invisible',
-    callback: () => {},
-    'expired-callback': () => {
-      /* recaptcha expired */
-    },
-  })
-  return _recaptchaVerifier
-}
-
-export function clearRecaptchaVerifier() {
-  if (_recaptchaVerifier) {
-    try {
-      _recaptchaVerifier.clear()
-    } catch (err) {
-      console.warn('Failed to clear reCAPTCHA verifier:', err)
-    }
-    _recaptchaVerifier = null
-  }
-}
+// reCAPTCHA verifier removed (2026-06-30): with the server-side
+// phoneEnforcementState set to OFF, the client no longer needs to
+// instantiate a reCAPTCHA verifier. Sending one triggered an
+// Enterprise-init attempt that failed with the v2 site key,
+// returning 400 and intermittently crashing the auth modal.
