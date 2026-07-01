@@ -87,7 +87,14 @@ jobs:
 
       # Step 3: Build for deploy
       - name: Build production bundle
-        run: npm run build
+        run: |
+          npm run build
+          echo "=== dist/ contents ==="
+          ls -la dist/ | head -15
+          echo "=== dist/index.html (first 5 lines) ==="
+          head -5 dist/index.html
+          echo "=== Verify index.html exists ==="
+          test -f dist/index.html && echo "✓ dist/index.html exists" || echo "✗ dist/index.html MISSING"
 
       # Step 4: Install Puppeteer for E2E tests
       - name: Install Puppeteer
