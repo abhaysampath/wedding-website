@@ -8,6 +8,7 @@ import { useAuth } from './context/useAuth'
 import { useScrollSpy, useSectionHash } from './hooks/useScrollSpy'
 import NotFound from './components/NotFound'
 import OfflineBanner from './components/OfflineBanner'
+import UpdateBanner from './components/UpdateBanner'
 import { SEO, JSONLD } from './components/SEO'
 import weddingJSONLD from './data/wedding-jsonld.js'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -382,8 +383,9 @@ function PageContent() {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
         >
-          Skip to main content
+           Skip to main content
         </a>
+        <UpdateBanner />
         <SectionNav />
         <ScrollProgress />
         <ErrorBoundary name="Navbar">

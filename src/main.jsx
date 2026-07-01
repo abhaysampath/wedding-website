@@ -50,7 +50,11 @@ if (process.env.NODE_ENV === 'production') {
           if (installing) {
             installing.addEventListener('statechange', () => {
               if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                // New SW is installed but waiting. Show a visible banner
+                // so the user knows to reload. The new SW won't activate
+                // until all tabs close (per our no-auto-claim policy).
                 console.log('New version available. Reload to update.')
+                window.dispatchEvent(new CustomEvent('app-update-available'))
               }
             })
           }
