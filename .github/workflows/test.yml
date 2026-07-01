@@ -58,8 +58,10 @@ jobs:
       # Step 4: Install platform-specific Tailwind binary
       # `npm ci` doesn't reliably install platform-specific optional
       # deps. Force-install the right binary before the build step.
+      # Use a single install — running `npm install` again after
+      # `--no-save` would remove the binary since it's not in the lockfile.
       - name: Install Tailwind native binary
-        run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu
+        run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu @tailwindcss/oxide
 
       # Step 5: Unit tests
       - name: Run unit tests
@@ -86,10 +88,12 @@ jobs:
       - run: npm ci
       # `npm ci` doesn't reliably install platform-specific optional
       # dependencies. Force-install the right platform binary using
-      # `--force` to bypass platform constraints, since the lockfile
-      # was generated on macOS but the CI runs on Linux.
-      - run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu
-      - run: npm install --include=optional --no-audit --no-fund
+      # `--force` to bypass platform constraints (the lockfile was
+      # generated on macOS but the CI runs on Linux). Use a single
+      # install command — running a second `npm install` after the
+      # `--no-save` install would remove the binary since it's not
+      # in the lockfile.
+      - run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu @tailwindcss/oxide
 
       # Step 3: Build for deploy
       - name: Build production bundle
