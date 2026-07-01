@@ -36,7 +36,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # `npm ci` doesn't reliably install platform-specific optional
+      # dependencies (e.g. @tailwindcss/oxide-linux-x64-gnu on the CI
+      # runner), so we run `npm install` afterwards to fetch the right one.
       - run: npm ci
+      - run: npm install --no-audit --no-fund
 
       # Step 1: Lint check
       - name: Lint
@@ -73,6 +77,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm install --no-audit --no-fund
 
       # Step 3: Build for deploy
       - name: Build production bundle
