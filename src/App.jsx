@@ -383,7 +383,7 @@ function PageContent() {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[70] focus:bg-cream focus:text-charcoal focus:px-4 focus:py-2 focus:rounded-sm focus:shadow-lg focus:outline-gold"
         >
-           Skip to main content
+          Skip to main content
         </a>
         <UpdateBanner />
         <SectionNav />

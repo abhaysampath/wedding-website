@@ -104,7 +104,7 @@ export async function sendPhoneCode(phoneNumber) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phoneNumber, recaptchaToken: fakeToken }),
-    }
+    },
   )
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
