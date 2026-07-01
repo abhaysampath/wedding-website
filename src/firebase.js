@@ -4,10 +4,6 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   signInAnonymously,
-  PhoneAuthProvider,
-  linkWithCredential,
-  signInWithCredential,
-  signInWithPhoneNumber,
   browserLocalPersistence,
   setPersistence,
 } from 'firebase/auth'
@@ -84,37 +80,52 @@ export async function createAnonymousSession() {
 }
 
 export async function sendPhoneCode(phoneNumber) {
-  const a = init()
-  if (!a) throw new Error('Firebase not initialized')
-  try {
-    a.settings.appVerificationDisabledForTesting = true
-    const confirmationResult = await signInWithPhoneNumber(a, phoneNumber)
-    return confirmationResult
-  } catch (err) {
-    console.error('signInWithPhoneNumber failed:', err.code, err.message)
+  // Bypass the Firebase SDK's auto-reCAPTCHA path entirely. The SDK was
+  // returning "Failed to initialize reCAPTCHA Enterprise config" and
+  // then auth/argument-error because the mock token is just the string
+  // "token" which the server rejects even with phoneEnforcementState=OFF.
+  // Calling the Identity Platform REST API directly with a properly-shaped
+  // token (the server ignores it for OFF enforcement state) works.
+  const res = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${config.firebase.apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phoneNumber,
+        recaptchaToken: 'wedding-bypass-' + Date.now().toString(36),
+      }),
+    },
+  )
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const err = new Error(data?.error?.message || 'Failed to send verification code')
+    err.code = data?.error?.message
     throw err
-  } finally {
-    a.settings.appVerificationDisabledForTesting = false
   }
+  return { verificationId: data.sessionInfo }
 }
 
 export async function linkPhoneCredential(verificationId, code) {
-  const a = init()
-  if (!a) throw new Error('Firebase not initialized')
-  const user = a.currentUser
-  if (!user) throw new Error('No user signed in')
-  const credential = PhoneAuthProvider.credential(verificationId, code)
-  try {
-    await linkWithCredential(user, credential)
-    return { linked: true }
-  } catch (err) {
-    if (err.code === 'auth/account-exists-with-different-credential') {
-      const result = await signInWithCredential(a, credential)
-      return { linked: false, user: result.user }
-    }
-    console.error('linkPhoneCredential failed:', err.code, err.message)
+  // Use the REST API to verify the SMS code against the sessionInfo
+  // we got from sendPhoneCode. Returns a { idToken, refreshToken, ... }
+  // payload that we then pass to accounts:signInWithCustomToken via
+  // /api/auth/session on the server.
+  const res = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${config.firebase.apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionInfo: verificationId, code }),
+    },
+  )
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const err = new Error(data?.error?.message || 'Failed to verify code')
+    err.code = data?.error?.message
     throw err
   }
+  return data
 }
 
 // reCAPTCHA verifier removed (2026-06-30): with the server-side

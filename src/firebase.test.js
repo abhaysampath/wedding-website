@@ -16,10 +16,6 @@ vi.mock('firebase/auth', () => {
     }),
     signInWithPopup: vi.fn(),
     signInAnonymously: vi.fn(() => Promise.resolve({ user: { uid: 'anon' } })),
-    PhoneAuthProvider: { credential: vi.fn(() => ({})) },
-    linkWithCredential: vi.fn(),
-    signInWithCredential: vi.fn(),
-    signInWithPhoneNumber: vi.fn(() => Promise.resolve({ verificationId: 'verId' })),
     browserLocalPersistence: 'local',
     setPersistence: vi.fn(),
   }
@@ -31,7 +27,24 @@ vi.mock('./config', () => ({
   },
 }))
 
+const originalFetch = global.fetch
+
 describe('firebase with config', () => {
+  let fetchMock
+
+  beforeEach(() => {
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ sessionInfo: 'verId' }),
+    })
+    global.fetch = fetchMock
+  })
+
+  afterEach(() => {
+    global.fetch = originalFetch
+  })
+
   it('signInWithGoogle calls signInWithPopup', async () => {
     const firebaseAuth = await import('firebase/auth')
     const { signInWithGoogle } = await import('./firebase')
@@ -45,29 +58,44 @@ describe('firebase with config', () => {
     expect(user).toBeTruthy()
   })
 
-  it('sendPhoneCode calls signInWithPhoneNumber', async () => {
-    const firebaseAuth = await import('firebase/auth')
+  it('sendPhoneCode calls the Identity Platform REST API with phone + recaptchaToken', async () => {
     const { sendPhoneCode } = await import('./firebase')
     const result = await sendPhoneCode('+15555550100')
-    expect(firebaseAuth.signInWithPhoneNumber).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('accounts:sendVerificationCode')
+    expect(url).toContain('key=test-key')
+    const body = JSON.parse(init.body)
+    expect(body.phoneNumber).toBe('+15555550100')
+    expect(body.recaptchaToken).toMatch(/^wedding-bypass-/)
+    expect(result.verificationId).toBe('verId')
   })
 
-  it('sendPhoneCode does NOT pass a reCAPTCHA verifier (regression: caused 400 + modal crash)', async () => {
-    const firebaseAuth = await import('firebase/auth')
+  it('sendPhoneCode throws friendly error on API failure', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: () => Promise.resolve({ error: { message: 'INVALID_PHONE_NUMBER' } }),
+    })
     const { sendPhoneCode } = await import('./firebase')
-    firebaseAuth.signInWithPhoneNumber.mockClear()
-    await sendPhoneCode('+15555550100')
-    const callArgs = firebaseAuth.signInWithPhoneNumber.mock.calls[0]
-    expect(callArgs.length).toBe(2)
-    expect(callArgs[2]).toBeUndefined()
+    await expect(sendPhoneCode('+15555550100')).rejects.toThrow('INVALID_PHONE_NUMBER')
   })
 
-  it('linkPhoneCredential calls linkWithCredential', async () => {
-    const firebaseAuth = await import('firebase/auth')
+  it('linkPhoneCredential calls the Identity Platform verify endpoint', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ idToken: 'jwt', refreshToken: 'rt' }),
+    })
     const { linkPhoneCredential } = await import('./firebase')
-    firebaseAuth.getAuth().currentUser = { uid: 'test-uid' }
     const result = await linkPhoneCredential('verId', '123456')
-    expect(firebaseAuth.linkWithCredential).toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [url, init] = fetchMock.mock.calls[0]
+    expect(url).toContain('accounts:signInWithPhoneNumber')
+    const body = JSON.parse(init.body)
+    expect(body.sessionInfo).toBe('verId')
+    expect(body.code).toBe('123456')
+    expect(result.idToken).toBe('jwt')
   })
 })
 
