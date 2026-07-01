@@ -96,9 +96,15 @@ jobs:
       # Step 5: Start preview server for E2E tests
       - name: Start preview server
         run: |
-          npx vite preview --port 3002 &
-          sleep 3
-          echo "Preview server started on port 3002"
+          # Make sure the platform-specific Tailwind binary is present
+          # (puppeteer install in the previous step can occasionally
+          # trigger npm to prune optional deps).
+          npm install --no-save --include=optional @tailwindcss/oxide-linux-x64-gnu 2>&1 | tail -3
+          ls node_modules/@tailwindcss/oxide-linux-x64-gnu/ 2>&1 || echo "binary NOT found"
+          npx vite preview --port 3002 > /tmp/preview.log 2>&1 &
+          sleep 5
+          cat /tmp/preview.log | head -10
+          curl -sS -o /dev/null -w "preview status: %{http_code}\n" http://localhost:3002 || echo "preview NOT responding"
 
       # Step 6: Run E2E tests against preview server
       - name: Run E2E tests
