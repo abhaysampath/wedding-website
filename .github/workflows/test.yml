@@ -55,6 +55,12 @@ jobs:
       - name: TypeScript check
         run: npm run typecheck
 
+      # Step 4: Install platform-specific Tailwind binary
+      # `npm ci` doesn't reliably install platform-specific optional
+      # deps. Force-install the right binary before the build step.
+      - name: Install Tailwind native binary
+        run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu
+
       # Step 5: Unit tests
       - name: Run unit tests
         run: npm test
