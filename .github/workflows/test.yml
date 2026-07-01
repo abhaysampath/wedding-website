@@ -79,10 +79,10 @@ jobs:
           cache: npm
       - run: npm ci
       # `npm ci` doesn't reliably install platform-specific optional
-      # dependencies (e.g. @tailwindcss/oxide-linux-x64-gnu on the CI
-      # runner is missing because the lockfile was generated on macOS).
-      # Force-install the right platform binary before running vite.
-      - run: npm install --no-save --include=optional @tailwindcss/oxide-linux-x64-gnu
+      # dependencies. Force-install the right platform binary using
+      # `--force` to bypass platform constraints, since the lockfile
+      # was generated on macOS but the CI runs on Linux.
+      - run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu
       - run: npm install --include=optional --no-audit --no-fund
 
       # Step 3: Build for deploy
