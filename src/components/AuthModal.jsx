@@ -57,12 +57,20 @@ export default function AuthModal() {
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [saving, setSaving] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
-  const [awaitingSmsCode, setAwaitingSmsCode] = useState(
-    () => !!sessionStorage.getItem('awaiting_sms'),
-  )
-  const [awaitingEmailLink, setAwaitingEmailLink] = useState(
-    () => !!sessionStorage.getItem('awaiting_email'),
-  )
+  const [awaitingSmsCode, setAwaitingSmsCode] = useState(() => {
+    try {
+      return !!sessionStorage.getItem('awaiting_sms')
+    } catch {
+      return false
+    }
+  })
+  const [awaitingEmailLink, setAwaitingEmailLink] = useState(() => {
+    try {
+      return !!sessionStorage.getItem('awaiting_email')
+    } catch {
+      return false
+    }
+  })
   const [smsCode, setSmsCode] = useState(Array(6).fill(''))
   const smsCodeRefs = useRef([])
   const [emailCode, setEmailCode] = useState(Array(6).fill(''))
@@ -135,6 +143,7 @@ export default function AuthModal() {
     setSaving(false)
     setShowDropdown(false)
     setFirebaseError(null)
+    setNameMismatch(null)
     setAwaitingSmsCode(false)
     setSmsCode(Array(6).fill(''))
     smsCodeRefs.current = []
@@ -160,7 +169,7 @@ export default function AuthModal() {
     sessionStorage.removeItem('pending_verification_id')
     sessionStorage.removeItem('pending_verification_phone')
     sessionStorage.removeItem('pending_verification_sent_at')
-  }, [setFirebaseError])
+  }, [setFirebaseError, setNameMismatch])
 
   const handleOAuthSignIn = useCallback(
     async provider => {
@@ -498,7 +507,7 @@ export default function AuthModal() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const urlCode = params.get('code')
-    const pathSlug = window.location.pathname.match(/^\/g\/(.+)/)?.[1]
+    const pathSlug = window.location.pathname.match(/^\/g\/(.+)/)?.[1]?.replace(/\/+$/, '')
     const queryG = params.get('g')
     const slug = pathSlug
       ? decodeURIComponent(pathSlug)

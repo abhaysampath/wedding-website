@@ -121,12 +121,15 @@ function baseAuth() {
     },
     firebaseLoading: false,
     firebaseError: null,
+    nameMismatch: null,
+    setNameMismatch: vi.fn(),
     setFirebaseError: vi.fn(),
     handleFirebaseSignIn: vi.fn(),
     signInAsGuest: vi.fn(),
     updateContact: vi.fn(),
     recordLogin: vi.fn(),
     recordLoginAttempt: vi.fn(),
+    signOut: vi.fn(),
     content: baseContent,
   }
 }

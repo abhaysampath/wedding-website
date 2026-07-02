@@ -6,6 +6,7 @@ import { signInWithGoogle, signOutFirebase } from '../firebase'
 import sampleGuests from '../data/guests'
 import { eastTime } from '../utils/time'
 import { writeToSheet, mintServerSession, clearServerSession } from '../utils/sheet-write'
+import { friendlyAuthError } from '../utils/firebase-errors'
 
 const { sheets } = config
 
@@ -295,7 +296,7 @@ export function AuthProvider({ children }) {
           track('name_mismatch', { name: authUser.name, email: authUser.email })
         }
       } catch (err) {
-        setFirebaseError(err.message || 'Sign in failed')
+        setFirebaseError(friendlyAuthError(err, 'Sign in failed'))
         track('signin_failed', { method: provider, reason: err.message })
       } finally {
         setFirebaseLoading(false)
@@ -356,6 +357,7 @@ export function AuthProvider({ children }) {
     setUser(null)
     setActiveWedding('us')
     localStorage.removeItem('wedding_user')
+    sessionStorage.clear()
     await clearServerSession()
     await signOutFirebase()
     updateUrlSlug('')
