@@ -156,7 +156,7 @@ function SectionNav() {
   const filtered = filterSections(user)
   const active = useScrollSpy(
     filtered.map(s => s.id),
-    '-80px 0px -60% 0px',
+    '-75px 0px -60% 0px',
   )
 
   if (filtered.length === 0) return null
