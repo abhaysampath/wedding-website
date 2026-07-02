@@ -896,7 +896,7 @@ export default function AuthModal() {
                       aria-activedescendant={
                         highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined
                       }
-                      className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
+                      className="w-full bg-cream-dark border border-sage/10 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                       placeholder="Start typing your name"
                       autoComplete="off"
                     />
@@ -1240,7 +1240,7 @@ export default function AuthModal() {
                                     type="text"
                                     inputMode="numeric"
                                     maxLength={i === 0 ? 6 : 1}
-                                    placeholder={i === 0 ? '000000' : ''}
+                                    placeholder=""
                                     aria-label={`Code digit ${i + 1}`}
                                     value={emailCode[i] || ''}
                                     onChange={e => {

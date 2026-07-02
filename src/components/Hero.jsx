@@ -42,7 +42,14 @@ function HeroImage({ src, srcSet, alt, isFirst, onError }) {
 }
 
 export default function Hero() {
-  const { user, openSettings, setShowAuthModal, handleFirebaseSignIn, firebaseLoading } = useAuth()
+  const {
+    user,
+    openSettings,
+    setShowAuthModal,
+    handleFirebaseSignIn,
+    firebaseLoading,
+    showAuthModal,
+  } = useAuth()
   const containerRef = useRef(null)
   const timerRef = useRef(null)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -369,9 +376,12 @@ export default function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 1.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
+        className={`absolute ${user || showAuthModal ? 'bottom-10' : 'top-[42vh]'} left-1/2 -translate-x-1/2 z-20`}
       >
-        <a href="#story" className="text-cream/60 hover:text-cream/90 transition-colors">
+        <a
+          href={user || showAuthModal ? '#story' : '#main-content'}
+          className="text-cream/60 hover:text-cream/90 transition-colors"
+        >
           <svg
             className="w-6 h-6 animate-bounce"
             fill="none"
