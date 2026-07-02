@@ -276,8 +276,34 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-full max-w-sm px-6"
+          className="absolute top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-full max-w-sm px-6 flex flex-col items-center gap-3"
         >
+          {!showAuthModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1, delay: 1.5 }}
+            >
+              <a
+                href="#main-content"
+                className="text-cream/60 hover:text-cream/90 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6 animate-bounce"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                  />
+                </svg>
+              </a>
+            </motion.div>
+          )}
           <motion.div
             whileHover={{
               scale: 1.02,
@@ -286,7 +312,7 @@ export default function Hero() {
             }}
             whileTap={{ scale: 0.95, transition: { type: 'spring', stiffness: 400, damping: 12 } }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className="bg-cream/10 backdrop-blur-md rounded-sm border border-cream/20 p-4"
+            className="w-full bg-cream/10 backdrop-blur-md rounded-sm border border-cream/20 p-4"
           >
             <div className="flex items-center gap-3">
               <motion.button
@@ -372,31 +398,30 @@ export default function Hero() {
         </motion.div>
       )}
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.5 }}
-        className={`absolute ${user || showAuthModal ? 'bottom-10' : 'top-[42vh]'} left-1/2 -translate-x-1/2 z-20`}
-      >
-        <a
-          href={user || showAuthModal ? '#story' : '#main-content'}
-          className="text-cream/60 hover:text-cream/90 transition-colors"
+      {(user || showAuthModal) && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20"
         >
-          <svg
-            className="w-6 h-6 animate-bounce"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
-        </a>
-      </motion.div>
+          <a href="#story" className="text-cream/60 hover:text-cream/90 transition-colors">
+            <svg
+              className="w-6 h-6 animate-bounce"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+              />
+            </svg>
+          </a>
+        </motion.div>
+      )}
     </section>
   )
 }

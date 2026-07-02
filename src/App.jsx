@@ -158,13 +158,32 @@ function SectionNav() {
     filtered.map(s => s.id),
     '-75px 0px -60% 0px',
   )
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    let rafId = null
+    const onScroll = () => {
+      if (rafId !== null) return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        setScrolled(window.scrollY > 10)
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId)
+      window.removeEventListener('scroll', onScroll)
+    }
+  }, [])
 
   if (filtered.length === 0) return null
 
   return (
     <nav
       aria-label="Section navigation"
-      className="fixed right-3 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3"
+      className={`fixed right-1.5 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-3 transition-all duration-500 ${
+        scrolled ? 'translate-x-0 opacity-100' : 'translate-x-8 opacity-0 pointer-events-none'
+      }`}
     >
       {filtered.map(s => (
         <button
@@ -175,23 +194,11 @@ function SectionNav() {
           aria-current={active === s.id ? 'true' : undefined}
           className="group relative flex items-center justify-center"
         >
-          {s.id === 'hero' ? (
-            <img
-              src="/ar-logo.png"
-              alt="AR"
-              className={`w-6 h-6 rounded-full transition-all duration-300 pointer-events-none ${
-                active === s.id
-                  ? 'opacity-100 scale-125 ring-2 ring-gold'
-                  : 'opacity-50 hover:opacity-80'
-              }`}
-            />
-          ) : (
-            <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
-              }`}
-            />
-          )}
+          <span
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              active === s.id ? 'bg-gold scale-125' : 'bg-charcoal/20 hover:bg-charcoal/40'
+            }`}
+          />
           <span className="absolute right-full mr-3 px-2 py-0.5 bg-charcoal/80 text-cream text-[10px] tracking-wider whitespace-nowrap rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
             {s.label}
           </span>

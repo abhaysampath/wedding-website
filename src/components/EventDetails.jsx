@@ -4,8 +4,12 @@ import { useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { useAuth } from '../context/useAuth'
 import weddings from '../data/weddings.json'
-import WeddingSwitcher from './WeddingSwitcher'
 import { linkTerms } from '../utils/glossary'
+
+const OPTIONS = [
+  { value: 'us', label: 'US' },
+  { value: 'india', label: 'India' },
+]
 
 function LinkedText({ text }) {
   if (!text) return null
@@ -78,7 +82,8 @@ function ChevronIcon({ open }) {
 }
 
 export default function EventDetails() {
-  const { activeWedding, user } = useAuth()
+  const { activeWedding, switchWedding, canSwitch, user } = useAuth()
+  const isIndia = activeWedding === 'india'
   const userRole = user?.role || null
   const w = weddings[activeWedding]
   const ref = useRef(null)
@@ -119,35 +124,102 @@ export default function EventDetails() {
           <div className="w-16 h-[1.5px] bg-sage mx-auto mb-8" />
 
           <div className="flex justify-center mb-10 md:mb-12">
-            <WeddingSwitcher />
-          </div>
-
-          <div className="inline-block w-full md:w-auto border border-sage/35 rounded-sm px-6 md:px-10 py-6 md:py-8 bg-cream transition-wedding shadow-sm">
-            <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2 pt-1">{w.date}</p>
-            <p className="text-charcoal-light text-sm md:text-base tracking-wide">
-              {w.venueUrl ? (
-                <a
-                  href={w.venueUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gold-dark hover:text-gold underline underline-offset-2 decoration-gold/30 hover:decoration-gold/60 transition-colors"
-                >
-                  {w.venue}
-                </a>
-              ) : (
-                w.venue
+            <div
+              className={`inline-block w-full md:w-auto border rounded-sm transition-all duration-700 ${
+                isIndia
+                  ? 'bg-india-pill-bg border-amber-200/40 shadow-amber-soft'
+                  : 'bg-cream border-sage/35 shadow-sm'
+              }`}
+            >
+              {canSwitch && user && (
+                <div className="px-3 pt-2 pb-1.5">
+                  <div
+                    className="flex items-center gap-1"
+                    role="radiogroup"
+                    aria-label="Select wedding"
+                  >
+                    {OPTIONS.map(opt => {
+                      const isOn = activeWedding === opt.value
+                      return (
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => switchWedding(opt.value)}
+                          role="radio"
+                          aria-checked={isOn}
+                          aria-label={`${opt.label} wedding${isOn ? ' (selected)' : ''}`}
+                          className={`relative flex-1 text-[11px] tracking-widest uppercase rounded-sm py-2 transition-all duration-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold ${
+                            isOn
+                              ? isIndia
+                                ? 'text-india-text font-medium'
+                                : 'text-cream font-medium'
+                              : isIndia
+                                ? 'text-india-text-muted/50 hover:text-india-text'
+                                : 'text-charcoal-light/50 hover:text-charcoal'
+                          }`}
+                        >
+                          {isOn && (
+                            <motion.div
+                              layoutId="wedding-pill"
+                              className={`absolute inset-0 rounded-sm transition-colors duration-700 ${
+                                isIndia ? 'bg-india-pill-active' : 'bg-sage'
+                              }`}
+                              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                            />
+                          )}
+                          <span className="relative z-10">{opt.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               )}
-            </p>
-            <p className="text-charcoal-light/60 text-xs md:text-sm mt-1.5">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(w.address)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-charcoal-light/80 transition-colors"
+
+              <div
+                className={
+                  canSwitch && user ? 'px-6 md:px-10 pb-6 md:pb-8' : 'px-6 md:px-10 py-6 md:py-8'
+                }
               >
-                {w.address}
-              </a>
-            </p>
+                {canSwitch && user && <div className="border-t border-current/10 mb-5 pt-4" />}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeWedding}
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 6 }}
+                    transition={{ duration: 0.25, ease: 'easeOut' }}
+                  >
+                    <p className="font-heading text-2xl md:text-3xl text-gold-dark mb-2 pt-1">
+                      {w.date}
+                    </p>
+                    <p className="text-charcoal-light text-sm md:text-base tracking-wide">
+                      {w.venueUrl ? (
+                        <a
+                          href={w.venueUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gold-dark hover:text-gold underline underline-offset-2 decoration-gold/30 hover:decoration-gold/60 transition-colors"
+                        >
+                          {w.venue}
+                        </a>
+                      ) : (
+                        w.venue
+                      )}
+                    </p>
+                    <p className="text-charcoal-light/60 text-xs md:text-sm mt-1.5">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(w.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-charcoal-light/80 transition-colors"
+                      >
+                        {w.address}
+                      </a>
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         </motion.div>
 
