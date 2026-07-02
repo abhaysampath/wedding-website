@@ -76,6 +76,7 @@ export const LIMITS = {
   guest: { limit: 10, windowMs: 60 * 1000 },
   'auth-session': { limit: 20, windowMs: 60 * 1000 },
   'rsvp-confirmation': { limit: 10, windowMs: 60 * 1000 },
+  otp: { limit: 10, windowMs: 60 * 1000 },
 }
 
 export function applyLimit(req, res, endpoint) {

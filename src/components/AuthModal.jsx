@@ -92,6 +92,7 @@ export default function AuthModal() {
   const inputRef = useRef(null)
   const urlCodeRef = useRef(null)
   const urlSlugRef = useRef(null)
+  const magicLinkInProgressRef = useRef(false)
   const modalRef = useRef(null)
   const inputContainerRef = useRef(null)
   const prevFocusRef = useRef(null)
@@ -513,6 +514,7 @@ export default function AuthModal() {
     }
 
     if (urlCode && urlCode.length === 6) {
+      magicLinkInProgressRef.current = true
       window.history.replaceState({}, '', window.location.pathname)
       sessionStorage.setItem('awaiting_email', '1')
       sessionStorage.setItem('pending_email_code', urlCode)
@@ -573,9 +575,12 @@ export default function AuthModal() {
   }, [content.guests, content.loaded, recordLoginAttempt, setFirebaseError])
 
   useEffect(() => {
-    if (showAuthModal) {
+    if (showAuthModal && !magicLinkInProgressRef.current) {
       const id = setTimeout(resetState, 0)
       return () => clearTimeout(id)
+    }
+    if (showAuthModal && magicLinkInProgressRef.current) {
+      magicLinkInProgressRef.current = false
     }
   }, [showAuthModal, resetState])
 

@@ -9,11 +9,12 @@
     var slug = window.location.pathname.match(/\/g\/(.+)/)
     var dest = '/'
     if (slug) {
-      dest = '/?' + (params ? params.slice(1) + '&' : '') + 'g=' + encodeURIComponent(slug[1])
+      var q = params ? params.slice(1) : ''
+      dest = '/?' + (q ? q + '&' : '') + 'g=' + encodeURIComponent(slug[1])
     } else if (params) {
       dest = '/' + params
     }
-    window.location.replace(dest)
+    window.location.href = dest
   </script>
 </head>
 <body>
