@@ -6,6 +6,8 @@ import {
   signInAnonymously,
   browserLocalPersistence,
   setPersistence,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
 } from 'firebase/auth'
 import config from './config'
 
@@ -79,41 +81,59 @@ export async function createAnonymousSession() {
   }
 }
 
-export async function sendPhoneCode(phoneNumber) {
-  // Call the Identity Platform REST API directly with a fake reCAPTCHA
-  // token. phoneEnforcementState=OFF in GCP means the server ignores
-  // the token value but still validates its charset. Use proper base64
-  // (with +/), not base64url (-_), to avoid MALFORMED rejection.
-  const fakeToken =
-    '03AGdBq25' +
-    Array.from({ length: 580 }, () =>
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.charAt(
-        Math.floor(Math.random() * 64),
-      ),
-    ).join('')
+let recaptchaVerifier = null
+let pendingConfirmation = null
 
-  const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${config.firebase.apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber, recaptchaToken: fakeToken }),
-    },
-  )
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    const err = new Error(data?.error?.message || 'Failed to send verification code')
-    err.code = data?.error?.message
-    throw err
+function getRecaptchaContainer() {
+  let el = document.getElementById('recaptcha-container')
+  if (!el) {
+    el = document.createElement('div')
+    el.id = 'recaptcha-container'
+    el.style.position = 'fixed'
+    el.style.top = '-9999px'
+    el.style.left = '-9999px'
+    document.body.appendChild(el)
   }
-  return { verificationId: data.sessionInfo }
+  return el
+}
+
+function ensureRecaptchaVerifier(auth) {
+  if (recaptchaVerifier) {
+    recaptchaVerifier.clear()
+    recaptchaVerifier = null
+  }
+  recaptchaVerifier = new RecaptchaVerifier(auth, getRecaptchaContainer(), {
+    size: 'invisible',
+  })
+  return recaptchaVerifier
+}
+
+export function clearRecaptchaVerifier() {
+  if (recaptchaVerifier) {
+    recaptchaVerifier.clear()
+    recaptchaVerifier = null
+  }
+  pendingConfirmation = null
+}
+
+export async function sendPhoneCode(phoneNumber) {
+  const a = init()
+  if (!a)
+    throw new Error(
+      'Firebase not configured. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID in .env',
+    )
+
+  const verifier = ensureRecaptchaVerifier(a)
+  pendingConfirmation = await signInWithPhoneNumber(a, phoneNumber, verifier)
+  return { verificationId: pendingConfirmation.verificationId }
 }
 
 export async function linkPhoneCredential(verificationId, code) {
-  // Use the REST API to verify the SMS code against the sessionInfo
-  // we got from sendPhoneCode. Returns a { idToken, refreshToken, ... }
-  // payload that we then pass to accounts:signInWithCustomToken via
-  // /api/auth/session on the server.
+  if (pendingConfirmation) {
+    const result = await pendingConfirmation.confirm(code)
+    pendingConfirmation = null
+    return result
+  }
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${config.firebase.apiKey}`,
     {
