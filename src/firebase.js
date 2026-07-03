@@ -80,17 +80,24 @@ export async function createAnonymousSession() {
 }
 
 export async function sendPhoneCode(phoneNumber) {
-  // Call the Identity Platform REST API directly, bypassing the SDK's
-  // reCAPTCHA requirement. When phoneEnforcementState=OFF in the GCP
-  // Identity Platform settings, the API accepts the request without a
-  // recaptchaToken. A fake token was previously sent but the server
-  // now rejects it as malformed — omit it entirely.
+  // Call the Identity Platform REST API directly with a fake reCAPTCHA
+  // token. phoneEnforcementState=OFF in GCP means the server ignores
+  // the token value but still validates its charset. Use proper base64
+  // (with +/), not base64url (-_), to avoid MALFORMED rejection.
+  const fakeToken =
+    '03AGdBq25' +
+    Array.from({ length: 580 }, () =>
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'.charAt(
+        Math.floor(Math.random() * 64),
+      ),
+    ).join('')
+
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${config.firebase.apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber }),
+      body: JSON.stringify({ phoneNumber, recaptchaToken: fakeToken }),
     },
   )
   const data = await res.json().catch(() => ({}))

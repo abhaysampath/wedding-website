@@ -58,7 +58,7 @@ describe('firebase with config', () => {
     expect(user).toBeTruthy()
   })
 
-  it('sendPhoneCode calls the Identity Platform REST API with phone (no recaptchaToken)', async () => {
+  it('sendPhoneCode calls the Identity Platform REST API with phone + recaptchaToken (base64)', async () => {
     const { sendPhoneCode } = await import('./firebase')
     const result = await sendPhoneCode('+15555550100')
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -67,7 +67,8 @@ describe('firebase with config', () => {
     expect(url).toContain('key=test-key')
     const body = JSON.parse(init.body)
     expect(body.phoneNumber).toBe('+15555550100')
-    expect(body.recaptchaToken).toBeUndefined()
+    expect(body.recaptchaToken).toMatch(/^03AGdBq25[a-zA-Z0-9+/]+$/)
+    expect(body.recaptchaToken.length).toBeGreaterThan(500)
     expect(result.verificationId).toBe('verId')
   })
 
