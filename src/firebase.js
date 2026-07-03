@@ -80,30 +80,17 @@ export async function createAnonymousSession() {
 }
 
 export async function sendPhoneCode(phoneNumber) {
-  // Bypass the Firebase SDK's auto-reCAPTCHA path entirely. The SDK was
-  // returning "Failed to initialize reCAPTCHA Enterprise config" and
-  // then auth/argument-error because the mock token is just the string
-  // "token" which the server rejects even with phoneEnforcementState=OFF.
-  // Calling the Identity Platform REST API directly with a properly-shaped
-  // token (the server ignores it for OFF enforcement state) works.
-  // The server validates the recaptchaToken's *format* (length ~600 chars,
-  // base64-ish) even with phoneEnforcementState=OFF. We send a long
-  // pseudo-token that matches the format. The server then ignores the
-  // value and accepts the request because enforcement is OFF.
-  const fakeToken =
-    '03AGdBq25' +
-    Array.from({ length: 580 }, () =>
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'.charAt(
-        Math.floor(Math.random() * 64),
-      ),
-    ).join('')
-
+  // Call the Identity Platform REST API directly, bypassing the SDK's
+  // reCAPTCHA requirement. When phoneEnforcementState=OFF in the GCP
+  // Identity Platform settings, the API accepts the request without a
+  // recaptchaToken. A fake token was previously sent but the server
+  // now rejects it as malformed — omit it entirely.
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${config.firebase.apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber, recaptchaToken: fakeToken }),
+      body: JSON.stringify({ phoneNumber }),
     },
   )
   const data = await res.json().catch(() => ({}))
