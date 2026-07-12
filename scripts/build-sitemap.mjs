@@ -45,7 +45,7 @@ async function fetchFromSheet() {
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     })
     const sheets = google.sheets({ version: 'v4', auth })
-    const SHEET_CONFIG = (await import('../api/sheets-config.js')).default
+    const SHEET_CONFIG = (await import('../api/_sheets-config.js')).default
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
       range: `${SHEET_CONFIG.guests.tab}!A2:R`,

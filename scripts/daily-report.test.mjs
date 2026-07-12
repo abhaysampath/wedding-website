@@ -32,7 +32,7 @@ import {
   main,
 } from './daily-report.mjs'
 
-import SHEET_CONFIG from '../api/sheets-config.js'
+import SHEET_CONFIG from '../api/_sheets-config.js'
 const ALL_COLUMNS = Object.values(SHEET_CONFIG.guests.columns)
 
 // ── Pure Function Tests ──────────────────────────────────────────

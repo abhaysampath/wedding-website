@@ -60,6 +60,9 @@ vi.mock('./components/TravelAccommodations', () => ({
   default: () => <section data-testid="travel">Travel</section>,
 }))
 vi.mock('./components/FAQ', () => ({ default: () => <section data-testid="faq">FAQ</section> }))
+vi.mock('./components/Registry', () => ({
+  default: () => <section data-testid="registry">Registry</section>,
+}))
 vi.mock('./components/ContactSection', () => ({
   default: () => <section data-testid="contact">Contact</section>,
 }))

@@ -40,6 +40,6 @@ describe('rsvp-confirmation.js (regression: was ERR_MODULE_NOT_FOUND in prod)', 
       'rsvp-confirmation.js',
     )
     const content = fs.readFileSync(rsvpPath, 'utf8')
-    expect(content).toMatch(/^import SHEET_CONFIG from '\.\/sheets-config\.js'/m)
+    expect(content).toMatch(/^import SHEET_CONFIG from '\.\/_sheets-config\.js'/m)
   })
 })

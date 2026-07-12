@@ -18,7 +18,7 @@
 import { readdirSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import SHEET_CONFIG from '../api/sheets-config.js'
+import SHEET_CONFIG from '../api/_sheets-config.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = join(__dirname, '..')

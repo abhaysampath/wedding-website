@@ -13,7 +13,7 @@
 
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
-import SHEET_CONFIG from '../api/sheets-config.js'
+import SHEET_CONFIG from '../api/_sheets-config.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const IS_TEST = !!process.env.VITEST

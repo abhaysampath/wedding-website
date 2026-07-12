@@ -7,7 +7,7 @@ import {
   getSession,
   isAdminRole,
 } from '../_session.js'
-import SHEET_CONFIG from '../sheets-config.js'
+import SHEET_CONFIG from '../_sheets-config.js'
 
 let _colMapCache = null
 
