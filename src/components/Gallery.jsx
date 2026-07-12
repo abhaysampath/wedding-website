@@ -286,8 +286,8 @@ export default function Gallery() {
         </motion.div>
 
         <div
-          className="overflow-x-auto pb-6 -mb-6 scrollbar-thin scroll-smooth"
-          style={{ scrollSnapType: 'x mandatory' }}
+          className="overflow-x-auto pb-6 -mb-6 scrollbar-thin scroll-smooth relative"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
         >
           <div className="flex gap-4 md:gap-6">
             {visibleImages.map((img, i) => {

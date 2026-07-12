@@ -81,6 +81,127 @@ function ChevronIcon({ open }) {
   )
 }
 
+function CalendarIcon() {
+  return (
+    <svg
+      className="w-3.5 h-3.5 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  )
+}
+
+function parseTime(timeStr) {
+  const match = timeStr.match(/(\d+):(\d+)\s*(am|pm)/i)
+  if (!match) return null
+  let hours = parseInt(match[1], 10)
+  const minutes = parseInt(match[2], 10)
+  const period = match[3].toLowerCase()
+  if (period === 'pm' && hours !== 12) hours += 12
+  if (period === 'am' && hours === 12) hours = 0
+  return { hours, minutes }
+}
+
+function parseEventDate(event, weddingDate) {
+  const dateMatch = weddingDate.match(/(\w+)\s+(\d+),\s+(\d+)/)
+  if (!dateMatch) return null
+
+  const month = dateMatch[1]
+  const day = parseInt(dateMatch[2], 10)
+  const year = parseInt(dateMatch[3], 10)
+
+  const months = {
+    January: 0, February: 1, March: 2, April: 3, May: 4, June: 5,
+    July: 6, August: 7, September: 8, October: 9, November: 10, December: 11,
+  }
+
+  const monthIdx = months[month]
+  if (monthIdx === undefined) return null
+
+  const baseDate = new Date(year, monthIdx, day)
+
+  const eventTime = event.time || ''
+
+  if (eventTime.includes('–')) {
+    const [startStr, endStr] = eventTime.split('–').map(s => s.trim())
+    const startTime = parseTime(startStr)
+    const endTime = parseTime(endStr)
+
+    if (startTime) {
+      const startDate = new Date(baseDate)
+      startDate.setHours(startTime.hours, startTime.minutes, 0, 0)
+
+      const endDate = new Date(endTime ? baseDate : baseDate)
+      if (endTime) {
+        endDate.setHours(endTime.hours, endTime.minutes, 0, 0)
+      } else {
+        endDate.setHours(startTime.hours + 1, 0, 0, 0)
+      }
+
+      return { startDate, endDate, allDay: false }
+    }
+  } else {
+    const startTime = parseTime(eventTime)
+    if (startTime) {
+      const startDate = new Date(baseDate)
+      startDate.setHours(startTime.hours, startTime.minutes, 0, 0)
+      const endDate = new Date(startDate)
+      endDate.setHours(endDate.getHours() + 1, 0, 0, 0)
+      return { startDate, endDate, allDay: false }
+    }
+  }
+
+  return { startDate: baseDate, endDate: baseDate, allDay: true }
+}
+
+function buildGoogleCalendarUrl(event, weddingDate, venue) {
+  const parsed = parseEventDate(event, weddingDate)
+  if (!parsed) return null
+
+  const { startDate, endDate, allDay } = parsed
+  const websiteUrl = 'https://abhayandrebecca.com'
+
+  let dates
+  if (allDay) {
+    const formatDate = d => {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      return `${y}${m}${day}`
+    }
+    const endDatePlus1 = new Date(endDate)
+    endDatePlus1.setDate(endDatePlus1.getDate() + 1)
+    dates = `${formatDate(startDate)}/${formatDate(endDatePlus1)}`
+  } else {
+    const formatDateTime = d => {
+      const y = d.getFullYear()
+      const m = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      const h = String(d.getHours()).padStart(2, '0')
+      const min = String(d.getMinutes()).padStart(2, '0')
+      const s = String(d.getSeconds()).padStart(2, '0')
+      return `${y}${m}${day}T${h}${min}${s}`
+    }
+    dates = `${formatDateTime(startDate)}/${formatDateTime(endDate)}`
+  }
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.label,
+    dates,
+    details: `${event.label} — ${venue}. Details: ${websiteUrl}`,
+  })
+
+  return `https://calendar.google.com/calendar/render?${params.toString()}`
+}
+
 export default function EventDetails() {
   const { activeWedding, switchWedding, canSwitch, user } = useAuth()
   const isIndia = activeWedding === 'india'
@@ -108,7 +229,7 @@ export default function EventDetails() {
   return (
     <section
       id="details"
-      className="py-20 md:py-32 px-6 bg-cream transition-colors duration-700"
+      className="py-20 md:py-32 px-6 bg-sage-fog transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-4xl mx-auto">
@@ -232,6 +353,7 @@ export default function EventDetails() {
                 const isExpanded = expanded === i
                 const isVendorHighlight = event.visibility === 'vendor'
                 const isCloseFamily = event.visibility === 'close_family'
+                const calendarUrl = buildGoogleCalendarUrl(event, w.date, w.venue)
                 return (
                   <motion.div
                     key={event.label}
@@ -328,6 +450,17 @@ export default function EventDetails() {
                                   </span>
                                 )}
                               </motion.div>
+                              {calendarUrl && (
+                                <a
+                                  href={calendarUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-gold-dark/60 hover:text-gold-dark transition-colors"
+                                >
+                                  <CalendarIcon />
+                                  Add to Google Calendar
+                                </a>
+                              )}
                             </motion.div>
                           </motion.div>
                         )}

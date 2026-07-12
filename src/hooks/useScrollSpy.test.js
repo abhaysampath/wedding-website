@@ -81,6 +81,7 @@ describe('useSectionHash', () => {
   let entriesCallback
 
   beforeEach(() => {
+    vi.useFakeTimers()
     entriesCallback = null
     replaceStateSpy = vi.spyOn(window.history, 'replaceState')
 
@@ -98,6 +99,7 @@ describe('useSectionHash', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
@@ -117,6 +119,10 @@ describe('useSectionHash', () => {
       ])
     })
 
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
     expect(replaceStateSpy).toHaveBeenCalledWith(null, '', expect.stringContaining('#story'))
   })
 
@@ -128,6 +134,10 @@ describe('useSectionHash', () => {
       entriesCallback([
         { target: document.getElementById('hero'), isIntersecting: true, intersectionRatio: 0.5 },
       ])
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(200)
     })
 
     expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/')

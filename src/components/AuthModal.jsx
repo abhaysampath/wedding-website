@@ -114,7 +114,7 @@ export default function AuthModal() {
 
   const matches = useMemo(() => {
     const t = normalize(nameInput)
-    if (t.length < 3) return []
+    if (t.length < 2) return []
     const includeTest = nameInput.includes('TEST')
     return content.guests
       .filter(g => {
@@ -491,8 +491,8 @@ export default function AuthModal() {
         e.preventDefault()
         setHighlightedIndex(prev => (prev > 0 ? prev - 1 : matches.length - 1))
       } else if (e.key === 'Enter') {
+        e.preventDefault()
         if (showDropdown && highlightedIndex >= 0) {
-          e.preventDefault()
           handleSelectMatch(matches[highlightedIndex])
         } else if (matches.length === 1) {
           handleSelectMatch(matches[0])
@@ -846,7 +846,7 @@ export default function AuthModal() {
                       RSVP for Rebecca &amp; Abhay
                     </h2>
                     <p className="text-charcoal-light/60 text-[11px] mt-1.5">
-                      Stone Mill, NY Botanical Garden · May 30 2027
+                      Two ceremonies · Two countries · One love
                     </p>
                   </div>
                   <motion.button
@@ -894,7 +894,21 @@ export default function AuthModal() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-charcoal-light/70">Find your invite by name</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-charcoal-light/70">Find your invite by name</p>
+                    <details className="text-[10px] text-charcoal-light/50">
+                      <summary className="cursor-pointer hover:text-charcoal-light/70 list-none">
+                        ?
+                      </summary>
+                      <p className="mt-1 text-charcoal-light/60 leading-relaxed">
+                        Easiest: Sign in with Google using an account that has your full name, or
+                        generate an OTP token to the email or phone we have on file. If you do not
+                        have access to that email/phone number, please contact us to update it,
+                        either thru the Contact form at the bottom of the website, or by reaching
+                        out to us directly.
+                      </p>
+                    </details>
+                  </div>
 
                   <div ref={inputContainerRef}>
                     <input

@@ -34,18 +34,22 @@ export function useSectionHash(ids, rootMargin = '-80px 0px -50% 0px', threshold
   const lastIdRef = useRef(lastId)
   const idsKey = ids.join('|')
   const thresholdKey = threshold.join('|')
+  const debounceRef = useRef(null)
 
   useEffect(() => {
     if (!ids.length) return
 
     const updateHash = id => {
       if (id === lastIdRef.current) return
-      setLastId(id)
-      const hash = id === 'hero' ? '' : `#${id}`
-      const url = hash
-        ? `${window.location.pathname.replace(/\/$/, '')}${hash}`
-        : window.location.pathname.replace(/\/$/, '') || '/'
-      history.replaceState(null, '', url)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+      debounceRef.current = setTimeout(() => {
+        setLastId(id)
+        const hash = id === 'hero' ? '' : `#${id}`
+        const url = hash
+          ? `${window.location.pathname.replace(/\/$/, '')}${hash}`
+          : window.location.pathname.replace(/\/$/, '') || '/'
+        history.replaceState(null, '', url)
+      }, 150)
     }
 
     const observer = new IntersectionObserver(
@@ -76,6 +80,7 @@ export function useSectionHash(ids, rootMargin = '-80px 0px -50% 0px', threshold
     return () => {
       observer.disconnect()
       window.removeEventListener('popstate', onPopState)
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [idsKey, rootMargin, thresholdKey, ids, threshold])
 

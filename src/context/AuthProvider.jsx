@@ -356,6 +356,8 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setUser(null)
     setActiveWedding('us')
+    setAuthMode('signin')
+    setShowAuthModal(false)
     localStorage.removeItem('wedding_user')
     sessionStorage.clear()
     await clearServerSession()

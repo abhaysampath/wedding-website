@@ -18,6 +18,7 @@ const Hero = lazy(() => import('./components/Hero'))
 const OurStory = lazy(() => import('./components/OurStory'))
 const AuthModal = lazy(() => import('./components/AuthModal'))
 const Gallery = lazy(() => import('./components/Gallery'))
+const Registry = lazy(() => import('./components/Registry'))
 const EventDetails = lazy(() => import('./components/EventDetails'))
 const TravelAccommodations = lazy(() => import('./components/TravelAccommodations'))
 const FAQ = lazy(() => import('./components/FAQ'))
@@ -138,14 +139,15 @@ function BackToTop() {
 const SECTIONS = [
   { id: 'hero', label: 'AR' },
   { id: 'story', label: 'Story' },
-  { id: 'gallery', label: 'Gallery' },
   { id: 'details', label: 'Events' },
   { id: 'travel', label: 'Travel' },
+  { id: 'gallery', label: 'Gallery' },
+  { id: 'registry', label: 'Registry' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contact', label: 'Contact' },
 ]
 
-const RESTRICTED_SECTIONS = ['story', 'details', 'travel', 'faq']
+const RESTRICTED_SECTIONS = ['story', 'details', 'travel', 'registry', 'faq']
 
 function filterSections(user) {
   return SECTIONS.filter(s => user || !RESTRICTED_SECTIONS.includes(s.id))
@@ -257,6 +259,19 @@ function BottomNav() {
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <path d="M21 15l-5-5L5 21" />
+              </svg>
+            )}
+            {s.id === 'registry' && (
+              <svg
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                <path d="M18 12a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4v-4h-4z" />
               </svg>
             )}
             {s.id === 'details' && (
@@ -406,17 +421,30 @@ function PageContent() {
           </Suspense>
         </ErrorBoundary>
         <main id="main-content" role="main">
-          <ErrorBoundary name="Gallery">
-            <Suspense fallback={<GallerySkeleton />}>
-              <Gallery />
-            </Suspense>
-          </ErrorBoundary>
           {user && (
             <ErrorBoundary name="Content">
               <Suspense fallback={<UserSkeleton />}>
                 <OurStory />
                 <EventDetails />
                 <TravelAccommodations />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+          <ErrorBoundary name="Gallery">
+            <Suspense fallback={<GallerySkeleton />}>
+              <Gallery />
+            </Suspense>
+          </ErrorBoundary>
+          {user && (
+            <ErrorBoundary name="Registry">
+              <Suspense fallback={null}>
+                <Registry />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+          {user && (
+            <ErrorBoundary name="ContentBottom">
+              <Suspense fallback={<UserSkeleton />}>
                 <FAQ />
                 <Footer />
               </Suspense>

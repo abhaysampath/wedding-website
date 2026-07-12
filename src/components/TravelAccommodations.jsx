@@ -22,7 +22,7 @@ export default function TravelAccommodations() {
   return (
     <section
       id="travel"
-      className="py-24 md:py-32 px-6 bg-sage-soft/40 transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-charcoal transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-5xl mx-auto">
@@ -32,11 +32,11 @@ export default function TravelAccommodations() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <h2 className="font-heading text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3">
+          <h2 className="font-heading text-4xl md:text-5xl text-cream font-light pt-1 mb-3">
             Travel & Accommodations
           </h2>
-          <div className="w-12 h-[1px] bg-sage mx-auto mb-4" />
-          <p className="text-charcoal-light/60 text-sm max-w-lg mx-auto">
+          <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
+          <p className="text-cream/70 text-sm max-w-lg mx-auto">
             Whether you're coming from near or far, we want to make your stay as comfortable as
             possible
           </p>
@@ -49,7 +49,7 @@ export default function TravelAccommodations() {
         {hotels && hotels.length > 0 && (
           <div>
             {isBrideFamily && w.brideFamilyHotels && (
-              <p className="text-charcoal-light/60 text-xs text-center mb-6 tracking-wide">
+              <p className="text-cream/60 text-xs text-center mb-6 tracking-wide">
                 Recommended for the Bride's family
               </p>
             )}

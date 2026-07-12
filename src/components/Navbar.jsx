@@ -6,9 +6,9 @@ const guestLinks = [{ href: '#gallery', label: 'Gallery' }]
 
 const authLinks = [
   { href: '#story', label: 'Story' },
-  { href: '#details', label: 'Event Details' },
-  { href: '#gallery', label: 'Gallery' },
+  { href: '#details', label: 'Events' },
   { href: '#travel', label: 'Travel' },
+  { href: '#gallery', label: 'Gallery' },
   { href: '#faq', label: 'FAQ' },
 ]
 

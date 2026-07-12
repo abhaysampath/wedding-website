@@ -67,7 +67,7 @@ describe('Navbar', () => {
       signOut: vi.fn(),
     })
     render(<Navbar />)
-    expect(screen.getByText('Event Details')).toBeTruthy()
+    expect(screen.getByText('Events')).toBeTruthy()
     expect(screen.getByText('Travel')).toBeTruthy()
     expect(screen.getByText('FAQ')).toBeTruthy()
     expect(screen.getByText('FAQ')).toBeTruthy()

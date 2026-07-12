@@ -45,7 +45,7 @@ export default function OurStory() {
   return (
     <section
       id="story"
-      className="py-24 md:py-32 px-6 bg-sage-fog transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-cream transition-colors duration-700"
       ref={ref}
     >
       <div className="max-w-5xl mx-auto">
@@ -62,7 +62,7 @@ export default function OurStory() {
             initial={{ opacity: 0, x: -40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="aspect-[4/5] rounded-sm overflow-hidden bg-sage-light/20 relative"
+            className="aspect-[4/5] rounded-sm overflow-hidden bg-sage-light/20 relative order-2 md:order-1"
           >
             <AnimatePresence mode="wait">
               <motion.img
@@ -104,6 +104,7 @@ export default function OurStory() {
             initial={{ opacity: 0, x: 40 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.4 }}
+            className="order-1 md:order-2"
           >
             <p className="font-heading text-lg md:text-xl text-gold-dark italic mb-6">
               No wonder we felt like we were already home from the start...

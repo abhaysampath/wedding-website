@@ -591,6 +591,29 @@ export default function ContactForm({ user, authMode, updateContact, sideName })
           {saveStatus === 'rsvp-saved'
             ? 'Thank you! Your RSVP has been saved.'
             : 'Saved successfully!'}
+          {saveStatus === 'rsvp-saved' && (
+            <div className="mt-3">
+              <a
+                href="/api/calendar-ics"
+                download
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold/10 border border-gold/30 rounded-sm text-[10px] tracking-widest uppercase text-gold-dark hover:bg-gold/20 transition-colors"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Download All Events to Calendar
+              </a>
+            </div>
+          )}
         </motion.div>
       )}
       {saveStatus === 'error' && (

@@ -73,7 +73,7 @@ export default function FAQ() {
   return (
     <section
       id="faq"
-      className="py-24 md:py-32 px-6 bg-sage-fog transition-colors duration-700"
+      className="py-24 md:py-32 px-6 bg-charcoal transition-colors duration-700"
       ref={ref}
       aria-labelledby="faq-heading"
     >
@@ -86,11 +86,11 @@ export default function FAQ() {
         >
           <h2
             id="faq-heading"
-            className="font-heading text-3xl sm:text-4xl md:text-5xl text-charcoal font-light pt-1 mb-3 whitespace-nowrap"
+            className="font-heading text-3xl sm:text-4xl md:text-5xl text-cream font-light pt-1 mb-3 whitespace-nowrap"
           >
             FAQ
           </h2>
-          <div className="w-12 h-[1px] bg-sage mx-auto mb-6" />
+          <div className="w-12 h-[1px] bg-gold mx-auto mb-6" />
 
           <div className="flex justify-center">
             <WeddingSwitcher />
@@ -111,7 +111,7 @@ export default function FAQ() {
           )}
 
         {faqs.length === 0 ? (
-          <p className="text-center text-charcoal-light/65 text-sm" role="status">
+          <p className="text-center text-cream/65 text-sm" role="status">
             No FAQs available yet. Check back closer to the wedding date.
           </p>
         ) : (
