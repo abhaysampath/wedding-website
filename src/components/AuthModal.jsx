@@ -806,7 +806,7 @@ export default function AuthModal() {
             onClick={e => e.stopPropagation()}
             style={{ ...logoAnimStyle, WebkitOverflowScrolling: 'touch' }}
           >
-            <div className="p-4 pb-6 md:p-10 relative">
+            <div className="p-4 pb-6 pt-5 md:p-10 md:pt-10 relative">
               <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
                 {authMode === 'signin'
                   ? 'Sign in'
@@ -845,9 +845,6 @@ export default function AuthModal() {
                     <h2 className="font-heading text-xl md:text-2xl text-charcoal leading-snug">
                       RSVP for Rebecca &amp; Abhay
                     </h2>
-                    <p className="text-charcoal-light/60 text-[11px] mt-1.5">
-                      Two ceremonies · Two countries · One love
-                    </p>
                   </div>
                   <motion.button
                     type="button"
@@ -924,7 +921,7 @@ export default function AuthModal() {
                       aria-activedescendant={
                         highlightedIndex >= 0 ? `name-option-${highlightedIndex}` : undefined
                       }
-                      className="w-full bg-cream-dark border border-sage/10 rounded-sm px-4 py-3 text-sm text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
+                      className="w-full bg-cream-dark border border-sage/10 rounded-sm px-4 py-3 text-base text-charcoal placeholder:text-charcoal-light/50 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                       placeholder="Start typing your name"
                       autoComplete="off"
                     />
@@ -1117,7 +1114,7 @@ export default function AuthModal() {
                             type="tel"
                             value={maskPhone(guestPhone)}
                             readOnly
-                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
+                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-base font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
                           />
                           <button
                             type="button"
@@ -1193,7 +1190,7 @@ export default function AuthModal() {
                                       if (pasted.length === 6) handleVerifySmsCode(pasted)
                                       else smsCodeRefs.current[pasted.length]?.focus()
                                     }}
-                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
+                                    className="w-8 h-8 text-center text-base font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                                     autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                   />
                                 ))}
@@ -1237,7 +1234,7 @@ export default function AuthModal() {
                             type="email"
                             value={maskEmail(guestEmail)}
                             readOnly
-                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-sm font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
+                            className="w-full bg-cream-dark border border-sage/25 rounded-sm px-4 py-3 pr-20 text-base font-mono text-charcoal/70 focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors cursor-default"
                           />
                           <button
                             type="button"
@@ -1316,7 +1313,7 @@ export default function AuthModal() {
                                       if (pasted.length === 6) handleEmailCodeComplete(pasted)
                                       else emailCodeRefs.current[pasted.length]?.focus()
                                     }}
-                                    className="w-8 h-8 text-center text-sm font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
+                                    className="w-8 h-8 text-center text-base font-mono bg-cream border border-gold/10 rounded-sm text-charcoal focus:outline-none focus:border-sage focus:ring-2 focus:ring-sage/20 transition-colors"
                                     autoComplete={i === 0 ? 'one-time-code' : 'off'}
                                   />
                                 ))}
