@@ -57,6 +57,7 @@ export default function AuthModal() {
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [saving, setSaving] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const [awaitingSmsCode, setAwaitingSmsCode] = useState(() => {
     try {
       return !!sessionStorage.getItem('awaiting_sms')
@@ -142,6 +143,7 @@ export default function AuthModal() {
     setSelectedMatch(null)
     setSaving(false)
     setShowDropdown(false)
+    setShowHelp(false)
     setFirebaseError(null)
     setNameMismatch(null)
     setAwaitingSmsCode(false)
@@ -704,6 +706,14 @@ export default function AuthModal() {
     return () => clearTimeout(timer)
   }, [showAuthModal])
 
+  // Auto-reveal the sign-in help after 3s if the guest hasn't started.
+  // showHelp is reset in resetState() when the modal reopens/changes mode.
+  useEffect(() => {
+    if (authMode !== 'signin' || selectedMatch || !showAuthModal) return
+    const t = setTimeout(() => setShowHelp(true), 3000)
+    return () => clearTimeout(t)
+  }, [authMode, selectedMatch, showAuthModal])
+
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       setHighlightedIndex(showDropdown && matches.length > 0 ? 0 : -1)
@@ -891,20 +901,17 @@ export default function AuthModal() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-3">
                     <p className="text-sm text-charcoal-light/70">Find your invite by name</p>
-                    <details className="text-[10px] text-charcoal-light/50">
-                      <summary className="cursor-pointer hover:text-charcoal-light/70 list-none">
-                        ?
-                      </summary>
-                      <p className="mt-1 text-charcoal-light/60 leading-relaxed">
-                        Easiest: Sign in with Google using an account that has your full name, or
-                        generate an OTP token to the email or phone we have on file. If you do not
-                        have access to that email/phone number, please contact us to update it,
-                        either thru the Contact form at the bottom of the website, or by reaching
-                        out to us directly.
-                      </p>
-                    </details>
+                    <button
+                      type="button"
+                      onClick={() => setShowHelp(h => !h)}
+                      aria-expanded={showHelp}
+                      aria-label="How to find your invite"
+                      className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full border border-sage/40 text-charcoal-light/70 text-lg font-medium hover:text-charcoal hover:border-sage hover:bg-sage-fog transition-colors"
+                    >
+                      ?
+                    </button>
                   </div>
 
                   <div ref={inputContainerRef}>
@@ -966,6 +973,22 @@ export default function AuthModal() {
                         document.body,
                       )}
                   </div>
+
+                  {showHelp && (
+                    <div
+                      role="note"
+                      aria-live="polite"
+                      className="mt-3 p-4 bg-cream-dark border border-sage/20 rounded-sm"
+                    >
+                      <p className="text-sm text-charcoal-light/70 leading-relaxed">
+                        Easiest: Sign in with Google using an account that has your full name, or
+                        generate an OTP token to the email or phone we have on file. If you do not
+                        have access to that email/phone number, please contact us to update it,
+                        either thru the Contact form at the bottom of the website, or by reaching
+                        out to us directly.
+                      </p>
+                    </div>
+                  )}
 
                   {firebaseError && (
                     <div
