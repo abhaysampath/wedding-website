@@ -32,8 +32,8 @@ export default function TravelAccommodations() {
           transition={{ duration: 0.7 }}
           className="text-center mb-16"
         >
-          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-cream font-light pt-1 mb-3 whitespace-nowrap">
-            Travel &amp; Accommodations
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl text-cream font-light pt-1 mb-3">
+            Getting There
           </h2>
           <div className="w-12 h-[1px] bg-gold mx-auto mb-4" />
           <p className="text-cream/70 text-sm max-w-lg mx-auto">
@@ -46,6 +46,34 @@ export default function TravelAccommodations() {
           </div>
         </motion.div>
 
+        {w.transport && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="bg-cream border border-sage/25 rounded-sm p-8 max-w-2xl mx-auto mb-16 transition-wedding"
+          >
+            <h3 className="font-heading text-xl text-charcoal mb-4 text-center">Getting Here</h3>
+            <div className="space-y-4 text-sm text-charcoal-light/70 leading-relaxed">
+              {Object.entries(w.transport).map(([mode, text]) => (
+                <p key={mode}>
+                  <strong className="text-charcoal capitalize">
+                    {mode === 'car'
+                      ? 'By Car'
+                      : mode === 'train'
+                        ? 'By Train'
+                        : mode === 'air'
+                          ? 'By Air'
+                          : 'By Subway'}
+                    :
+                  </strong>{' '}
+                  {text}
+                </p>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {hotels && hotels.length > 0 && (
           <div>
             {isBrideFamily && w.brideFamilyHotels && (
@@ -54,7 +82,7 @@ export default function TravelAccommodations() {
               </p>
             )}
             <div
-              className={`grid gap-6 mb-16 ${hotels.length <= 2 ? 'md:grid-cols-2 max-w-lg mx-auto' : 'md:grid-cols-3'}`}
+              className={`grid gap-6 ${hotels.length <= 2 ? 'md:grid-cols-2 max-w-lg mx-auto' : 'md:grid-cols-3'}`}
             >
               {hotels.map((hotel, i) => (
                 <motion.div
@@ -101,34 +129,6 @@ export default function TravelAccommodations() {
               ))}
             </div>
           </div>
-        )}
-
-        {w.transport && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.6 }}
-            className="bg-cream border border-sage/25 rounded-sm p-8 max-w-2xl mx-auto transition-wedding"
-          >
-            <h3 className="font-heading text-xl text-charcoal mb-4 text-center">Getting Here</h3>
-            <div className="space-y-4 text-sm text-charcoal-light/70 leading-relaxed">
-              {Object.entries(w.transport).map(([mode, text]) => (
-                <p key={mode}>
-                  <strong className="text-charcoal capitalize">
-                    {mode === 'car'
-                      ? 'By Car'
-                      : mode === 'train'
-                        ? 'By Train'
-                        : mode === 'air'
-                          ? 'By Air'
-                          : 'By Subway'}
-                    :
-                  </strong>{' '}
-                  {text}
-                </p>
-              ))}
-            </div>
-          </motion.div>
         )}
       </div>
     </section>

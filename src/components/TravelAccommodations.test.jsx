@@ -50,7 +50,7 @@ describe('TravelAccommodations', () => {
 
   it('renders section heading', () => {
     render(<TravelAccommodations />)
-    expect(screen.getByText('Travel & Accommodations')).toBeTruthy()
+    expect(screen.getByText('Getting There')).toBeTruthy()
   })
 
   it('renders hotel listings for US wedding', () => {
@@ -107,6 +107,6 @@ describe('TravelAccommodations', () => {
 
   it('renders without crashing when user is null', () => {
     render(<TravelAccommodations />)
-    expect(screen.getByText('Travel & Accommodations')).toBeTruthy()
+    expect(screen.getByText('Getting There')).toBeTruthy()
   })
 })
