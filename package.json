@@ -54,7 +54,7 @@
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.7.0",
     "jest-axe": "^10.0.0",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.0",
     "nodemailer": "^9.0.3",
     "prettier": "^3.9.6",
     "typescript": "^6.0.3",
