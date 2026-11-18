@@ -63,13 +63,26 @@ jobs:
       - name: Install Tailwind native binary
         run: npm install --no-save --force --include=optional @tailwindcss/oxide-linux-x64-gnu @tailwindcss/oxide
 
-      # Step 5: Unit tests
+      # Step 5: Unit tests (JSON output feeds the failure-email notifier)
       - name: Run unit tests
-        run: npm test
+        run: |
+          mkdir -p test-results
+          npx vitest run --reporter=default --reporter=json --outputFile=test-results/vitest.json
 
       # Step 6: Build (also validates env vars via verify-env.mjs)
       - name: Build production bundle
         run: npm run build
+
+      # Step 7: Email any test failures to the same inbox as the other summaries
+      - name: Email test failures
+        if: failure()
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          REPORT_RECIPIENT: ${{ secrets.NOTIFICATION_EMAIL }}
+          FAILURE_STAGE: 'Lint / format / typecheck / unit tests / build'
+          VITEST_JSON: test-results/vitest.json
+        run: node scripts/notify-test-failures.mjs
 
   deploy:
     # Only deploy on push to main (not PRs)
@@ -180,4 +193,14 @@ jobs:
         run: |
           sleep 5
           node scripts/deploy-e2e.mjs https://abhayandrebecca.com
+
+      # Step 11: Email any deploy/E2E/smoke failures to the notification inbox
+      - name: Email test failures
+        if: failure()
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          REPORT_RECIPIENT: ${{ secrets.NOTIFICATION_EMAIL }}
+          FAILURE_STAGE: 'Deploy E2E / preview check / production smoke'
+        run: node scripts/notify-test-failures.mjs
 

@@ -6,7 +6,7 @@ export default defineConfig({
   fullyParallel: true,
   // Keep the suite cheap: one retry only, no per-test videos.
   retries: 1,
-  reporter: [['list']],
+  reporter: [['list'], ['json', { outputFile: 'test-results/playwright.json' }]],
   use: {
     baseURL: process.env.TEST_URL || 'http://localhost:3002',
     screenshot: 'only-on-failure',

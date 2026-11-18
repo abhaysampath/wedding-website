@@ -44,3 +44,13 @@ jobs:
 
       - name: Run Playwright E2E tests
         run: npx playwright test
+
+      - name: Email test failures
+        if: failure()
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          REPORT_RECIPIENT: ${{ secrets.NOTIFICATION_EMAIL }}
+          FAILURE_STAGE: 'Playwright browser tests (mobile + desktop)'
+          PLAYWRIGHT_JSON: test-results/playwright.json
+        run: node scripts/notify-test-failures.mjs
