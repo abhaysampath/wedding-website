@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:full": "vitest run && npm run build",
     "test:local": "vitest run",
+    "test:browser": "playwright test",
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",

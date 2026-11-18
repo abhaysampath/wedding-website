@@ -14,6 +14,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    exclude: ['node_modules/**', 'scripts/test-e2e-playwright.test.ts'],
+    exclude: ['node_modules/**', 'scripts/**/*-playwright.test.ts'],
   },
 })

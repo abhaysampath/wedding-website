@@ -381,3 +381,19 @@ describe('AuthModal magic-link auto sign-in (regression)', () => {
     })
   })
 })
+
+describe('AuthModal access flows — Google / phone / email', () => {
+  beforeEach(() => {
+    window.history.pushState({}, '', '/')
+    sessionStorage.clear()
+    mockUseAuth.mockReturnValue(baseAuth())
+  })
+
+  it('Google: clicking "Sign in with Google" initiates Firebase sign-in', () => {
+    const handleFirebaseSignIn = vi.fn()
+    mockUseAuth.mockReturnValue({ ...baseAuth(), handleFirebaseSignIn })
+    render(<AuthModal />)
+    fireEvent.click(screen.getByText('Sign in with Google'))
+    expect(handleFirebaseSignIn).toHaveBeenCalledWith('google')
+  })
+})

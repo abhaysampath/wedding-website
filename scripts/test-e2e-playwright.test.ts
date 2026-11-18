@@ -11,7 +11,8 @@ test.describe('Deployment smoke tests', () => {
 
   test('sign in flow works', async ({ page }) => {
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
-    await page.click('text=Sign in');
+    // Viewport-agnostic CTA (navbar "Sign in" is inside the mobile menu).
+    await page.getByText('Sign in to find your invite').click();
     await expect(page.locator('.animate-modal-fade-in')).toBeVisible({ timeout: 5000 });
   });
 
