@@ -1,0 +1,3 @@
+# Exclude test files from the deployment so Vercel does not count them as
+# Serverless Functions (Hobby plan caps at 12). Tests still run locally and in CI.
+api/**/*.test.js
