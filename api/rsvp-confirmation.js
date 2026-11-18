@@ -1,6 +1,6 @@
 import SHEET_CONFIG from './_sheets-config.js'
 import { isAllowedOrigin } from './_origin.js'
-import { getSession } from './_session.js'
+import { getSession, sessionGuestId } from './_session.js'
 import { applyLimit } from './_rate-limit.js'
 import { getResend, escapeHtml, buildConfirmationEmail, RSVP_FROM } from './_email.js'
 
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'Sheet not configured' })
   }
 
-  const userRowIndex = rowIndexFromId(session.guestId)
+  const userRowIndex = rowIndexFromId(sessionGuestId(session))
   if (isNaN(userRowIndex) || userRowIndex < 1) {
     return res.status(400).json({ error: 'Invalid guest id in session' })
   }

@@ -268,7 +268,34 @@ export default async function handler(req, res) {
 
     let authorized = false
     let viaPlusOne = false
-    if (session.kind === 'firebase') {
+
+    // Lazily read all rows at most once (shared by the Firebase fallback and the
+    // cookie plus-one check) to avoid redundant Sheet reads.
+    let _allRows = null
+    const getRows = async () => {
+      if (_allRows === null) {
+        _allRows = await readAllRows(sheets, sheetId, tabName, colMap)
+      }
+      return _allRows
+    }
+
+    // The HttpOnly session cookie is minted at sign-in for the guest's OWN row
+    // and is a reliable ownership proof for every sign-in method. Honor it even
+    // when a Firebase Bearer token is present, because anonymous/phone Firebase
+    // users have no email or name to match against the sheet.
+    const cookieGuestId =
+      session.kind === 'cookie' ? session.guestId : session.cookie?.guestId
+    const cookieRole = session.kind === 'cookie' ? session.role : session.cookie?.role
+    const cookieRowIndex = cookieGuestId
+      ? parseInt(String(cookieGuestId).replace(/[^\d]/g, ''), 10)
+      : NaN
+    if (!isNaN(cookieRowIndex) && cookieRowIndex === rowIndex) {
+      authorized = true
+    } else if (isAdminRole(String(cookieRole || ''))) {
+      authorized = true
+    }
+
+    if (!authorized && session.kind === 'firebase') {
       const targetEmail = String(targetRow[colMap.email] || '')
         .trim()
         .toLowerCase()
@@ -288,7 +315,7 @@ export default async function handler(req, res) {
         }
       }
       if (!authorized) {
-        const rows = await readAllRows(sheets, sheetId, tabName, colMap)
+        const rows = await getRows()
         let userRowIndex = -1
         if (session.email) {
           userRowIndex = findRowIndexByField(rows, colMap, 'email', session.email)
@@ -300,25 +327,33 @@ export default async function handler(req, res) {
           userRowIndex = findRowIndexByName(rows, colMap, session.name)
         }
         if (userRowIndex > 0) {
-          const userRole = String(rows[userRowIndex - 1][colMap.role] || '').trim()
-          if (isAdminRole(normalizeRole(userRole))) {
+          if (userRowIndex === rowIndex) {
+            // The resolved row is the caller's own row — always allowed.
             authorized = true
           } else {
-            const groupRows = findPlusOneGroup(rows, colMap, userRowIndex)
-            if (groupRows.includes(rowIndex)) { authorized = true; viaPlusOne = true }
+            const userRole = String(rows[userRowIndex - 1][colMap.role] || '').trim()
+            if (isAdminRole(normalizeRole(userRole))) {
+              authorized = true
+            } else {
+              const groupRows = findPlusOneGroup(rows, colMap, userRowIndex)
+              if (groupRows.includes(rowIndex)) {
+                authorized = true
+                viaPlusOne = true
+              }
+            }
           }
         }
       }
-    } else if (session.kind === 'cookie') {
-      const cookieRowIndex = parseInt(String(session.guestId).replace(/[^\d]/g, ''), 10)
-      if (!isNaN(cookieRowIndex) && cookieRowIndex === rowIndex) {
+    }
+
+    // Cookie-based plus-one group membership (e.g. the "+1 head" seat editing a
+    // dependent). The cookie identifies the owning row.
+    if (!authorized && !isNaN(cookieRowIndex)) {
+      const rows = await getRows()
+      const groupRows = findPlusOneGroup(rows, colMap, cookieRowIndex)
+      if (groupRows.includes(rowIndex)) {
         authorized = true
-      } else if (isAdminRole(session.role)) {
-        authorized = true
-      } else if (!isNaN(cookieRowIndex)) {
-        const rows = await readAllRows(sheets, sheetId, tabName, colMap)
-        const groupRows = findPlusOneGroup(rows, colMap, cookieRowIndex)
-        if (groupRows.includes(rowIndex)) { authorized = true; viaPlusOne = true }
+        viaPlusOne = true
       }
     }
 

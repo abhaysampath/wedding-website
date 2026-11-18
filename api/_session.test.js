@@ -5,6 +5,7 @@ import {
   getSessionCookieHeader,
   getClearCookieHeader,
   getSession,
+  sessionGuestId,
   isAdminRole,
   ADMIN_ROLES,
   parseCookies,
@@ -173,6 +174,22 @@ describe('getSession', () => {
       guestId: 'g008',
       role: 'invited_guest',
     })
+  })
+})
+
+describe('sessionGuestId', () => {
+  it('returns guestId for a cookie session', () => {
+    expect(sessionGuestId({ kind: 'cookie', guestId: 'g005', role: 'x' })).toBe('g005')
+  })
+  it('returns the attached cookie guestId for a firebase session', () => {
+    expect(
+      sessionGuestId({ kind: 'firebase', uid: 'u', cookie: { guestId: 'g007', role: 'x' } }),
+    ).toBe('g007')
+  })
+  it('returns an empty string when unknown', () => {
+    expect(sessionGuestId(null)).toBe('')
+    expect(sessionGuestId({ kind: 'firebase', uid: 'u', cookie: null })).toBe('')
+    expect(sessionGuestId({ kind: 'cookie' })).toBe('')
   })
 })
 

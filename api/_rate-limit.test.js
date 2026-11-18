@@ -137,6 +137,6 @@ describe('LIMITS', () => {
     expect(LIMITS.contact).toEqual({ limit: 5, windowMs: 60 * 1000 })
     expect(LIMITS['alert-error']).toEqual({ limit: 30, windowMs: 60 * 1000 })
     expect(LIMITS.content).toEqual({ limit: 60, windowMs: 60 * 1000 })
-    expect(LIMITS.guest).toEqual({ limit: 10, windowMs: 60 * 1000 })
+    expect(LIMITS.guest).toEqual({ limit: 30, windowMs: 60 * 1000 })
   })
 })

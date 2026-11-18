@@ -38,11 +38,16 @@ function inferSide(firstName, lastName, relationship, role) {
   return 'bride'
 }
 
-function parseWeddings(val) {
-  const v = (val || '').toLowerCase()
-  if (v.includes('both')) return ['us', 'india']
-  if (v.includes('us')) return ['us']
-  if (v.includes('india')) return ['india']
+export function parseWeddings(val) {
+  const v = String(val || '').toLowerCase()
+  const hasUs = v.includes('us')
+  const hasIndia = v.includes('india')
+  // "Both" or an explicit combination like "US, India" must yield both weddings.
+  // The old code returned ['us'] first, so "US, India" guests only ever saw the US
+  // ceremony (no wedding switcher, single RSVP option).
+  if (v.includes('both') || (hasUs && hasIndia)) return ['us', 'india']
+  if (hasIndia) return ['india']
+  if (hasUs) return ['us']
   return ['us']
 }
 

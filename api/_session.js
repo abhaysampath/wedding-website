@@ -143,6 +143,24 @@ export function getClearCookieHeader() {
  * missing) but a Bearer header was sent — caller should respond 503.
  */
 export async function getSession(req) {
+  // Resolve the cookie session first. The cookie is minted at sign-in for the
+  // guest's OWN row and is a reliable ownership proof for every sign-in method
+  // (email OTP, phone, Google). Phone sign-in produces an *anonymous* Firebase
+  // user with no email/name, so the Firebase identity alone cannot be matched to
+  // a sheet row — in that case the cookie is the only thing that authorizes the
+  // guest. We therefore attach it to the firebase session too.
+  const cookies = parseCookies(req.headers?.cookie)
+  const raw = cookies[COOKIE_NAME]
+  const payload = raw ? verifyCookieToken(raw) : null
+  const cookieSession =
+    payload && payload.guestId
+      ? {
+          kind: 'cookie',
+          guestId: String(payload.guestId),
+          role: String(payload.role || ''),
+        }
+      : null
+
   const authHeader = req.headers?.authorization || req.headers?.Authorization
   if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
     const token = authHeader.slice(7).trim()
@@ -158,6 +176,8 @@ export async function getSession(req) {
               email: (decoded.email || '').toLowerCase(),
               name: (decoded.name || decoded['name'] || '').toString(),
               emailVerified: !!decoded.email_verified,
+              // Cookie-derived ownership (null when no valid cookie is present).
+              cookie: cookieSession,
             }
           }
         } catch {
@@ -166,19 +186,20 @@ export async function getSession(req) {
       }
     }
   }
-  const cookies = parseCookies(req.headers?.cookie)
-  const raw = cookies[COOKIE_NAME]
-  if (raw) {
-    const payload = verifyCookieToken(raw)
-    if (payload && payload.guestId) {
-      return {
-        kind: 'cookie',
-        guestId: String(payload.guestId),
-        role: String(payload.role || ''),
-      }
-    }
-  }
-  return null
+  return cookieSession
+}
+
+/**
+ * Returns the sheet guest id (e.g. "g005") for a resolved session, whether it
+ * came from the HttpOnly cookie directly (`kind: 'cookie'`) or from the cookie
+ * attached to a Firebase session (`session.cookie`). Returns '' when unknown.
+ */
+export function sessionGuestId(session) {
+  if (!session) return ''
+  if (session.kind === 'cookie' && session.guestId) return String(session.guestId)
+  if (session.cookie && session.cookie.guestId) return String(session.cookie.guestId)
+  if (session.guestId) return String(session.guestId)
+  return ''
 }
 
 export const ADMIN_ROLES = ['bride', 'groom', 'close_family']

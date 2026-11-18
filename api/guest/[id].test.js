@@ -201,6 +201,74 @@ describe('PATCH /api/guest/:id', () => {
     expect(res.statusCode).toBe(200)
   })
 
+  // ---- Regression: anonymous/phone Firebase sessions must be able to RSVP ----
+
+  it('allows anonymous/phone Firebase session via attached cookie ownership', async () => {
+    // Phone sign-in yields an anonymous Firebase user with no email or name.
+    // The cookie (minted for the guest's own row) must authorize the write.
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'anon-uid',
+      email: '',
+      name: '',
+      cookie: { kind: 'cookie', guestId: 'g005', role: 'invited_guest' },
+    })
+    const targetRow = makeGuestRow({ email: 'phone@example.com', role: 'invited_guest' })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+    mockBatchUpdate.mockResolvedValueOnce({})
+    const res = makeRes()
+    await handler(makeReq({ id: '5', body: { rsvpUs: 'Yes', rsvpIndia: 'Yes' } }), res)
+    expect(res.statusCode).toBe(200)
+    expect(mockBatchUpdate).toHaveBeenCalledOnce()
+  })
+
+  it('does not let a mismatched cookie authorize another guest row', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'anon-uid',
+      email: '',
+      name: '',
+      cookie: { kind: 'cookie', guestId: 'g001', role: 'invited_guest' },
+    })
+    const targetRow = makeGuestRow({ email: 'other@example.com', role: 'invited_guest' })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [[]] } })
+    const res = makeRes()
+    await handler(makeReq({ id: '5', body: { rsvpUs: 'Yes' } }), res)
+    expect(res.statusCode).toBe(403)
+    expect(mockBatchUpdate).not.toHaveBeenCalled()
+  })
+
+  it('allows Firebase owner to edit their own row found in the name fallback', async () => {
+    mockGetSession.mockResolvedValue({
+      kind: 'firebase',
+      uid: 'uid-own',
+      email: 'own@example.com',
+      name: 'Abhay Sampath',
+      emailVerified: true,
+    })
+    // Target row's email differs from the Firebase email; only the name matches,
+    // and it resolves back to the same row.
+    const targetRow = makeGuestRow({
+      email: 'own-alt@example.com',
+      firstName: 'Abhay',
+      lastName: 'Sampath',
+      role: 'Br-Family',
+    })
+    mockValuesGet
+      .mockResolvedValueOnce({ data: { values: [GUESTS_HEADERS] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+      .mockResolvedValueOnce({ data: { values: [targetRow] } })
+    mockBatchUpdate.mockResolvedValueOnce({})
+    const res = makeRes()
+    await handler(makeReq({ id: '1', body: { rsvpUs: 'Yes' } }), res)
+    expect(res.statusCode).toBe(200)
+  })
+
   it('allows Firebase session by matching email', async () => {
     mockGetSession.mockResolvedValue({
       kind: 'firebase',
